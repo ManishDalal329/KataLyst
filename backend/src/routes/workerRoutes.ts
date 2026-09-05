@@ -1,7 +1,7 @@
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { rankWorker } from '../services/matchingService';
-import { authenticateJWT, AuthenticatedRequest } from '../middleware/auth';
+import { authenticateJWT, AuthenticatedRequest, requireRoles } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -105,9 +105,18 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
 });
 
 // Toggle worker availability status
-router.patch('/:id/availability', authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+router.patch('/:id/availability', authenticateJWT, requireRoles(['WORKER', 'COOP_ADMIN', 'GOV_ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { availability_status } = req.body;
+    
+    // If caller is WORKER, ensure they are editing their own profile
+    if (req.user!.role === 'WORKER') {
+      const currentWorker = await prisma.worker.findUnique({ where: { user_id: req.user!.id } });
+      if (!currentWorker || currentWorker.id !== req.params.id) {
+        return res.status(403).json({ error: 'Access denied: you can only update your own availability' });
+      }
+    }
+
     const worker = await prisma.worker.update({
       where: { id: req.params.id },
       data: { availability_status: Boolean(availability_status) }

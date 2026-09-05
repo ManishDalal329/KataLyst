@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { authenticateJWT, AuthenticatedRequest } from '../middleware/auth';
+import { authenticateJWT, AuthenticatedRequest, requireRoles } from '../middleware/auth';
 import { processBookingPayout } from '../services/payoutService';
 import { emitBookingUpdate } from '../socket';
 
@@ -8,7 +8,7 @@ const router = Router();
 const prisma = new PrismaClient();
 
 // Create a booking
-router.post('/', authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/', authenticateJWT, requireRoles(['CUSTOMER', 'COOP_ADMIN', 'GOV_ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { worker_id, category_id, scheduled_time, address, instructions, amount } = req.body;
 
@@ -173,7 +173,7 @@ router.patch('/:id/status', authenticateJWT, async (req: AuthenticatedRequest, r
 });
 
 // Rate booking
-router.post('/:id/rate', authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/rate', authenticateJWT, requireRoles(['CUSTOMER']), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { score, comment } = req.body;
     const bookingId = req.params.id;
@@ -185,6 +185,10 @@ router.post('/:id/rate', authenticateJWT, async (req: AuthenticatedRequest, res:
     const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
     if (!booking) {
       return res.status(404).json({ error: 'Booking not found' });
+    }
+
+    if (booking.customer_id !== req.user!.id) {
+      return res.status(403).json({ error: 'Only the booking customer can submit a rating' });
     }
 
     const rating = await prisma.rating.upsert({

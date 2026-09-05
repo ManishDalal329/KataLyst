@@ -1,12 +1,12 @@
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { authenticateJWT, AuthenticatedRequest } from '../middleware/auth';
+import { authenticateJWT, AuthenticatedRequest, requireRoles } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // Platform Overview Analytics
-router.get('/analytics/overview', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/analytics/overview', authenticateJWT, requireRoles(['GOV_ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const totalBookings = await prisma.booking.count();
     const completedBookings = await prisma.booking.count({ where: { status: 'COMPLETED' } });
@@ -41,7 +41,7 @@ router.get('/analytics/overview', async (req: AuthenticatedRequest, res: Respons
 });
 
 // Bookings demand by Category
-router.get('/analytics/demand-by-category', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/analytics/demand-by-category', authenticateJWT, requireRoles(['GOV_ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const categories = await prisma.serviceCategory.findMany({
       include: {
@@ -64,7 +64,7 @@ router.get('/analytics/demand-by-category', async (req: AuthenticatedRequest, re
 });
 
 // Bookings demand by District
-router.get('/analytics/demand-by-district', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/analytics/demand-by-district', authenticateJWT, requireRoles(['GOV_ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const coops = await prisma.cooperative.findMany({
       include: {
@@ -95,7 +95,7 @@ router.get('/analytics/demand-by-district', async (req: AuthenticatedRequest, re
 });
 
 // Flagged Cooperatives (rating < 3.0 or high disputes)
-router.get('/analytics/flagged-cooperatives', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/analytics/flagged-cooperatives', authenticateJWT, requireRoles(['GOV_ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const coops = await prisma.cooperative.findMany({
       include: {

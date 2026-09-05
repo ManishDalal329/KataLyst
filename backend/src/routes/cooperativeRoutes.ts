@@ -28,7 +28,7 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
 });
 
 // Create a cooperative (Admin / Gov)
-router.post('/', authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/', authenticateJWT, requireRoles(['COOP_ADMIN', 'GOV_ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { name, registration_no, district, state } = req.body;
 
@@ -106,7 +106,7 @@ router.patch('/:id/status', authenticateJWT, requireRoles(['GOV_ADMIN']), async 
 });
 
 // Add worker member to cooperative (Coop admin)
-router.post('/:id/members', authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/members', authenticateJWT, requireRoles(['COOP_ADMIN', 'GOV_ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { name, phone, skills } = req.body;
     const coopId = req.params.id;
@@ -158,7 +158,7 @@ router.post('/:id/members', authenticateJWT, async (req: AuthenticatedRequest, r
 });
 
 // Update/Set service category rates for cooperative
-router.patch('/:id/rates', authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+router.patch('/:id/rates', authenticateJWT, requireRoles(['COOP_ADMIN', 'GOV_ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { name, description, base_rate } = req.body;
     const coopId = req.params.id;

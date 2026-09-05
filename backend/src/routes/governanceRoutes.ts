@@ -1,12 +1,12 @@
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { authenticateJWT, AuthenticatedRequest } from '../middleware/auth';
+import { authenticateJWT, AuthenticatedRequest, requireRoles } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // Create proposal for a cooperative
-router.post('/cooperatives/:id/proposals', authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/cooperatives/:id/proposals', authenticateJWT, requireRoles(['COOP_ADMIN', 'GOV_ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { title, description, options, deadline } = req.body;
     const coopId = req.params.id;
@@ -88,7 +88,7 @@ router.get('/cooperatives/:id/proposals', async (req: AuthenticatedRequest, res:
 });
 
 // Cast vote on a proposal (Worker member only, 1 vote limit)
-router.post('/proposals/:id/vote', authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/proposals/:id/vote', authenticateJWT, requireRoles(['WORKER']), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { choice } = req.body;
     const proposalId = req.params.id;

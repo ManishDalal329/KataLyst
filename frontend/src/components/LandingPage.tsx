@@ -8,7 +8,7 @@ interface LandingPageProps {
   onExploreGov: () => void;
 }
 
-/* 3D Interactive Tilt Card Component (Matching Reference Image 2 Hover Effect) */
+/* 3D Interactive Tilt Card Component */
 const TiltCard: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [transform, setTransform] = useState('perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
@@ -166,13 +166,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
           {/* Top Pill Badge */}
           <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#F4F0EA] border border-[#E8E2D9] text-[#6B4F3B] text-xs font-semibold tracking-wide shadow-sm backdrop-blur-md animate-float">
             <Sparkles className="w-3.5 h-3.5 text-[#8B7355]" />
-            <span>National Worker Cooperative Platform</span>
+            <span>{t('hero_badge', 'National Worker Cooperative Platform')}</span>
           </div>
 
           {/* Main Title Hierarchy */}
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-[#2B2824] tracking-tight leading-[1.1] max-w-3xl">
-            Fair Household Services Built Around{' '}
-            <span className="gradient-text font-black">Worker Cooperatives</span>
+            {t('hero_title_lead', 'Fair Household Services Built Around')}{' '}
+            <span className="gradient-text font-black">{t('hero_title_accent', 'Worker Cooperatives')}</span>
           </h1>
 
           {/* Subtitle with refined readability */}
@@ -189,7 +189,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
                 onClick={onStartBooking}
                 className="relative z-10 flex items-center space-x-3 px-8 py-4 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-extrabold text-base shadow-xl transition-all transform hover:scale-[1.03] active:scale-95 group"
               >
-                <span>Explore Services & Book</span>
+                <span>{t('cta_book_service')}</span>
                 <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition-transform">
                   <ArrowRight className="w-4 h-4 stroke-[3] text-white" />
                 </div>
@@ -202,7 +202,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
               className="flex items-center space-x-2 px-6 py-3.5 rounded-full bg-white hover:bg-[#F4F0EA] border border-[#E8E2D9] text-[#2B2824] font-semibold text-sm transition-all shadow-sm"
             >
               <Building2 className="w-4 h-4 text-[#8B7355]" />
-              <span>Ministry & Admin Portal</span>
+              <span>{t('cta_explore_gov')}</span>
               <ChevronRight className="w-3.5 h-3.5 text-[#857E75]" />
             </button>
 
@@ -215,13 +215,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
       <section className="space-y-8">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-extrabold text-[#6B4F3B] uppercase tracking-widest bg-[#F4F0EA] px-3 py-1 rounded-full border border-[#E8E2D9]">
-            Cooperative Economics
+            {t('compare_badge', 'Cooperative Economics')}
           </span>
           <h2 className="text-2xl sm:text-4xl font-extrabold text-[#2B2824] tracking-tight">
-            Why SahakarConnect Disrupts Traditional Gig Platforms
+            {t('compare_heading', 'Why SahakarConnect Disrupts Traditional Gig Platforms')}
           </h2>
           <p className="text-xs sm:text-sm text-[#6E675F] leading-relaxed">
-            Comparing typical commercial gig apps vs. democratic worker cooperative platform model
+            {t('compare_sub', 'Comparing typical commercial gig apps vs. democratic worker cooperative platform model')}
           </p>
         </div>
 
@@ -233,7 +233,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
               {/* Upper Visual Header Box */}
               <div className="h-52 rounded-2xl bg-gradient-to-br from-[#241B1B] via-[#181414] to-[#120F0F] border border-[#3D2929] relative overflow-hidden flex items-center justify-center p-6 group-hover:scale-[1.01] transition-transform duration-300">
                 <span className="absolute top-4 left-4 px-3 py-1 bg-[#2D1F1F] text-rose-300/90 border border-rose-500/20 text-[10px] font-semibold uppercase tracking-wider rounded-full backdrop-blur-md">
-                  Corporate Gig Platforms
+                  {t('corporate_card_badge', 'Corporate Gig Platforms')}
                 </span>
                 
                 {/* Subtle 3D Friction Graphic Illustration */}
@@ -246,31 +246,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
                 </div>
               </div>
               
-              <h3 className="text-xl font-bold text-zinc-100 tracking-tight">Urban Company / Commercial Apps</h3>
+              <h3 className="text-xl font-bold text-zinc-100 tracking-tight">{t('corporate_apps_title', 'Urban Company / Commercial Apps')}</h3>
 
               <ul className="space-y-3.5 text-sm text-[#A09890]">
                 <li className="flex items-start space-x-3">
                   <XCircle className="w-4.5 h-4.5 text-rose-400/80 shrink-0 mt-0.5" />
-                  <span><strong className="text-zinc-200 font-medium">20-30% Commission Fee</strong> taken by corporate shareholders</span>
+                  <span><strong className="text-zinc-200 font-medium">20% - 30% Deducted:</strong> {t('compare_feature_comm_them')}</span>
                 </li>
                 <li className="flex items-start space-x-3">
                   <XCircle className="w-4.5 h-4.5 text-rose-400/80 shrink-0 mt-0.5" />
-                  <span><strong className="text-zinc-200 font-medium">Zero Worker Ownership</strong> — gig workers treated as disposable contractors</span>
+                  <span><strong className="text-zinc-200 font-medium">Zero Representation:</strong> {t('compare_feature_gov_them')}</span>
                 </li>
                 <li className="flex items-start space-x-3">
                   <XCircle className="w-4.5 h-4.5 text-rose-400/80 shrink-0 mt-0.5" />
-                  <span><strong className="text-zinc-200 font-medium">Arbitrary Rate Drops & Bans</strong> without any democratic right to appeal</span>
+                  <span><strong className="text-zinc-200 font-medium">No Welfare Pool:</strong> {t('compare_feature_welfare_them')}</span>
                 </li>
                 <li className="flex items-start space-x-3">
                   <XCircle className="w-4.5 h-4.5 text-rose-400/80 shrink-0 mt-0.5" />
-                  <span>No insurance or welfare funds reinvested into worker families</span>
+                  <span><strong className="text-zinc-200 font-medium">Opaque Ratings:</strong> {t('compare_feature_algo_them')}</span>
                 </li>
               </ul>
             </div>
 
             <div className="pt-2">
-              <button className="px-5 py-2 rounded-xl bg-[#24201D] hover:bg-[#332D29] text-xs font-semibold text-zinc-300 border border-zinc-700/50 transition-all shadow-sm">
-                Learn More
+              <button className="px-5 py-2 rounded-xl bg-[#24201D] hover:bg-[#2F2925] border border-[#3D3530] text-xs font-semibold text-zinc-300 transition-all shadow-md">
+                {t('learn_more', 'Learn More')}
               </button>
             </div>
           </div>
@@ -281,7 +281,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
               {/* Upper Visual Header Box */}
               <div className="h-52 rounded-2xl bg-gradient-to-br from-[#FAF3EA] via-[#F4EBE0] to-[#EAE0CF] border border-[#E8E2D9] relative overflow-hidden flex items-center justify-center p-6 group-hover:scale-[1.01] transition-transform duration-300">
                 <span className="absolute top-4 left-4 px-3 py-1 bg-[#6B4F3B] text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-md">
-                  SahakarConnect Model
+                  {t('sahakar_card_badge', 'SahakarConnect Model')}
                 </span>
 
                 {/* Glossy 3D Gold/Bronze Token Illustration */}
@@ -294,31 +294,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
                 </div>
               </div>
 
-              <h3 className="text-2xl font-black text-[#2B2824] tracking-tight">SahakarConnect Cooperatives</h3>
+              <h3 className="text-2xl font-black text-[#2B2824] tracking-tight">{t('sahakar_card_title', 'SahakarConnect Cooperatives')}</h3>
 
               <ul className="space-y-3.5 text-sm text-[#2B2824]">
                 <li className="flex items-start space-x-3">
                   <CheckCircle2 className="w-5 h-5 text-[#8B7355] shrink-0 mt-0.5" />
-                  <span><strong className="text-[#2B2824] font-extrabold">80% Direct to Worker</strong> — maximum earnings per booking</span>
+                  <span><strong className="text-[#2B2824] font-extrabold">80% Direct to Worker</strong> — {t('compare_feature_comm_us')}</span>
                 </li>
                 <li className="flex items-start space-x-3">
                   <CheckCircle2 className="w-5 h-5 text-[#8B7355] shrink-0 mt-0.5" />
-                  <span><strong className="text-[#2B2824] font-extrabold">15% Cooperative Fund</strong> — worker health insurance & equipment grants</span>
+                  <span><strong className="text-[#2B2824] font-extrabold">15% Cooperative Fund</strong> — {t('compare_feature_welfare_us')}</span>
                 </li>
                 <li className="flex items-start space-x-3">
                   <CheckCircle2 className="w-5 h-5 text-[#8B7355] shrink-0 mt-0.5" />
-                  <span><strong className="text-[#2B2824] font-extrabold">5% Platform Fee</strong> — lean open-technology maintenance</span>
+                  <span><strong className="text-[#2B2824] font-extrabold">5% Platform Fee</strong> — {t('compare_feature_comm_us')}</span>
                 </li>
                 <li className="flex items-start space-x-3">
                   <CheckCircle2 className="w-5 h-5 text-[#8B7355] shrink-0 mt-0.5" />
-                  <span><strong className="text-[#2B2824] font-extrabold">1-Member-1-Vote Governance</strong> — workers vote on rate revisions</span>
+                  <span><strong className="text-[#2B2824] font-extrabold">1-Member-1-Vote Governance</strong> — {t('compare_feature_gov_us')}</span>
                 </li>
               </ul>
             </div>
 
             <div className="pt-2">
               <button className="px-6 py-2.5 rounded-xl bg-[#2B2824] hover:bg-[#6B4F3B] text-xs font-bold text-white transition-all shadow-md">
-                Learn More
+                {t('learn_more', 'Learn More')}
               </button>
             </div>
           </div>
@@ -330,10 +330,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
       <section className="space-y-8">
         <div className="text-center space-y-2 max-w-2xl mx-auto">
           <span className="text-xs font-extrabold text-[#6B4F3B] uppercase tracking-widest bg-[#F4F0EA] px-3 py-1 rounded-full border border-[#E8E2D9]">
-            Core Platform Pillars
+            {t('core_pillars_badge', 'Core Platform Pillars')}
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2B2824] tracking-tight">
-            Built for Transparency, Equity & Intelligence
+            {t('core_pillars_title', 'Built for Transparency, Equity & Intelligence')}
           </h2>
         </div>
 
@@ -351,10 +351,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
 
             <div className="z-10 space-y-2">
               <h3 className="text-2xl sm:text-3xl font-extrabold text-white group-hover:text-amber-200 transition-colors tracking-tight font-serif">
-                Transparent 80/15/5 Split
+                {t('split_card_title', 'Transparent 80/15/5 Split')}
               </h3>
               <p className="text-xs sm:text-sm text-[#9BB0B9] leading-relaxed">
-                Every booking receipt explicitly breaks down worker earnings, cooperative reserve funds, and platform maintenance fee before payment.
+                {t('split_card_desc', 'Every booking receipt explicitly breaks down worker earnings, cooperative reserve funds, and platform maintenance fee before payment.')}
               </p>
             </div>
           </TiltCard>
@@ -371,10 +371,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
 
             <div className="z-10 space-y-2">
               <h3 className="text-2xl sm:text-3xl font-extrabold text-white group-hover:text-amber-200 transition-colors tracking-tight font-serif">
-                Democratic Governance
+                {t('governance_card_title', 'Democratic Governance')}
               </h3>
               <p className="text-xs sm:text-sm text-[#9BB0B9] leading-relaxed">
-                Workers vote on rate changes, equipment investments, and new member approvals. One member equals one vote.
+                {t('governance_card_desc', 'Workers vote on rate changes, equipment investments, and new member approvals. One member equals one vote.')}
               </p>
             </div>
           </TiltCard>
@@ -391,10 +391,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
 
             <div className="z-10 space-y-2">
               <h3 className="text-2xl sm:text-3xl font-extrabold text-white group-hover:text-amber-200 transition-colors tracking-tight font-serif">
-                AI Smart Match Scoring
+                {t('match_card_title', 'AI Smart Match Scoring')}
               </h3>
               <p className="text-xs sm:text-sm text-[#9BB0B9] leading-relaxed">
-                Transparent algorithm ranks workers by proximity, rating, availability, and skill match with clear score tooltips.
+                {t('match_card_desc', 'Transparent algorithm ranks workers by proximity, rating, availability, and skill match with clear score tooltips.')}
               </p>
             </div>
           </TiltCard>
@@ -407,4 +407,3 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
 };
 
 export default LandingPage;
-
