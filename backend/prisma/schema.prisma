@@ -1,0 +1,134 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         String   @id @default(uuid())
+  role       String   // CUSTOMER, WORKER, COOP_ADMIN, GOV_ADMIN
+  name       String
+  phone      String   @unique
+  lang_pref  String   @default("EN") // EN, HI
+  created_at DateTime @default(now())
+
+  // Relations
+  cooperativesAdmin Cooperative[] @relation("CoopAdmin")
+  workerProfile     Worker?
+  customerBookings  Booking[]     @relation("CustomerBookings")
+}
+
+model Cooperative {
+  id              String   @id @default(uuid())
+  name            String
+  registration_no String   @unique
+  district        String
+  state           String
+  admin_user_id   String
+  fund_balance    Float    @default(0.0)
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  created_at      DateTime @default(now())
+
+  admin           User              @relation("CoopAdmin", fields: [admin_user_id], references: [id])
+  workers         Worker[]
+  serviceCategories ServiceCategory[]
+  proposals       Proposal[]
+}
+
+model Worker {
+  id                  String   @id @default(uuid())
+  user_id             String   @unique
+  cooperative_id      String
+  skills              String   // Comma-separated or JSON string of skills
+  verification_status String   @default("PENDING") // PENDING, VERIFIED, REJECTED
+  rating_avg          Float    @default(0.0)
+  availability_status Boolean  @default(false)
+  lat                 Float?
+  lng                 Float?
+
+  user        User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  cooperative Cooperative @relation(fields: [cooperative_id], references: [id])
+  bookings    Booking[]
+  votes       Vote[]
+}
+
+model ServiceCategory {
+  id             String       @id @default(uuid())
+  name           String
+  description    String
+  base_rate      Float
+  cooperative_id String?
+  cooperative    Cooperative? @relation(fields: [cooperative_id], references: [id])
+  bookings       Booking[]
+}
+
+model Booking {
+  id             String   @id @default(uuid())
+  customer_id    String
+  worker_id      String
+  category_id    String
+  status         String   @default("REQUESTED") // REQUESTED, ACCEPTED, IN_PROGRESS, COMPLETED, CANCELLED, DISPUTED
+  scheduled_time DateTime
+  address        String
+  instructions   String?
+  amount         Float
+  created_at     DateTime @default(now())
+
+  customer User            @relation("CustomerBookings", fields: [customer_id], references: [id])
+  worker   Worker          @relation(fields: [worker_id], references: [id])
+  category ServiceCategory @relation(fields: [category_id], references: [id])
+  payout   Payout?
+  rating   Rating?
+}
+
+model Payout {
+  id                String   @id @default(uuid())
+  booking_id        String   @unique
+  worker_share      Float
+  cooperative_share Float
+  platform_fee      Float
+  status            String   @default("PENDING") // PENDING, RELEASED
+  created_at        DateTime @default(now())
+
+  booking Booking @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+}
+
+model Rating {
+  id         String   @id @default(uuid())
+  booking_id String   @unique
+  score      Int      // 1 to 5
+  comment    String?
+  created_at DateTime @default(now())
+
+  booking Booking @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+}
+
+model Proposal {
+  id             String   @id @default(uuid())
+  cooperative_id String
+  title          String
+  description    String
+  options        String   // Comma-separated or JSON string array of choices e.g. ["Yes", "No"]
+  deadline       DateTime
+  status         String   @default("OPEN") // OPEN, CLOSED
+  created_at     DateTime @default(now())
+
+  cooperative Cooperative @relation(fields: [cooperative_id], references: [id])
+  votes       Vote[]
+}
+
+model Vote {
+  id          String   @id @default(uuid())
+  proposal_id String
+  worker_id   String
+  choice      String
+  created_at  DateTime @default(now())
+
+  proposal Proposal @relation(fields: [proposal_id], references: [id], onDelete: Cascade)
+  worker   Worker   @relation(fields: [worker_id], references: [id], onDelete: Cascade)
+
+  @@unique([proposal_id, worker_id])
+}
