@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, User as UserIcon, LogOut, Globe, Sparkles, Layers, Vote, BarChart3, Briefcase } from 'lucide-react';
+import { ShieldCheck, User as UserIcon, LogOut, Globe, Briefcase, Vote, Layers, BarChart3, Home } from 'lucide-react';
 import AuthModal from './AuthModal';
 
 interface NavbarProps {
@@ -19,137 +19,160 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
     i18n.changeLanguage(newLang);
   };
 
+  const navItems = [
+    {
+      id: 'home',
+      label: t('nav_home'),
+      Icon: Home,
+      onClick: () => setActiveTab('home'),
+    },
+    {
+      id: 'services',
+      label: t('nav_services'),
+      Icon: Briefcase,
+      onClick: () => setActiveTab('services'),
+    },
+    {
+      id: 'worker',
+      label: t('nav_worker_app'),
+      Icon: Vote,
+      onClick: () => {
+        if (!user || user.role !== 'WORKER') {
+          quickLoginAs('9711000001', 'WORKER');
+        }
+        setActiveTab('worker');
+      },
+    },
+    {
+      id: 'coop',
+      label: t('nav_coop_admin'),
+      Icon: Layers,
+      onClick: () => {
+        if (!user || user.role !== 'COOP_ADMIN') {
+          quickLoginAs('9810011111', 'COOP_ADMIN');
+        }
+        setActiveTab('coop');
+      },
+    },
+    {
+      id: 'admin',
+      label: t('nav_gov_admin'),
+      Icon: BarChart3,
+      onClick: () => {
+        if (!user || user.role !== 'GOV_ADMIN') {
+          quickLoginAs('9999999999', 'GOV_ADMIN');
+        }
+        setActiveTab('admin');
+      },
+    },
+  ];
+
+  // Group contiguous items into active pop-out pills vs. inactive shared capsules
+  const groups: { isActive: boolean; items: typeof navItems }[] = [];
+  navItems.forEach((item) => {
+    const isActive = activeTab === item.id;
+    const lastGroup = groups[groups.length - 1];
+    if (lastGroup && lastGroup.isActive === isActive) {
+      lastGroup.items.push(item);
+    } else {
+      groups.push({ isActive, items: [item] });
+    }
+  });
+
   return (
-    <header className="sticky top-0 z-40 glass-panel border-b border-slate-800 bg-slate-950/90 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header className="sticky top-3 z-50 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="glass-panel rounded-full border border-[#E8E2D9] bg-[#FAF8F5]/95 backdrop-blur-xl px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 lg:gap-6 shadow-sm">
         
         {/* Brand Logo & Title */}
-        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('home')}>
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-coop-600 via-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-coop-500/20">
-            <ShieldCheck className="w-6 h-6 text-slate-950 stroke-[2.5]" />
+        <div className="flex items-center space-x-2.5 shrink-0 cursor-pointer" onClick={() => setActiveTab('home')}>
+          <div className="w-9 h-9 rounded-full bg-[#8B7355] flex items-center justify-center shadow-md shadow-[#8B7355]/20 shrink-0">
+            <ShieldCheck className="w-5 h-5 text-[#FAF8F5] stroke-[2.5]" />
           </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="font-extrabold text-xl tracking-tight text-white">Sahakar<span className="text-coop-400">Connect</span></span>
-              <span className="bg-coop-500/10 border border-coop-500/30 text-coop-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                SIH 2026 #26089
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 hidden sm:block">Ministry of Cooperation • Worker Cooperative Platform</p>
+          <div className="shrink-0">
+            <span className="font-extrabold text-base sm:text-lg tracking-tight text-[#2B2824]">
+              Sahakar<span className="text-[#8B7355]">Connect</span>
+            </span>
           </div>
         </div>
 
-        {/* Center Navigation Tabs */}
-        <nav className="hidden md:flex items-center space-x-1">
-          <button
-            onClick={() => setActiveTab('home')}
-            className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              activeTab === 'home'
-                ? 'bg-slate-800 text-coop-400 font-semibold shadow-inner'
-                : 'text-slate-300 hover:text-white hover:bg-slate-900'
-            }`}
-          >
-            {t('nav_home')}
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('services')}
-            className={`px-3.5 py-1.5 rounded-lg text-sm font-medium flex items-center space-x-1.5 transition-all ${
-              activeTab === 'services'
-                ? 'bg-slate-800 text-coop-400 font-semibold shadow-inner'
-                : 'text-slate-300 hover:text-white hover:bg-slate-900'
-            }`}
-          >
-            <Briefcase className="w-4 h-4" />
-            <span>{t('nav_services')}</span>
-          </button>
-
-          <button
-            onClick={() => {
-              if (!user || user.role !== 'WORKER') {
-                quickLoginAs('9711000001', 'WORKER');
-              }
-              setActiveTab('worker');
-            }}
-            className={`px-3.5 py-1.5 rounded-lg text-sm font-medium flex items-center space-x-1.5 transition-all ${
-              activeTab === 'worker'
-                ? 'bg-slate-800 text-coop-400 font-semibold shadow-inner'
-                : 'text-slate-300 hover:text-white hover:bg-slate-900'
-            }`}
-          >
-            <Vote className="w-4 h-4 text-emerald-400" />
-            <span>{t('nav_worker_app')}</span>
-          </button>
-
-          <button
-            onClick={() => {
-              if (!user || user.role !== 'COOP_ADMIN') {
-                quickLoginAs('9810011111', 'COOP_ADMIN');
-              }
-              setActiveTab('coop');
-            }}
-            className={`px-3.5 py-1.5 rounded-lg text-sm font-medium flex items-center space-x-1.5 transition-all ${
-              activeTab === 'coop'
-                ? 'bg-slate-800 text-coop-400 font-semibold shadow-inner'
-                : 'text-slate-300 hover:text-white hover:bg-slate-900'
-            }`}
-          >
-            <Layers className="w-4 h-4 text-teal-400" />
-            <span>{t('nav_coop_admin')}</span>
-          </button>
-
-          <button
-            onClick={() => {
-              if (!user || user.role !== 'GOV_ADMIN') {
-                quickLoginAs('9999999999', 'GOV_ADMIN');
-              }
-              setActiveTab('admin');
-            }}
-            className={`px-3.5 py-1.5 rounded-lg text-sm font-medium flex items-center space-x-1.5 transition-all ${
-              activeTab === 'admin'
-                ? 'bg-slate-800 text-coop-400 font-semibold shadow-inner'
-                : 'text-slate-300 hover:text-white hover:bg-slate-900'
-            }`}
-          >
-            <BarChart3 className="w-4 h-4 text-indigo-400" />
-            <span>{t('nav_gov_admin')}</span>
-          </button>
+        {/* Center Dynamic Segmented Pop-out Navigation */}
+        <nav className="hidden md:flex items-center space-x-1.5 shrink-0">
+          {groups.map((group, groupIdx) =>
+            group.isActive ? (
+              // Active Pop-out Pill (Matches reference image active orange/coffee pill design)
+              <div key={groupIdx} className="flex items-center shrink-0">
+                {group.items.map((item) => {
+                  const Icon = item.Icon;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={item.onClick}
+                      className="px-3.5 py-1.5 rounded-2xl bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-bold text-xs shadow-md shadow-[#6B4F3B]/25 flex items-center space-x-1.5 transition-all transform scale-[1.02] whitespace-nowrap"
+                    >
+                      <Icon className="w-3.5 h-3.5 stroke-[2.5] text-white shrink-0" />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              // Inactive Shared Container Pill Capsule
+              <div
+                key={groupIdx}
+                className="bg-[#F4F0EA] border border-[#E8E2D9] rounded-2xl p-1 flex items-center space-x-0.5 shrink-0"
+              >
+                {group.items.map((item) => {
+                  const Icon = item.Icon;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={item.onClick}
+                      className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#6E675F] hover:text-[#2B2824] hover:bg-white/80 transition-all flex items-center space-x-1.5 whitespace-nowrap"
+                    >
+                      <Icon className="w-3.5 h-3.5 text-[#8B7355] shrink-0" />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )
+          )}
         </nav>
 
         {/* Right Tools: Language Toggle & User Auth */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 shrink-0">
           
           {/* Language Selector */}
           <button
             onClick={toggleLanguage}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-300 transition-all"
+            className="flex items-center space-x-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-[#F4F0EA] hover:bg-[#E8E2D9] border border-[#E8E2D9] text-xs font-semibold text-[#2B2824] transition-all shrink-0 whitespace-nowrap"
             title="Switch Language"
           >
-            <Globe className="w-3.5 h-3.5 text-coop-400" />
+            <Globe className="w-3.5 h-3.5 text-[#8B7355] shrink-0" />
             <span>{i18n.language === 'en' ? 'हिन्दी' : 'English'}</span>
           </button>
 
           {/* User Profile / Quick Login */}
           {user ? (
-            <div className="flex items-center space-x-3">
-              <div className="hidden sm:flex flex-col items-end">
-                <span className="text-xs font-bold text-slate-200">{user.name}</span>
-                <span className="text-[10px] text-coop-400 font-semibold uppercase">{user.role}</span>
+            <div className="flex items-center space-x-2 shrink-0">
+              <div className="hidden lg:flex flex-col items-end max-w-[130px] xl:max-w-[180px]">
+                <span className="text-xs font-bold text-[#2B2824] truncate w-full text-right">{user.name}</span>
+                <span className="text-[10px] text-[#8B7355] font-semibold uppercase truncate w-full text-right">{user.role}</span>
               </div>
               <button
                 onClick={logout}
-                className="p-2 rounded-lg bg-slate-900 hover:bg-red-500/10 hover:text-red-400 border border-slate-800 text-slate-400 transition-all"
+                className="p-2 rounded-full bg-[#F4F0EA] hover:bg-red-50 hover:text-red-600 border border-[#E8E2D9] text-[#6E675F] transition-all shrink-0"
                 title={t('logout')}
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5 shrink-0" />
               </button>
             </div>
           ) : (
             <button
               onClick={() => setShowAuthModal(true)}
-              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-coop-600 to-emerald-500 hover:from-coop-500 hover:to-emerald-400 text-slate-950 font-bold text-xs shadow-lg shadow-coop-500/20 transition-all transform active:scale-95"
+              className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-bold text-xs shadow-md transition-all transform active:scale-95 shrink-0 whitespace-nowrap"
             >
-              <UserIcon className="w-4 h-4" />
+              <UserIcon className="w-3.5 h-3.5 text-white shrink-0" />
               <span>{t('login')}</span>
             </button>
           )}
@@ -175,3 +198,5 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
 };
 
 export default Navbar;
+
+

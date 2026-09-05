@@ -1,167 +1,405 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShieldCheck, ArrowRight, DollarSign, Vote, Award, CheckCircle2, TrendingUp, Users2, Sparkles, Building2 } from 'lucide-react';
+import { ShieldCheck, ArrowRight, DollarSign, Vote, CheckCircle2, Sparkles, Building2, ChevronRight, XCircle, Layers } from 'lucide-react';
+import FlowingCanvas from './FlowingCanvas';
 
 interface LandingPageProps {
   onStartBooking: () => void;
   onExploreGov: () => void;
 }
 
+/* 3D Interactive Tilt Card Component (Matching Reference Image 2 Hover Effect) */
+const TiltCard: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [transform, setTransform] = useState('perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
+  const [shadow, setShadow] = useState('0 10px 30px -15px rgba(0,0,0,0.5)');
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -12;
+    const rotateY = ((x - centerX) / centerX) * 12;
+    setTransform(`perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.03, 1.03, 1.03)`);
+    setShadow(`${-rotateY * 2}px ${rotateX * 2 + 25}px 40px -10px rgba(220, 180, 120, 0.25)`);
+  };
+
+  const handleMouseLeave = () => {
+    setTransform('perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
+    setShadow('0 10px 30px -15px rgba(0,0,0,0.5)');
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ transform, boxShadow: shadow, transition: 'transform 0.15s ease-out, box-shadow 0.15s ease-out' }}
+      className={`will-change-transform ${className}`}
+    >
+      {children}
+    </div>
+  );
+};
+
+/* Animated 3D Wave Particle Canvas (Matching Reference Image 2 Card Ribbons) */
+const CardWaveCanvas: React.FC<{ seed: number }> = ({ seed }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    let time = 0;
+
+    const resize = () => {
+      if (!canvas || !canvas.parentElement) return;
+      canvas.width = canvas.parentElement.clientWidth || 300;
+      canvas.height = canvas.parentElement.clientHeight || 240;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const render = () => {
+      time += 0.015;
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h * 0.45;
+      const numPoints = 160;
+
+      ctx.save();
+      
+      // Draw smooth continuous organic 3D ribbons
+      for (let layer = 0; layer < 3; layer++) {
+        ctx.beginPath();
+        const layerOffset = layer * 0.45;
+
+        for (let i = 0; i <= numPoints; i++) {
+          const t = (i / numPoints) * Math.PI * 2;
+          let x = 0;
+          let y = 0;
+
+          if (seed === 0) {
+            // Torus Mobius loop ribbon (Card 1)
+            const r = Math.min(w, h) * 0.32 + Math.sin(t * 3 + time + layerOffset) * 12;
+            x = cx + Math.cos(t + time * 0.4) * r + Math.sin(t * 2 + time) * 14;
+            y = cy + Math.sin(t + time * 0.4) * (r * 0.65) + Math.cos(t * 3 + time) * 10;
+          } else if (seed === 1) {
+            // Vertical S-curve ribbon loop (Card 2)
+            const r = Math.min(w, h) * 0.35;
+            x = cx + Math.sin(t * 2 + time + layerOffset) * (r * 0.8);
+            y = cy + (t - Math.PI) * (r * 0.5) + Math.cos(t * 3 + time) * 12;
+          } else {
+            // Double helix parametric spiral (Card 3)
+            const r = Math.min(w, h) * 0.3;
+            x = cx + Math.cos(t * 3 + time + layerOffset) * (r * 0.85) + Math.sin(t + time) * 12;
+            y = cy + Math.sin(t * 2 + time * 0.8) * (r * 0.65);
+          }
+
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+
+        ctx.strokeStyle = layer === 0 ? 'rgba(235, 195, 140, 0.85)' : layer === 1 ? 'rgba(185, 145, 95, 0.55)' : 'rgba(139, 115, 85, 0.3)';
+        ctx.lineWidth = layer === 0 ? 3 : 1.5;
+        ctx.shadowColor = 'rgba(235, 195, 140, 0.6)';
+        ctx.shadowBlur = 12;
+        ctx.stroke();
+      }
+
+      // Sparkle particles floating around ribbon
+      for (let p = 0; p < 20; p++) {
+        const pt = (p / 20) * Math.PI * 2;
+        const px = cx + Math.cos(pt * (seed + 2) + time * 0.7) * (w * 0.32);
+        const py = cy + Math.sin(pt * (seed + 1) + time * 0.5) * (h * 0.32);
+
+        ctx.beginPath();
+        ctx.arc(px, py, 2 + Math.sin(time + p) * 1, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(245, 215, 160, 0.85)';
+        ctx.shadowColor = 'rgba(245, 215, 160, 0.8)';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+      }
+
+      ctx.restore();
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [seed]);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none opacity-85 group-hover:opacity-100 transition-opacity duration-500" />;
+};
+
 export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExploreGov }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-16 py-8">
+    <div className="space-y-24 py-6 sm:py-12">
       
-      {/* Hero Section */}
-      <section className="relative overflow-hidden glass-panel p-8 sm:p-12 rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 via-slate-950/80 to-slate-950">
+      {/* Hero Section with Continuously Flowing Canvas */}
+      <section className="relative min-h-[520px] sm:min-h-[580px] flex flex-col items-center justify-center text-center px-4 overflow-hidden rounded-3xl border border-[#E8E2D9] bg-gradient-to-b from-[#FAF8F5] via-white to-[#FAF8F5] shadow-xl">
         
-        {/* Glow backdrop */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-coop-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Animated Canvas background */}
+        <FlowingCanvas className="opacity-80" />
 
-        <div className="relative z-10 max-w-3xl space-y-6">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-coop-500/10 border border-coop-500/30 text-coop-400 text-xs font-bold uppercase tracking-wider shadow-inner">
-            <Sparkles className="w-4 h-4 text-coop-400" />
-            <span>Smart India Hackathon 2026 • Problem Statement 26089</span>
+        {/* Ambient atmospheric lighting */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#8B7355]/10 rounded-full blur-[120px] pointer-events-none" />
+
+        {/* Content container */}
+        <div className="relative z-10 max-w-4xl mx-auto space-y-8 py-12 flex flex-col items-center">
+          
+          {/* Top Pill Badge */}
+          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#F4F0EA] border border-[#E8E2D9] text-[#6B4F3B] text-xs font-semibold tracking-wide shadow-sm backdrop-blur-md animate-float">
+            <Sparkles className="w-3.5 h-3.5 text-[#8B7355]" />
+            <span>National Worker Cooperative Platform</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight">
-            Fair Household Services Built Around <span className="gradient-text">Worker Cooperatives</span>
+          {/* Main Title Hierarchy */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-[#2B2824] tracking-tight leading-[1.1] max-w-3xl">
+            Fair Household Services Built Around{' '}
+            <span className="gradient-text font-black">Worker Cooperatives</span>
           </h1>
 
-          <p className="text-slate-300 text-base sm:text-lg font-normal leading-relaxed">
+          {/* Subtitle with refined readability */}
+          <p className="text-[#524B43] text-base sm:text-lg font-normal leading-relaxed max-w-2xl text-balance">
             {t('hero_desc')}
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 pt-2">
-            <button
-              onClick={onStartBooking}
-              className="flex items-center space-x-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-coop-600 via-emerald-500 to-teal-400 hover:from-coop-500 hover:to-teal-300 text-slate-950 font-extrabold text-sm shadow-xl shadow-coop-500/25 transition-all transform hover:-translate-y-0.5 active:scale-95"
-            >
-              <span>Explore Services & Book</span>
-              <ArrowRight className="w-4 h-4 stroke-[3]" />
-            </button>
+          {/* Single Clear CTA with Dynamic Ambient Glow & Secondary Action */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            
+            {/* Primary Action: Floating Glow Pill Button */}
+            <div className="cta-glow-wrapper">
+              <button
+                onClick={onStartBooking}
+                className="relative z-10 flex items-center space-x-3 px-8 py-4 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-extrabold text-base shadow-xl transition-all transform hover:scale-[1.03] active:scale-95 group"
+              >
+                <span>Explore Services & Book</span>
+                <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                  <ArrowRight className="w-4 h-4 stroke-[3] text-white" />
+                </div>
+              </button>
+            </div>
 
+            {/* Secondary Action Link */}
             <button
               onClick={onExploreGov}
-              className="flex items-center space-x-2 px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-sm transition-all"
+              className="flex items-center space-x-2 px-6 py-3.5 rounded-full bg-white hover:bg-[#F4F0EA] border border-[#E8E2D9] text-[#2B2824] font-semibold text-sm transition-all shadow-sm"
             >
-              <Building2 className="w-4 h-4 text-coop-400" />
+              <Building2 className="w-4 h-4 text-[#8B7355]" />
               <span>Ministry & Admin Portal</span>
+              <ChevronRight className="w-3.5 h-3.5 text-[#857E75]" />
             </button>
+
           </div>
+
         </div>
       </section>
 
-      {/* Direct Financial Comparison Matrix */}
-      <section className="space-y-6">
-        <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <span className="text-xs font-bold text-coop-400 uppercase tracking-widest">Cooperative Economics</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Why SahakarConnect Disrupts Traditional Gig Platforms</h2>
-          <p className="text-xs sm:text-sm text-slate-400">Comparing typical commercial gig apps vs. democratic worker cooperative platform model</p>
+      {/* SECTION 1: Upper 2 Cards (Styled matching Reference Image 3) */}
+      <section className="space-y-8">
+        <div className="text-center space-y-3 max-w-2xl mx-auto">
+          <span className="text-xs font-extrabold text-[#6B4F3B] uppercase tracking-widest bg-[#F4F0EA] px-3 py-1 rounded-full border border-[#E8E2D9]">
+            Cooperative Economics
+          </span>
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-[#2B2824] tracking-tight">
+            Why SahakarConnect Disrupts Traditional Gig Platforms
+          </h2>
+          <p className="text-xs sm:text-sm text-[#6E675F] leading-relaxed">
+            Comparing typical commercial gig apps vs. democratic worker cooperative platform model
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
-          {/* Traditional Gig Platform Card */}
-          <div className="glass-panel p-6 rounded-2xl border border-red-500/20 bg-slate-900/60 relative overflow-hidden">
-            <div className="absolute top-0 right-0 px-3 py-1 bg-red-500/20 text-red-400 text-[10px] font-bold uppercase rounded-bl-xl border-l border-b border-red-500/30">
-              Corporate Gig Platforms
-            </div>
-            
-            <h3 className="text-lg font-bold text-slate-200 mb-4 flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-              <span>Urban Company / Commercial Apps</span>
-            </h3>
+          {/* Left Upper Card: Corporate Gig Platforms (Sleek Dark Theme matching Image 3 Left Card) */}
+          <div className="rounded-[32px] bg-[#161412] border border-[#2B2724] p-7 space-y-6 shadow-xl flex flex-col justify-between group hover:border-[#403833] transition-all duration-300">
+            <div className="space-y-6">
+              {/* Upper Visual Header Box */}
+              <div className="h-52 rounded-2xl bg-gradient-to-br from-[#241B1B] via-[#181414] to-[#120F0F] border border-[#3D2929] relative overflow-hidden flex items-center justify-center p-6 group-hover:scale-[1.01] transition-transform duration-300">
+                <span className="absolute top-4 left-4 px-3 py-1 bg-[#2D1F1F] text-rose-300/90 border border-rose-500/20 text-[10px] font-semibold uppercase tracking-wider rounded-full backdrop-blur-md">
+                  Corporate Gig Platforms
+                </span>
+                
+                {/* Subtle 3D Friction Graphic Illustration */}
+                <div className="relative w-28 h-28 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-rose-500/15 to-orange-500/5 blur-xl" />
+                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-tr from-[#2D1B1B] to-[#1F1515] border border-rose-500/20 shadow-xl flex flex-col items-center justify-center space-y-1 transform rotate-6 group-hover:rotate-12 transition-transform">
+                    <XCircle className="w-9 h-9 text-rose-400/90" />
+                    <span className="text-[10px] font-mono font-medium text-rose-300/80">30% CUT</span>
+                  </div>
+                </div>
+              </div>
+              
+              <h3 className="text-xl font-bold text-zinc-100 tracking-tight">Urban Company / Commercial Apps</h3>
 
-            <ul className="space-y-3 text-sm text-slate-400">
-              <li className="flex items-start space-x-2.5">
-                <span className="text-red-400 font-bold">✖</span>
-                <span><strong className="text-slate-200">20-30% Commission Fee</strong> taken by corporate shareholders</span>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <span className="text-red-400 font-bold">✖</span>
-                <span><strong className="text-slate-200">Zero Worker Ownership</strong> — gig workers treated as disposable contractors</span>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <span className="text-red-400 font-bold">✖</span>
-                <span><strong className="text-slate-200">Arbitrary Rate Drops & Bans</strong> without any democratic right to appeal</span>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <span className="text-red-400 font-bold">✖</span>
-                <span>No insurance or welfare funds reinvested into worker families</span>
-              </li>
-            </ul>
+              <ul className="space-y-3.5 text-sm text-[#A09890]">
+                <li className="flex items-start space-x-3">
+                  <XCircle className="w-4.5 h-4.5 text-rose-400/80 shrink-0 mt-0.5" />
+                  <span><strong className="text-zinc-200 font-medium">20-30% Commission Fee</strong> taken by corporate shareholders</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <XCircle className="w-4.5 h-4.5 text-rose-400/80 shrink-0 mt-0.5" />
+                  <span><strong className="text-zinc-200 font-medium">Zero Worker Ownership</strong> — gig workers treated as disposable contractors</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <XCircle className="w-4.5 h-4.5 text-rose-400/80 shrink-0 mt-0.5" />
+                  <span><strong className="text-zinc-200 font-medium">Arbitrary Rate Drops & Bans</strong> without any democratic right to appeal</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <XCircle className="w-4.5 h-4.5 text-rose-400/80 shrink-0 mt-0.5" />
+                  <span>No insurance or welfare funds reinvested into worker families</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="pt-2">
+              <button className="px-5 py-2 rounded-xl bg-[#24201D] hover:bg-[#332D29] text-xs font-semibold text-zinc-300 border border-zinc-700/50 transition-all shadow-sm">
+                Learn More
+              </button>
+            </div>
           </div>
 
-          {/* SahakarConnect Cooperative Model Card */}
-          <div className="glass-panel p-6 rounded-2xl border border-coop-500/40 bg-gradient-to-b from-coop-950/40 to-slate-900/90 relative overflow-hidden shadow-xl shadow-coop-500/10">
-            <div className="absolute top-0 right-0 px-3 py-1 bg-coop-500 text-slate-950 text-[10px] font-extrabold uppercase rounded-bl-xl shadow-md">
-              SahakarConnect Model
+          {/* Right Upper Card: SahakarConnect Cooperatives (Light Warm Theme matching Image 3 Right Card) */}
+          <div className="rounded-[32px] bg-white border border-[#E8E2D9] p-7 space-y-6 shadow-xl shadow-[#8B7355]/5 flex flex-col justify-between group hover:border-[#8B7355]/60 transition-all duration-300">
+            <div className="space-y-6">
+              {/* Upper Visual Header Box */}
+              <div className="h-52 rounded-2xl bg-gradient-to-br from-[#FAF3EA] via-[#F4EBE0] to-[#EAE0CF] border border-[#E8E2D9] relative overflow-hidden flex items-center justify-center p-6 group-hover:scale-[1.01] transition-transform duration-300">
+                <span className="absolute top-4 left-4 px-3 py-1 bg-[#6B4F3B] text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-md">
+                  SahakarConnect Model
+                </span>
+
+                {/* Glossy 3D Gold/Bronze Token Illustration */}
+                <div className="relative w-28 h-28 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#8B7355]/30 to-[#6B4F3B]/20 blur-xl animate-pulse" />
+                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-tr from-[#FAF8F5] to-[#F4F0EA] border border-[#8B7355]/40 shadow-2xl flex flex-col items-center justify-center space-y-1 transform -rotate-6 group-hover:-rotate-12 transition-transform">
+                    <CheckCircle2 className="w-10 h-10 text-[#8B7355]" />
+                    <span className="text-[10px] font-mono font-bold text-[#6B4F3B]">80% WORKER</span>
+                  </div>
+                </div>
+              </div>
+
+              <h3 className="text-2xl font-black text-[#2B2824] tracking-tight">SahakarConnect Cooperatives</h3>
+
+              <ul className="space-y-3.5 text-sm text-[#2B2824]">
+                <li className="flex items-start space-x-3">
+                  <CheckCircle2 className="w-5 h-5 text-[#8B7355] shrink-0 mt-0.5" />
+                  <span><strong className="text-[#2B2824] font-extrabold">80% Direct to Worker</strong> — maximum earnings per booking</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <CheckCircle2 className="w-5 h-5 text-[#8B7355] shrink-0 mt-0.5" />
+                  <span><strong className="text-[#2B2824] font-extrabold">15% Cooperative Fund</strong> — worker health insurance & equipment grants</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <CheckCircle2 className="w-5 h-5 text-[#8B7355] shrink-0 mt-0.5" />
+                  <span><strong className="text-[#2B2824] font-extrabold">5% Platform Fee</strong> — lean open-technology maintenance</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <CheckCircle2 className="w-5 h-5 text-[#8B7355] shrink-0 mt-0.5" />
+                  <span><strong className="text-[#2B2824] font-extrabold">1-Member-1-Vote Governance</strong> — workers vote on rate revisions</span>
+                </li>
+              </ul>
             </div>
 
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-coop-400 animate-ping" />
-              <span className="text-coop-400 font-extrabold">SahakarConnect Cooperatives</span>
-            </h3>
-
-            <ul className="space-y-3 text-sm text-slate-300">
-              <li className="flex items-start space-x-2.5">
-                <CheckCircle2 className="w-5 h-5 text-coop-400 shrink-0 mt-0.5" />
-                <span><strong className="text-white">80% Direct to Worker</strong> — maximum earnings per booking</span>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <CheckCircle2 className="w-5 h-5 text-coop-400 shrink-0 mt-0.5" />
-                <span><strong className="text-white">15% Cooperative Fund</strong> — worker health insurance & equipment grants</span>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <CheckCircle2 className="w-5 h-5 text-coop-400 shrink-0 mt-0.5" />
-                <span><strong className="text-white">5% Platform Fee</strong> — lean open-technology maintenance</span>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <CheckCircle2 className="w-5 h-5 text-coop-400 shrink-0 mt-0.5" />
-                <span><strong className="text-white">1-Member-1-Vote Governance</strong> — workers vote on rate revisions</span>
-              </li>
-            </ul>
+            <div className="pt-2">
+              <button className="px-6 py-2.5 rounded-xl bg-[#2B2824] hover:bg-[#6B4F3B] text-xs font-bold text-white transition-all shadow-md">
+                Learn More
+              </button>
+            </div>
           </div>
 
         </div>
       </section>
 
-      {/* Feature Pillar Badges */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        
-        <div className="glass-panel glass-panel-hover p-6 rounded-2xl border border-slate-800 space-y-3">
-          <div className="w-12 h-12 rounded-xl bg-coop-500/10 border border-coop-500/30 flex items-center justify-center text-coop-400">
-            <DollarSign className="w-6 h-6" />
-          </div>
-          <h3 className="text-lg font-bold text-white">Transparent 80/15/5 Split</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Every booking receipt explicitly breaks down worker earnings, cooperative reserve funds, and platform maintenance fee before payment.
-          </p>
+      {/* SECTION 2: Lower 3 Cards (Styled matching Reference Image 2 with 3D Hover Tilt) */}
+      <section className="space-y-8">
+        <div className="text-center space-y-2 max-w-2xl mx-auto">
+          <span className="text-xs font-extrabold text-[#6B4F3B] uppercase tracking-widest bg-[#F4F0EA] px-3 py-1 rounded-full border border-[#E8E2D9]">
+            Core Platform Pillars
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2B2824] tracking-tight">
+            Built for Transparency, Equity & Intelligence
+          </h2>
         </div>
 
-        <div className="glass-panel glass-panel-hover p-6 rounded-2xl border border-slate-800 space-y-3">
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-            <Vote className="w-6 h-6" />
-          </div>
-          <h3 className="text-lg font-bold text-white">Democratic Governance</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Workers vote on rate changes, equipment investments, and new member approvals. One member equals one vote.
-          </p>
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          
+          {/* Card 1: Transparent 80/15/5 Split */}
+          <TiltCard className="rounded-[32px] bg-gradient-to-b from-[#131D21] via-[#0E1619] to-[#091012] border border-[#22333B] p-7 h-[420px] flex flex-col justify-between relative overflow-hidden group cursor-pointer shadow-2xl">
+            <CardWaveCanvas seed={0} />
+            <div className="z-10 flex justify-between items-start">
+              <span className="px-3 py-1 rounded-full bg-[#8B7355]/15 border border-[#8B7355]/30 text-[#DBC5A5] text-[10px] font-mono font-bold uppercase tracking-wider backdrop-blur-md">
+                01 / Financial Split
+              </span>
+              <DollarSign className="w-5 h-5 text-[#DBC5A5]" />
+            </div>
 
-        <div className="glass-panel glass-panel-hover p-6 rounded-2xl border border-slate-800 space-y-3">
-          <div className="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <h3 className="text-lg font-bold text-white">AI Smart Match Scoring</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Transparent algorithm ranks workers by proximity, rating, availability, and skill match with clear score tooltips.
-          </p>
-        </div>
+            <div className="z-10 space-y-2">
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-white group-hover:text-amber-200 transition-colors tracking-tight font-serif">
+                Transparent 80/15/5 Split
+              </h3>
+              <p className="text-xs sm:text-sm text-[#9BB0B9] leading-relaxed">
+                Every booking receipt explicitly breaks down worker earnings, cooperative reserve funds, and platform maintenance fee before payment.
+              </p>
+            </div>
+          </TiltCard>
 
+          {/* Card 2: Democratic Governance */}
+          <TiltCard className="rounded-[32px] bg-gradient-to-b from-[#131D21] via-[#0E1619] to-[#091012] border border-[#22333B] p-7 h-[420px] flex flex-col justify-between relative overflow-hidden group cursor-pointer shadow-2xl">
+            <CardWaveCanvas seed={1} />
+            <div className="z-10 flex justify-between items-start">
+              <span className="px-3 py-1 rounded-full bg-[#8B7355]/15 border border-[#8B7355]/30 text-[#DBC5A5] text-[10px] font-mono font-bold uppercase tracking-wider backdrop-blur-md">
+                02 / Governance
+              </span>
+              <Vote className="w-5 h-5 text-[#DBC5A5]" />
+            </div>
+
+            <div className="z-10 space-y-2">
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-white group-hover:text-amber-200 transition-colors tracking-tight font-serif">
+                Democratic Governance
+              </h3>
+              <p className="text-xs sm:text-sm text-[#9BB0B9] leading-relaxed">
+                Workers vote on rate changes, equipment investments, and new member approvals. One member equals one vote.
+              </p>
+            </div>
+          </TiltCard>
+
+          {/* Card 3: AI Smart Match Scoring */}
+          <TiltCard className="rounded-[32px] bg-gradient-to-b from-[#131D21] via-[#0E1619] to-[#091012] border border-[#22333B] p-7 h-[420px] flex flex-col justify-between relative overflow-hidden group cursor-pointer shadow-2xl">
+            <CardWaveCanvas seed={2} />
+            <div className="z-10 flex justify-between items-start">
+              <span className="px-3 py-1 rounded-full bg-[#8B7355]/15 border border-[#8B7355]/30 text-[#DBC5A5] text-[10px] font-mono font-bold uppercase tracking-wider backdrop-blur-md">
+                03 / Match Engine
+              </span>
+              <Sparkles className="w-5 h-5 text-[#DBC5A5]" />
+            </div>
+
+            <div className="z-10 space-y-2">
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-white group-hover:text-amber-200 transition-colors tracking-tight font-serif">
+                AI Smart Match Scoring
+              </h3>
+              <p className="text-xs sm:text-sm text-[#9BB0B9] leading-relaxed">
+                Transparent algorithm ranks workers by proximity, rating, availability, and skill match with clear score tooltips.
+              </p>
+            </div>
+          </TiltCard>
+
+        </div>
       </section>
 
     </div>
@@ -169,3 +407,4 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
 };
 
 export default LandingPage;
+

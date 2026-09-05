@@ -118,44 +118,44 @@ export const WorkerPortal: React.FC = () => {
     <div className="space-y-6 py-4">
       
       {/* Top Banner: Worker Status & Availability Toggle */}
-      <div className="glass-panel p-6 rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-950 via-slate-900 to-coop-950/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl border border-[#E8E2D9] bg-gradient-to-r from-white via-[#FAF8F5] to-[#F4F0EA] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <h1 className="text-2xl font-extrabold text-white">{user?.name || 'Worker Member Dashboard'}</h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-coop-500/10 text-coop-400 border border-coop-500/30 text-[10px] font-extrabold uppercase">
+            <h1 className="text-2xl font-extrabold text-[#2B2824]">{user?.name || 'Worker Member Dashboard'}</h1>
+            <span className="px-2.5 py-0.5 rounded-full bg-[#F4F0EA] text-[#6B4F3B] border border-[#E8E2D9] text-[10px] font-extrabold uppercase">
               VERIFIED MEMBER
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Affiliation: <strong className="text-coop-400">{workerProfile?.cooperative?.name || 'Delhi NCR Urban Workers Cooperative'}</strong>
+          <p className="text-xs text-[#6E675F] mt-1">
+            Affiliation: <strong className="text-[#8B7355]">{workerProfile?.cooperative?.name || 'Delhi NCR Urban Workers Cooperative'}</strong>
           </p>
         </div>
 
         {/* Availability Toggle */}
-        <div className="flex items-center space-x-3 bg-slate-950 px-4 py-2.5 rounded-2xl border border-slate-800">
-          <span className="text-xs font-bold text-slate-300">Duty Status:</span>
+        <div className="flex items-center space-x-3 bg-[#FAF8F5] px-4 py-2.5 rounded-2xl border border-[#E8E2D9]">
+          <span className="text-xs font-bold text-[#2B2824]">Duty Status:</span>
           <button
             onClick={toggleAvailability}
-            className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl font-extrabold text-xs transition-all shadow-md ${
+            className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl font-extrabold text-xs transition-all shadow-sm ${
               isAvailable
-                ? 'bg-coop-500 text-slate-950 shadow-coop-500/20'
-                : 'bg-slate-800 text-slate-400'
+                ? 'bg-[#6B4F3B] text-white shadow-md'
+                : 'bg-[#E8E2D9] text-[#6E675F]'
             }`}
           >
-            <Power className="w-3.5 h-3.5" />
+            <Power className="w-3.5 h-3.5 text-white" />
             <span>{isAvailable ? 'AVAILABLE FOR JOBS' : 'OFFLINE'}</span>
           </button>
         </div>
       </div>
 
       {/* Worker Sub-navigation Tabs */}
-      <div className="flex items-center space-x-2 border-b border-slate-800 pb-3">
+      <div className="flex items-center space-x-2 border-b border-[#E8E2D9] pb-3">
         <button
           onClick={() => setActiveTab('jobs')}
           className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 ${
             activeTab === 'jobs'
-              ? 'bg-coop-500 text-slate-950 shadow-md'
-              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+              ? 'bg-[#6B4F3B] text-white shadow-sm'
+              : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
           }`}
         >
           <Clock className="w-4 h-4" />
@@ -166,8 +166,8 @@ export const WorkerPortal: React.FC = () => {
           onClick={() => setActiveTab('earnings')}
           className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 ${
             activeTab === 'earnings'
-              ? 'bg-coop-500 text-slate-950 shadow-md'
-              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+              ? 'bg-[#6B4F3B] text-white shadow-sm'
+              : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
           }`}
         >
           <TrendingUp className="w-4 h-4" />
@@ -178,8 +178,8 @@ export const WorkerPortal: React.FC = () => {
           onClick={() => setActiveTab('governance')}
           className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 ${
             activeTab === 'governance'
-              ? 'bg-coop-500 text-slate-950 shadow-md'
-              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+              ? 'bg-[#6B4F3B] text-white shadow-sm'
+              : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
           }`}
         >
           <Vote className="w-4 h-4" />
@@ -190,10 +190,10 @@ export const WorkerPortal: React.FC = () => {
       {/* Tab 1: Job Feed & Lifecycle Management */}
       {activeTab === 'jobs' && (
         <div className="space-y-4">
-          <h2 className="text-base font-extrabold text-white">Incoming & Active Job Bookings</h2>
+          <h2 className="text-base font-extrabold text-[#2B2824]">Incoming & Active Job Bookings</h2>
 
           {myBookings.length === 0 ? (
-            <div className="p-8 text-center glass-panel text-slate-400 text-xs rounded-2xl">
+            <div className="p-8 text-center bg-white border border-[#E8E2D9] text-[#6E675F] text-xs rounded-3xl">
               No active job requests. Ensure duty status is set to AVAILABLE to receive matches.
             </div>
           ) : (
@@ -201,31 +201,31 @@ export const WorkerPortal: React.FC = () => {
               {myBookings.map((job) => {
                 const workerShare = job.payout?.worker_share || (job.amount * 0.80);
                 return (
-                  <div key={job.id} className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-900 pb-3">
+                  <div key={job.id} className="p-5 rounded-2xl bg-white border border-[#E8E2D9] space-y-3 shadow-sm">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#E8E2D9] pb-3">
                       <div>
-                        <span className="font-extrabold text-white text-base">{job.category?.name || 'Service Booking'}</span>
-                        <div className="text-xs text-slate-400 mt-0.5">Customer: <strong className="text-slate-200">{job.customer?.name}</strong> ({job.customer?.phone})</div>
-                        <div className="flex items-center space-x-1 text-xs text-slate-500 mt-1">
-                          <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                        <span className="font-extrabold text-[#2B2824] text-base">{job.category?.name || 'Service Booking'}</span>
+                        <div className="text-xs text-[#6E675F] mt-0.5">Customer: <strong className="text-[#2B2824]">{job.customer?.name}</strong> ({job.customer?.phone})</div>
+                        <div className="flex items-center space-x-1 text-xs text-[#857E75] mt-1">
+                          <MapPin className="w-3.5 h-3.5 text-[#8B7355]" />
                           <span>{job.address}</span>
                         </div>
                       </div>
 
                       <div className="text-right">
-                        <div className="text-xs text-slate-400">Your 80% Share:</div>
-                        <div className="text-lg font-extrabold text-coop-400">₹{workerShare.toFixed(2)}</div>
-                        <div className="text-[10px] text-slate-500">Gross Total: ₹{job.amount}</div>
+                        <div className="text-xs text-[#6E675F]">Your 80% Share:</div>
+                        <div className="text-xl font-black text-[#6B4F3B]">₹{workerShare.toFixed(2)}</div>
+                        <div className="text-[10px] text-[#857E75]">Gross Total: ₹{job.amount}</div>
                       </div>
                     </div>
 
                     {/* Status Actions */}
                     <div className="flex items-center justify-between">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase ${
-                        job.status === 'COMPLETED' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                        job.status === 'IN_PROGRESS' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                        job.status === 'ACCEPTED' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                        'bg-coop-500/20 text-coop-400 border border-coop-500/30'
+                        job.status === 'COMPLETED' ? 'bg-[#F4F0EA] text-[#6B4F3B] border border-[#8B7355]/40' :
+                        job.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-900 border border-amber-300' :
+                        job.status === 'ACCEPTED' ? 'bg-blue-50 text-blue-800 border border-blue-200' :
+                        'bg-stone-100 text-stone-700 border border-[#E8E2D9]'
                       }`}>
                         Status: {job.status}
                       </span>
@@ -234,7 +234,7 @@ export const WorkerPortal: React.FC = () => {
                         {job.status === 'REQUESTED' && (
                           <button
                             onClick={() => updateJobStatus(job.id, 'ACCEPTED')}
-                            className="px-4 py-1.5 rounded-xl bg-coop-500 hover:bg-coop-400 text-slate-950 text-xs font-extrabold shadow-md"
+                            className="px-4 py-1.5 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white text-xs font-extrabold shadow-sm"
                           >
                             Accept Job
                           </button>
@@ -243,7 +243,7 @@ export const WorkerPortal: React.FC = () => {
                         {job.status === 'ACCEPTED' && (
                           <button
                             onClick={() => updateJobStatus(job.id, 'IN_PROGRESS')}
-                            className="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow-md"
+                            className="px-4 py-1.5 rounded-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-extrabold shadow-sm"
                           >
                             Start Job
                           </button>
@@ -252,7 +252,7 @@ export const WorkerPortal: React.FC = () => {
                         {job.status === 'IN_PROGRESS' && (
                           <button
                             onClick={() => updateJobStatus(job.id, 'COMPLETED')}
-                            className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 text-xs font-extrabold shadow-lg"
+                            className="px-4 py-1.5 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white text-xs font-extrabold shadow-md"
                           >
                             Mark Completed (Trigger 80/15/5 Payout)
                           </button>
@@ -272,37 +272,37 @@ export const WorkerPortal: React.FC = () => {
       {activeTab === 'earnings' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="glass-panel p-5 rounded-2xl border border-slate-800">
-              <div className="text-xs text-slate-400 font-semibold">Total Direct Earnings (80%)</div>
-              <div className="text-2xl font-extrabold text-coop-400 mt-1">₹{totalEarned.toFixed(2)}</div>
-              <div className="text-[10px] text-slate-500 mt-1">Released straight to worker bank account</div>
+            <div className="p-5 rounded-2xl bg-white border border-[#E8E2D9] shadow-sm">
+              <div className="text-xs text-[#6E675F] font-semibold">Total Direct Earnings (80%)</div>
+              <div className="text-2xl font-black text-[#6B4F3B] mt-1">₹{totalEarned.toFixed(2)}</div>
+              <div className="text-[10px] text-[#857E75] mt-1">Released straight to worker account</div>
             </div>
 
-            <div className="glass-panel p-5 rounded-2xl border border-slate-800">
-              <div className="text-xs text-slate-400 font-semibold">Coop Welfare Contribution (15%)</div>
-              <div className="text-2xl font-extrabold text-teal-400 mt-1">₹{totalCoopFundContributed.toFixed(2)}</div>
-              <div className="text-[10px] text-slate-500 mt-1">Accumulated for member health & grants</div>
+            <div className="p-5 rounded-2xl bg-white border border-[#E8E2D9] shadow-sm">
+              <div className="text-xs text-[#6E675F] font-semibold">Coop Welfare Contribution (15%)</div>
+              <div className="text-2xl font-black text-[#8B7355] mt-1">₹{totalCoopFundContributed.toFixed(2)}</div>
+              <div className="text-[10px] text-[#857E75] mt-1">Accumulated for health & equipment</div>
             </div>
 
-            <div className="glass-panel p-5 rounded-2xl border border-slate-800">
-              <div className="text-xs text-slate-400 font-semibold">Completed Jobs</div>
-              <div className="text-2xl font-extrabold text-white mt-1">{completedJobs.length}</div>
-              <div className="text-[10px] text-slate-500 mt-1">100% transparent fee calculation</div>
+            <div className="p-5 rounded-2xl bg-white border border-[#E8E2D9] shadow-sm">
+              <div className="text-xs text-[#6E675F] font-semibold">Completed Jobs</div>
+              <div className="text-2xl font-black text-[#2B2824] mt-1">{completedJobs.length}</div>
+              <div className="text-[10px] text-[#857E75] mt-1">100% transparent fee calculation</div>
             </div>
           </div>
 
           {/* Recharts Stacked Breakdown */}
-          <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-3">
-            <h3 className="text-sm font-extrabold text-white">Payout Distribution per Job (80% Worker vs 15% Coop Fund)</h3>
+          <div className="p-6 rounded-3xl bg-white border border-[#E8E2D9] space-y-3 shadow-sm">
+            <h3 className="text-sm font-extrabold text-[#2B2824]">Payout Distribution per Job (80% Worker vs 15% Coop Fund)</h3>
             <div className="h-64 w-full pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={earningsChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                  <XAxis dataKey="name" stroke="#64748b" fontSize={11} />
-                  <YAxis stroke="#64748b" fontSize={11} />
-                  <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }} />
-                  <Bar dataKey="Worker80Pct" name="Worker Share (80%)" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="CoopFund15Pct" name="Coop Fund (15%)" fill="#14b8a6" radius={[4, 4, 0, 0]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E8E2D9" />
+                  <XAxis dataKey="name" stroke="#6E675F" fontSize={11} />
+                  <YAxis stroke="#6E675F" fontSize={11} />
+                  <Tooltip contentStyle={{ backgroundColor: '#FAF8F5', borderColor: '#E8E2D9', borderRadius: '12px', color: '#2B2824' }} />
+                  <Bar dataKey="Worker80Pct" name="Worker Share (80%)" fill="#6B4F3B" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="CoopFund15Pct" name="Coop Fund (15%)" fill="#8B7355" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -313,12 +313,12 @@ export const WorkerPortal: React.FC = () => {
       {/* Tab 3: Cooperative Governance (1 Member 1 Vote) */}
       {activeTab === 'governance' && (
         <div className="space-y-6">
-          <div className="glass-panel p-5 rounded-2xl border border-coop-500/30 bg-coop-950/20 flex items-start space-x-3">
-            <ShieldCheck className="w-6 h-6 text-coop-400 shrink-0 mt-0.5" />
+          <div className="p-5 rounded-2xl border border-[#E8E2D9] bg-[#F4F0EA] flex items-start space-x-3">
+            <ShieldCheck className="w-6 h-6 text-[#8B7355] shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-sm font-extrabold text-white">Democratic Worker Governance (1 Member = 1 Vote)</h3>
-              <p className="text-xs text-slate-300 mt-0.5">
-                Unlike corporate apps where management dictates prices, every worker member gets equal voting power on rate changes, fund spending, and member approvals.
+              <h3 className="text-sm font-extrabold text-[#2B2824]">Democratic Worker Governance (1 Member = 1 Vote)</h3>
+              <p className="text-xs text-[#524B43] mt-0.5">
+                Every worker member gets equal voting power on rate changes, fund spending, and member approvals.
               </p>
             </div>
           </div>
@@ -327,57 +327,57 @@ export const WorkerPortal: React.FC = () => {
             
             {/* Proposals List */}
             <div className="space-y-4">
-              <h3 className="text-sm font-extrabold text-white">Active Cooperative Proposals</h3>
+              <h3 className="text-sm font-extrabold text-[#2B2824]">Active Cooperative Proposals</h3>
 
               {proposals.map((prop) => (
                 <div
                   key={prop.id}
                   onClick={() => setSelectedProposal(prop)}
-                  className={`glass-panel p-5 rounded-2xl border cursor-pointer transition-all space-y-3 ${
+                  className={`p-5 rounded-2xl border cursor-pointer transition-all space-y-3 ${
                     selectedProposal?.id === prop.id
-                      ? 'border-coop-500 bg-coop-950/40 shadow-lg shadow-coop-500/10'
-                      : 'border-slate-800 hover:border-slate-700'
+                      ? 'border-[#6B4F3B] bg-[#F4F0EA] shadow-md'
+                      : 'border-[#E8E2D9] bg-white hover:border-[#8B7355]'
                   }`}
                 >
                   <div className="flex items-start justify-between">
-                    <h4 className="font-extrabold text-white text-sm">{prop.title}</h4>
+                    <h4 className="font-extrabold text-[#2B2824] text-sm">{prop.title}</h4>
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                      prop.status === 'OPEN' ? 'bg-coop-500/20 text-coop-400 border border-coop-500/30' : 'bg-slate-800 text-slate-400'
+                      prop.status === 'OPEN' ? 'bg-[#F4F0EA] text-[#6B4F3B] border border-[#8B7355]/30' : 'bg-[#E8E2D9] text-[#6E675F]'
                     }`}>
                       {prop.status}
                     </span>
                   </div>
 
-                  <p className="text-xs text-slate-400 line-clamp-2">{prop.description}</p>
+                  <p className="text-xs text-[#6E675F] line-clamp-2">{prop.description}</p>
 
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-900">
+                  <div className="flex items-center justify-between text-[11px] text-[#857E75] pt-2 border-t border-[#E8E2D9]">
                     <span>Total Votes Cast: {prop.totalVotes || prop.votes?.length || 0}</span>
-                    <span className="text-coop-400 font-bold">Click to Vote / View Results</span>
+                    <span className="text-[#6B4F3B] font-bold">Click to Vote / View Results</span>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Voting & Results Panel */}
-            <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+            <div className="p-6 rounded-3xl bg-white border border-[#E8E2D9] space-y-4 shadow-sm">
               {selectedProposal ? (
                 <>
                   <div>
-                    <span className="text-[10px] font-bold text-coop-400 uppercase tracking-widest">Cooperative Proposal Poll</span>
-                    <h3 className="text-lg font-extrabold text-white mt-1">{selectedProposal.title}</h3>
-                    <p className="text-xs text-slate-300 mt-2 leading-relaxed">{selectedProposal.description}</p>
+                    <span className="text-[10px] font-bold text-[#8B7355] uppercase tracking-widest">Cooperative Proposal Poll</span>
+                    <h3 className="text-lg font-extrabold text-[#2B2824] mt-1">{selectedProposal.title}</h3>
+                    <p className="text-xs text-[#524B43] mt-2 leading-relaxed">{selectedProposal.description}</p>
                   </div>
 
                   {votingMsg && (
-                    <div className="p-3 rounded-xl bg-coop-500/10 border border-coop-500/40 text-coop-400 text-xs font-bold text-center">
+                    <div className="p-3 rounded-2xl bg-[#F4F0EA] border border-[#8B7355]/30 text-[#6B4F3B] text-xs font-bold text-center">
                       {votingMsg}
                     </div>
                   )}
 
                   {/* Cast Vote Form if Open */}
                   {selectedProposal.status === 'OPEN' && (
-                    <div className="space-y-3 pt-2 border-t border-slate-900">
-                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Cast Your Member Vote</label>
+                    <div className="space-y-3 pt-2 border-t border-[#E8E2D9]">
+                      <label className="block text-xs font-bold text-[#6E675F] uppercase tracking-wider">Cast Your Member Vote</label>
                       
                       <div className="space-y-2">
                         {(selectedProposal.optionsList || selectedProposal.options.split(',')).map((opt: string, idx: number) => {
@@ -387,8 +387,8 @@ export const WorkerPortal: React.FC = () => {
                               key={idx}
                               className={`flex items-center space-x-3 p-3 rounded-xl border cursor-pointer transition-all ${
                                 voteChoice === optionText
-                                  ? 'border-coop-500 bg-coop-950/60 text-white font-bold'
-                                  : 'border-slate-800 bg-slate-950 text-slate-300 hover:bg-slate-900'
+                                  ? 'border-[#6B4F3B] bg-[#F4F0EA] text-[#2B2824] font-bold'
+                                  : 'border-[#E8E2D9] bg-[#FAF8F5] text-[#524B43] hover:bg-[#F4F0EA]'
                               }`}
                             >
                               <input
@@ -397,7 +397,7 @@ export const WorkerPortal: React.FC = () => {
                                 value={optionText}
                                 checked={voteChoice === optionText}
                                 onChange={(e) => setVoteChoice(e.target.value)}
-                                className="accent-coop-500"
+                                className="accent-[#6B4F3B]"
                               />
                               <span className="text-xs">{optionText}</span>
                             </label>
@@ -408,7 +408,7 @@ export const WorkerPortal: React.FC = () => {
                       <button
                         onClick={() => handleVoteSubmit(selectedProposal.id)}
                         disabled={!voteChoice}
-                        className="w-full py-2.5 rounded-xl bg-coop-500 hover:bg-coop-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-coop-500/20 disabled:opacity-50 transition-all"
+                        className="w-full py-3 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-extrabold text-xs shadow-md disabled:opacity-50 transition-all"
                       >
                         Submit Democratic Vote
                       </button>
@@ -416,18 +416,18 @@ export const WorkerPortal: React.FC = () => {
                   )}
 
                   {/* Live Results Bar Breakdown */}
-                  <div className="space-y-3 pt-4 border-t border-slate-900">
-                    <h4 className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">Live Vote Distribution</h4>
+                  <div className="space-y-3 pt-4 border-t border-[#E8E2D9]">
+                    <h4 className="text-xs font-extrabold text-[#6E675F] uppercase tracking-wider">Live Vote Distribution</h4>
 
                     {selectedProposal.optionsBreakdown?.map((item: any, idx: number) => (
                       <div key={idx} className="space-y-1">
-                        <div className="flex justify-between text-xs text-slate-300 font-semibold">
+                        <div className="flex justify-between text-xs text-[#2B2824] font-semibold">
                           <span>{item.option}</span>
-                          <span className="text-coop-400 font-mono">{item.percentage}% ({item.votes} votes)</span>
+                          <span className="text-[#6B4F3B] font-mono">{item.percentage}% ({item.votes} votes)</span>
                         </div>
-                        <div className="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                        <div className="w-full h-2.5 bg-[#F4F0EA] rounded-full overflow-hidden border border-[#E8E2D9]">
                           <div
-                            className="h-full bg-gradient-to-r from-coop-500 to-teal-400 rounded-full transition-all duration-500"
+                            className="h-full bg-[#6B4F3B] rounded-full transition-all duration-500"
                             style={{ width: `${item.percentage}%` }}
                           />
                         </div>
@@ -436,7 +436,7 @@ export const WorkerPortal: React.FC = () => {
                   </div>
                 </>
               ) : (
-                <div className="p-12 text-center text-slate-500 text-xs">
+                <div className="p-12 text-center text-[#857E75] text-xs">
                   Select an active proposal on the left to cast your vote or inspect live member poll results.
                 </div>
               )}
@@ -451,3 +451,4 @@ export const WorkerPortal: React.FC = () => {
 };
 
 export default WorkerPortal;
+
