@@ -26,7 +26,7 @@ export const CustomerPortal: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [workers, setWorkers] = useState<any[]>([]);
   const [loadingWorkers, setLoadingWorkers] = useState(false);
-  
+
   // Selected Worker for Booking Modal
   const [selectedWorker, setSelectedWorker] = useState<any | null>(null);
   const [bookingAddress, setBookingAddress] = useState('Flat 402, Green Park Heights, Sector 14');
@@ -154,7 +154,7 @@ export const CustomerPortal: React.FC = () => {
 
   return (
     <div className="space-y-10 py-4">
-      
+
       {/* Category Selection Carousel/Grid */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
@@ -179,11 +179,10 @@ export const CustomerPortal: React.FC = () => {
               <div
                 key={cat.id}
                 onClick={() => handleCategoryClick(cat.name)}
-                className={`p-4 rounded-2xl cursor-pointer transition-all border text-center ${
-                  isSelected
-                    ? 'border-[#6B4F3B] bg-[#F4F0EA] shadow-md'
-                    : 'border-[#E8E2D9] bg-white hover:border-[#8B7355] hover:bg-[#FAF8F5]'
-                }`}
+                className={`p-4 rounded-2xl cursor-pointer transition-all border text-center ${isSelected
+                  ? 'border-[#6B4F3B] bg-[#F4F0EA] shadow-md'
+                  : 'border-[#E8E2D9] bg-white hover:border-[#8B7355] hover:bg-[#FAF8F5]'
+                  }`}
               >
                 <div className="text-xs font-bold text-[#2B2824] mb-1 truncate">{cat.name}</div>
                 <div className="text-[11px] font-extrabold text-[#6B4F3B]">₹{cat.base_rate} base</div>
@@ -223,7 +222,7 @@ export const CustomerPortal: React.FC = () => {
                   key={worker.id}
                   className="rounded-3xl border border-[#E8E2D9] bg-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between group"
                 >
-                  
+
                   <div>
                     {/* Top Decorative Banner */}
                     <div className={`h-24 bg-gradient-to-r ${gradientCover} relative p-3 flex justify-between items-start`}>
@@ -309,7 +308,7 @@ export const CustomerPortal: React.FC = () => {
                           <span className="font-extrabold text-[#2B2824] text-sm">{worker.rating_avg.toFixed(1)}</span>
                           <span className="text-[#857E75] text-[11px]">(15+ jobs)</span>
                         </div>
-                        
+
                         <div className="text-right">
                           <span className="text-[11px] text-[#6E675F]">Base Rate: </span>
                           <span className="text-base font-black text-[#2B2824]">₹{categoryAmount}</span>
@@ -346,7 +345,7 @@ export const CustomerPortal: React.FC = () => {
       {selectedWorker && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2B2824]/60 backdrop-blur-sm animate-fadeIn">
           <div className="relative w-full max-w-lg p-6 rounded-3xl border border-[#E8E2D9] bg-white shadow-2xl space-y-5">
-            
+
             <button
               onClick={() => setSelectedWorker(null)}
               className="absolute top-4 right-4 text-[#857E75] hover:text-[#2B2824] p-1 rounded-full hover:bg-[#F4F0EA]"
@@ -365,7 +364,7 @@ export const CustomerPortal: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handleCreateBooking} className="space-y-4">
-                
+
                 {/* Address & Instructions */}
                 <div>
                   <label className="block text-xs font-bold text-[#6E675F] uppercase tracking-wider mb-1">Service Address</label>
@@ -446,12 +445,11 @@ export const CustomerPortal: React.FC = () => {
                   <div>
                     <div className="flex items-center space-x-2">
                       <span className="font-extrabold text-[#2B2824] text-base">{b.category?.name || 'Household Service'}</span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                        b.status === 'COMPLETED' ? 'bg-[#F4F0EA] text-[#6B4F3B] border border-[#8B7355]/40' :
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${b.status === 'COMPLETED' ? 'bg-[#F4F0EA] text-[#6B4F3B] border border-[#8B7355]/40' :
                         b.status === 'IN_PROGRESS' ? 'bg-amber-50 text-amber-800 border border-amber-200' :
-                        b.status === 'ACCEPTED' ? 'bg-blue-50 text-blue-800 border border-blue-200' :
-                        'bg-stone-100 text-stone-700'
-                      }`}>
+                          b.status === 'ACCEPTED' ? 'bg-blue-50 text-blue-800 border border-blue-200' :
+                            'bg-stone-100 text-stone-700'
+                        }`}>
                         {b.status}
                       </span>
                     </div>
@@ -502,9 +500,8 @@ export const CustomerPortal: React.FC = () => {
                 <Star
                   key={s}
                   onClick={() => setRatingScore(s)}
-                  className={`w-8 h-8 cursor-pointer transition-all ${
-                    s <= ratingScore ? 'text-amber-500 fill-amber-500 scale-110' : 'text-[#D5CCBF]'
-                  }`}
+                  className={`w-8 h-8 cursor-pointer transition-all ${s <= ratingScore ? 'text-amber-500 fill-amber-500 scale-110' : 'text-[#D5CCBF]'
+                    }`}
                 />
               ))}
             </div>

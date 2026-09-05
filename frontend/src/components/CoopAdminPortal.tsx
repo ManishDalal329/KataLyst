@@ -109,7 +109,7 @@ export const CoopAdminPortal: React.FC = () => {
 
   return (
     <div className="space-y-6 py-4">
-      
+
       {/* Top Banner: Cooperative Overview & Fund Balance */}
       <div className="p-6 rounded-3xl border border-[#E8E2D9] bg-gradient-to-r from-white via-[#FAF8F5] to-[#F4F0EA] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
@@ -137,11 +137,10 @@ export const CoopAdminPortal: React.FC = () => {
       <div className="flex items-center space-x-2 border-b border-[#E8E2D9] pb-3">
         <button
           onClick={() => setActiveTab('members')}
-          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 ${
-            activeTab === 'members'
-              ? 'bg-[#6B4F3B] text-white shadow-sm'
-              : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 ${activeTab === 'members'
+            ? 'bg-[#6B4F3B] text-white shadow-sm'
+            : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
+            }`}
         >
           <UserPlus className="w-4 h-4" />
           <span>Worker Members ({coopData.workers?.length || 0})</span>
@@ -149,11 +148,10 @@ export const CoopAdminPortal: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('rates')}
-          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 ${
-            activeTab === 'rates'
-              ? 'bg-[#6B4F3B] text-white shadow-sm'
-              : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 ${activeTab === 'rates'
+            ? 'bg-[#6B4F3B] text-white shadow-sm'
+            : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
+            }`}
         >
           <DollarSign className="w-4 h-4" />
           <span>Service Base Rates Matrix</span>
@@ -161,11 +159,10 @@ export const CoopAdminPortal: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('proposals')}
-          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 ${
-            activeTab === 'proposals'
-              ? 'bg-[#6B4F3B] text-white shadow-sm'
-              : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 ${activeTab === 'proposals'
+            ? 'bg-[#6B4F3B] text-white shadow-sm'
+            : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
+            }`}
         >
           <Vote className="w-4 h-4" />
           <span>Democratic Proposals ({coopData.proposals?.length || 0})</span>
