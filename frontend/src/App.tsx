@@ -12,7 +12,7 @@ export const AppContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('home');
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-[#2B2824]">
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -29,13 +29,13 @@ export const AppContent: React.FC = () => {
         {activeTab === 'admin' && <GovAdminPortal />}
       </main>
 
-      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+      <footer className="border-t border-[#E8E2D9] bg-[#FAF8F5] py-6 text-center text-xs text-[#857E75]">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div>
-            <strong>SahakarConnect</strong> • Cooperative Gig Services Platform
+            <strong className="text-[#2B2824]">SahakarConnect</strong> • Cooperative Gig Services Platform
           </div>
           <div>
-            Smart India Hackathon 2026 • Problem Statement 26089 (Ministry of Cooperation)
+            Ministry of Cooperation • Worker Cooperative Platform
           </div>
         </div>
       </footer>

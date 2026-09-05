@@ -67,7 +67,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSuccess }) => {
         <div className="mb-6 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
           <div className="flex items-center space-x-1.5 mb-2.5">
             <Sparkles className="w-3.5 h-3.5 text-coop-400 animate-pulse" />
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300">Quick Hackathon Demo Logins</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300">Quick Demo Logins</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
