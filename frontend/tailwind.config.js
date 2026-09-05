@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: ['selector', '[data-theme="dark"]'],
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,6 +8,14 @@ export default {
   theme: {
     extend: {
       colors: {
+        bg: 'var(--bg)',
+        surface: 'var(--surface)',
+        border: 'var(--border)',
+        textPrimary: 'var(--text-primary)',
+        textSecondary: 'var(--text-secondary)',
+        accent: 'var(--accent)',
+        accentCtaText: 'var(--accent-cta-text)',
+        accentMuted: 'var(--accent-muted)',
         ivory: '#FAF8F5',
         charcoal: '#2B2824',
         bronze: {
@@ -50,4 +59,3 @@ export default {
   },
   plugins: [],
 }
-

@@ -4,11 +4,11 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   en: {
     translation: {
-      app_title: "SahakarConnect",
+      app_title: "KataLyst",
       app_subtitle: "Cooperative Gig Services Platform",
       tagline: "Empowering Workers Through Democratic Cooperatives",
       hero_title: "Fair Work. Zero Exploitation.",
-      hero_desc: "Traditional gig platforms deduct 20-30% commissions. SahakarConnect guarantees 80% to workers, 15% to community welfare funds, and only 5% platform fee.",
+      hero_desc: "Traditional gig platforms deduct 20-30% commissions. KataLyst guarantees 80% to workers, 15% to community welfare funds, and only 5% platform fee.",
       nav_home: "Home",
       nav_services: "Book Services",
       nav_worker_app: "Worker App",
@@ -38,11 +38,11 @@ const resources = {
   },
   hi: {
     translation: {
-      app_title: "सहकारकनेक्ट",
+      app_title: "कैटालिस्ट (KataLyst)",
       app_subtitle: "सहकारी गिग सेवा मंच",
       tagline: "लोकतांत्रिक सहकारिता से श्रमिकों का सशक्तिकरण",
       hero_title: "न्यायसंगत काम। शून्य शोषण।",
-      hero_desc: "पारंपरिक गिग प्लेटफॉर्म 20-30% कमीशन लेते हैं। सहकारकनेक्ट 80% सीधे श्रमिक को, 15% कल्याण कोष को और केवल 5% प्लेटफॉर्म शुल्क सुनिश्चित करता है।",
+      hero_desc: "पारंपरिक गिग प्लेटफॉर्म 20-30% कमीशन लेते हैं। कैटालिस्ट (KataLyst) 80% सीधे श्रमिक को, 15% कल्याण कोष को और केवल 5% प्लेटफॉर्म शुल्क सुनिश्चित करता है।",
       nav_home: "मुख्य पृष्ठ",
       nav_services: "सेवाएं बुक करें",
       nav_worker_app: "श्रमिक ऐप",

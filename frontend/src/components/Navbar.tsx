@@ -1,12 +1,14 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { KatalystLogo } from './KatalystLogo';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { ThemeToggle } from './ThemeToggle';
 import { ShieldCheck, User as UserIcon, LogOut, Globe, Briefcase, Vote, Layers, BarChart3, Home } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { user, logout, quickLoginAs } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -15,53 +17,44 @@ export const Navbar: React.FC = () => {
     i18n.changeLanguage(newLang);
   };
 
+  // Build role-specific navigation items array (DOM-level conditional filtering)
   const navItems = [
     {
       id: '/',
       label: t('nav_home'),
       Icon: Home,
       onClick: () => navigate('/'),
+      show: true, // Everyone sees Home
     },
     {
       id: '/services',
       label: t('nav_services'),
       Icon: Briefcase,
       onClick: () => navigate('/services'),
+      show: user?.role === 'CUSTOMER', // User role only
     },
     {
       id: '/worker',
       label: t('nav_worker_app'),
       Icon: Vote,
-      onClick: () => {
-        if (!user || user.role !== 'WORKER') {
-          quickLoginAs('9711000001', 'WORKER');
-        }
-        navigate('/worker');
-      },
+      onClick: () => navigate('/worker'),
+      show: user?.role === 'WORKER', // Worker role only
     },
     {
       id: '/coop',
       label: t('nav_coop_admin'),
       Icon: Layers,
-      onClick: () => {
-        if (!user || user.role !== 'COOP_ADMIN') {
-          quickLoginAs('9810011111', 'COOP_ADMIN');
-        }
-        navigate('/coop');
-      },
+      onClick: () => navigate('/coop'),
+      show: user?.role === 'COOP_ADMIN' || user?.role === 'GOV_ADMIN', // Org role
     },
     {
       id: '/admin',
       label: t('nav_gov_admin'),
       Icon: BarChart3,
-      onClick: () => {
-        if (!user || user.role !== 'GOV_ADMIN') {
-          quickLoginAs('9999999999', 'GOV_ADMIN');
-        }
-        navigate('/admin');
-      },
+      onClick: () => navigate('/admin'),
+      show: user?.role === 'GOV_ADMIN', // Government Admin role
     },
-  ];
+  ].filter((item) => item.show);
 
   // Group contiguous items into active pop-out pills vs. inactive shared capsules
   const groups: { isActive: boolean; items: typeof navItems }[] = [];
@@ -77,18 +70,14 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-3 z-50 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <div className="glass-panel rounded-full border border-[#E8E2D9] bg-[#FAF8F5]/95 backdrop-blur-xl px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 lg:gap-6 shadow-sm">
+      <div className="glass-panel rounded-full px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 lg:gap-6 shadow-sm transition-colors duration-200">
 
-        {/* Brand Logo & Title */}
-        <div className="flex items-center space-x-2.5 shrink-0 cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-9 h-9 rounded-full bg-[#8B7355] flex items-center justify-center shadow-md shadow-[#8B7355]/20 shrink-0">
-            <ShieldCheck className="w-5 h-5 text-[#FAF8F5] stroke-[2.5]" />
-          </div>
-          <div className="shrink-0">
-            <span className="font-extrabold text-base sm:text-lg tracking-tight text-[#2B2824]">
-              Sahakar<span className="text-[#8B7355]">Connect</span>
-            </span>
-          </div>
+        {/* Brand Logo */}
+        <div
+          className="flex items-center shrink-0 cursor-pointer text-[var(--text-primary)] hover:opacity-90 transition-opacity"
+          onClick={() => navigate('/')}
+        >
+          <KatalystLogo className="h-9 w-auto" />
         </div>
 
         {/* Center Dynamic Segmented Pop-out Navigation */}
@@ -103,9 +92,9 @@ export const Navbar: React.FC = () => {
                     <button
                       key={item.id}
                       onClick={item.onClick}
-                      className="px-3.5 py-1.5 rounded-2xl bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-bold text-xs shadow-md shadow-[#6B4F3B]/25 flex items-center space-x-1.5 transition-all transform scale-[1.02] whitespace-nowrap"
+                      className="px-3.5 py-1.5 rounded-2xl bg-[var(--accent)] text-[var(--accent-cta-text)] font-bold text-xs shadow-md flex items-center space-x-1.5 transition-all transform scale-[1.02] whitespace-nowrap"
                     >
-                      <Icon className="w-3.5 h-3.5 stroke-[2.5] text-white shrink-0" />
+                      <Icon className="w-3.5 h-3.5 stroke-[2.5] text-[var(--accent-cta-text)] shrink-0" />
                       <span>{item.label}</span>
                     </button>
                   );
@@ -115,7 +104,7 @@ export const Navbar: React.FC = () => {
               // Inactive Shared Container Pill Capsule
               <div
                 key={groupIdx}
-                className="bg-[#F4F0EA] border border-[#E8E2D9] rounded-2xl p-1 flex items-center space-x-0.5 shrink-0"
+                className="bg-[var(--border)] border border-[var(--border)] rounded-2xl p-1 flex items-center space-x-0.5 shrink-0"
               >
                 {group.items.map((item) => {
                   const Icon = item.Icon;
@@ -123,9 +112,9 @@ export const Navbar: React.FC = () => {
                     <button
                       key={item.id}
                       onClick={item.onClick}
-                      className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#6E675F] hover:text-[#2B2824] hover:bg-white/80 transition-all flex items-center space-x-1.5 whitespace-nowrap"
+                      className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition-all flex items-center space-x-1.5 whitespace-nowrap"
                     >
-                      <Icon className="w-3.5 h-3.5 text-[#8B7355] shrink-0" />
+                      <Icon className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
                       <span>{item.label}</span>
                     </button>
                   );
@@ -135,29 +124,59 @@ export const Navbar: React.FC = () => {
           )}
         </nav>
 
-        {/* Right Tools: Language Toggle & User Auth */}
+        {/* Right Tools: Theme Toggle, Language Toggle & User Auth */}
         <div className="flex items-center space-x-2 shrink-0">
+
+          {/* Theme Toggle Button */}
+          <ThemeToggle />
 
           {/* Language Selector */}
           <button
             onClick={toggleLanguage}
-            className="flex items-center space-x-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-[#F4F0EA] hover:bg-[#E8E2D9] border border-[#E8E2D9] text-xs font-semibold text-[#2B2824] transition-all shrink-0 whitespace-nowrap"
+            className="flex items-center space-x-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-[var(--surface)] hover:bg-[var(--border)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] transition-all shrink-0 whitespace-nowrap"
             title="Switch Language"
           >
-            <Globe className="w-3.5 h-3.5 text-[#8B7355] shrink-0" />
+            <Globe className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
             <span>{i18n.language === 'en' ? 'हिन्दी' : 'English'}</span>
           </button>
 
-          {/* User Profile / Login Route Button */}
+          {/* User Profile Button / Login Route Button */}
           {user ? (
             <div className="flex items-center space-x-2 shrink-0">
-              <div className="hidden lg:flex flex-col items-end max-w-[130px] xl:max-w-[180px]">
-                <span className="text-xs font-bold text-[#2B2824] truncate w-full text-right">{user.name}</span>
-                <span className="text-[10px] text-[#8B7355] font-semibold uppercase truncate w-full text-right">{user.role}</span>
-              </div>
               <button
-                onClick={logout}
-                className="p-2 rounded-full bg-[#F4F0EA] hover:bg-red-50 hover:text-red-600 border border-[#E8E2D9] text-[#6E675F] transition-all shrink-0"
+                onClick={() => navigate('/profile')}
+                className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-[var(--surface)] hover:bg-[var(--border)] border border-[var(--border)] transition-all cursor-pointer group shrink-0"
+                title="View & Edit Profile"
+              >
+                <div className="w-6 h-6 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] font-bold text-[11px] flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+                  {user.profilePicture ? (
+                    <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{user.name.charAt(0).toUpperCase()}</span>
+                  )}
+                </div>
+                <div className="hidden lg:flex flex-col items-start max-w-[120px] xl:max-w-[160px]">
+                  <div className="flex items-center space-x-1 w-full">
+                    <span className="text-xs font-bold text-[var(--text-primary)] truncate text-left group-hover:text-[var(--accent)] transition-colors">
+                      {user.name}
+                    </span>
+                    {user.isAadhaarVerified && (
+                      <span title="Aadhaar Verified Member" className="flex items-center shrink-0">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-[var(--accent)] font-semibold uppercase truncate w-full text-left">
+                    {user.role === 'CUSTOMER' ? 'User' : user.role === 'WORKER' ? 'Worker' : 'Org Admin'}
+                  </span>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  logout();
+                  navigate('/login');
+                }}
+                className="p-2 rounded-full bg-[var(--surface)] hover:bg-red-500/10 hover:text-red-500 border border-[var(--border)] text-[var(--text-secondary)] transition-all shrink-0"
                 title={t('logout')}
               >
                 <LogOut className="w-3.5 h-3.5 shrink-0" />
@@ -166,9 +185,9 @@ export const Navbar: React.FC = () => {
           ) : (
             <button
               onClick={() => navigate('/login')}
-              className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-bold text-xs shadow-md transition-all transform active:scale-95 shrink-0 whitespace-nowrap"
+              className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] font-bold text-xs shadow-md transition-all transform active:scale-95 shrink-0 whitespace-nowrap"
             >
-              <UserIcon className="w-3.5 h-3.5 text-white shrink-0" />
+              <UserIcon className="w-3.5 h-3.5 text-[var(--accent-cta-text)] shrink-0" />
               <span>{t('login')}</span>
             </button>
           )}
@@ -180,5 +199,3 @@ export const Navbar: React.FC = () => {
 };
 
 export default Navbar;
-
-

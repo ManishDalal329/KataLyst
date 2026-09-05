@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { KatalystLogo } from './KatalystLogo';
 import { ShieldCheck, UserCheck, HardHat, Building2, CheckCircle2, ArrowRight, Lock, Mail, User as UserIcon, Sparkles, X, KeyRound } from 'lucide-react';
 
 interface LoginProps {
@@ -10,9 +11,10 @@ interface LoginProps {
 
 export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
   const navigate = useNavigate();
-  const { loginWithGoogle, loginWithEmail, loginWithOtp } = useAuth();
+  const location = useLocation();
+  const { user, loginWithGoogle, loginWithEmail, loginWithOtp } = useAuth();
 
-  const [isSignUp, setIsSignUp] = useState(true);
+  const [isSignUp, setIsSignUp] = useState(location.pathname === '/signup');
   const [selectedRole, setSelectedRole] = useState<'CUSTOMER' | 'WORKER' | 'ADMIN'>('CUSTOMER');
   
   const [email, setEmail] = useState('');
@@ -30,6 +32,22 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [googleEmailInput, setGoogleEmailInput] = useState('');
   const [googleNameInput, setGoogleNameInput] = useState('');
+
+  // Sync isSignUp state with URL path
+  useEffect(() => {
+    if (location.pathname === '/signup') {
+      setIsSignUp(true);
+    } else if (location.pathname === '/login') {
+      setIsSignUp(false);
+    }
+  }, [location.pathname]);
+
+  // Auto-redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      handleAuthComplete(user.role);
+    }
+  }, [user]);
 
   // Initialize Google GIS script if available
   useEffect(() => {
@@ -77,11 +95,11 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
     setError('');
 
     try {
-      const mappedRole = selectedRole === 'ADMIN' ? 'GOV_ADMIN' : selectedRole;
+      const mappedRole = selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole;
       const displayName = isSignUp 
         ? (selectedRole === 'ADMIN' && orgName ? `${fullName} (${orgName})` : fullName)
         : undefined;
-      await loginWithEmail(email, password, mappedRole, displayName, isSignUp);
+      await loginWithEmail(email, password, mappedRole, displayName, isSignUp, orgName);
       handleAuthComplete(mappedRole);
     } catch (err: any) {
       setError(err?.message || 'Authentication failed. Please try again.');
@@ -104,7 +122,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
     setError('');
 
     try {
-      const mappedRole = selectedRole === 'ADMIN' ? 'GOV_ADMIN' : selectedRole;
+      const mappedRole = selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole;
       const displayName = isSignUp 
         ? (selectedRole === 'ADMIN' && orgName ? `${fullName} (${orgName})` : fullName)
         : undefined;
@@ -119,7 +137,6 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
 
   // Google Sign-In handler
   const handleGoogleSignInClick = () => {
-    // Check if Google GIS object is loaded & client ID exists in env
     const googleClientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID;
     
     if (googleClientId && (window as any).google?.accounts?.id) {
@@ -128,9 +145,8 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
           client_id: googleClientId,
           callback: async (response: any) => {
             if (response.credential) {
-              // Parse JWT token from Google
               const payload = JSON.parse(atob(response.credential.split('.')[1]));
-              const mappedRole = selectedRole === 'ADMIN' ? 'GOV_ADMIN' : selectedRole;
+              const mappedRole = selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole;
               await loginWithGoogle({
                 email: payload.email,
                 name: payload.name,
@@ -147,7 +163,6 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
       }
     }
 
-    // Interactive Google OAuth modal fallback
     setShowGoogleModal(true);
   };
 
@@ -155,7 +170,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
     setLoading(true);
     setShowGoogleModal(false);
     try {
-      const mappedRole = selectedRole === 'ADMIN' ? 'GOV_ADMIN' : selectedRole;
+      const mappedRole = selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole;
       await loginWithGoogle({
         email: acctEmail,
         name: acctName,
@@ -170,13 +185,13 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
   };
 
   return (
-    <div className="h-screen max-h-screen w-full bg-[#FAF8F5] relative overflow-hidden flex items-center justify-center p-3 sm:p-5 my-auto font-sans">
+    <div className="h-screen max-h-screen w-full bg-[var(--bg)] relative overflow-hidden flex items-center justify-center p-3 sm:p-5 my-auto font-sans transition-colors duration-200">
       {/* Subtle warm background ambient glow spheres */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#8B7355]/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-[#6B4F3B]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Container matching glass-panel style with max height restricted to 100vh */}
-      <div className="w-full max-w-5xl max-h-[calc(100vh-2rem)] bg-[#FAF8F5]/90 backdrop-blur-xl rounded-3xl border border-[#E8E2D9] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 relative z-10 my-auto">
+      <div className="w-full max-w-5xl max-h-[calc(100vh-2rem)] bg-[var(--surface)] backdrop-blur-xl rounded-3xl border border-[var(--border)] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 relative z-10 my-auto">
         
         {/* LEFT COLUMN: Auth Form */}
         <div className="lg:col-span-7 p-5 sm:p-8 md:p-9 flex flex-col justify-between relative overflow-y-auto">
@@ -185,25 +200,15 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
           <div>
             <div className="flex items-center justify-between mb-4">
               <div 
-                className="flex items-center space-x-2.5 cursor-pointer group"
+                className="flex items-center space-x-2.5 cursor-pointer text-[var(--text-primary)] hover:opacity-90 transition-opacity"
                 onClick={handleHomeClick}
               >
-                <div className="w-9 h-9 rounded-full bg-[#8B7355] flex items-center justify-center text-white shadow-md shadow-[#8B7355]/20 shrink-0 transition-transform group-hover:scale-105">
-                  <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
-                </div>
-                <div>
-                  <span className="font-extrabold text-lg text-[#2B2824] tracking-tight block leading-none">
-                    Sahakar<span className="text-[#8B7355]">Connect</span>
-                  </span>
-                  <span className="text-[10px] font-bold text-[#8B7355] tracking-wide uppercase">
-                    Cooperative Platform
-                  </span>
-                </div>
+                <KatalystLogo className="h-9 w-auto" />
               </div>
 
               <button 
                 onClick={handleHomeClick}
-                className="px-3 py-1.5 rounded-full bg-[#F4F0EA] hover:bg-[#E8E2D9] border border-[#E8E2D9] text-xs font-semibold text-[#6E675F] hover:text-[#2B2824] transition-all flex items-center gap-1"
+                className="px-3 py-1.5 rounded-full bg-[var(--border)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:opacity-80 transition-all flex items-center gap-1"
               >
                 ← Back to Home
               </button>
@@ -211,10 +216,10 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
 
             {/* Title & Toggle */}
             <div className="mb-4 text-left">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2B2824] tracking-tight">
-                {isSignUp ? 'Get started with Sahakar' : 'Welcome back to Sahakar'}
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+                {isSignUp ? 'Get started with KataLyst' : 'Welcome back to KataLyst'}
               </h1>
-              <p className="text-xs sm:text-sm text-[#6E675F] mt-1 font-medium">
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1 font-medium">
                 {isSignUp ? 'Already have an account?' : "Don't have an account yet?"}{' '}
                 <button
                   type="button"
@@ -222,7 +227,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                     setIsSignUp(!isSignUp);
                     setError('');
                   }}
-                  className="font-bold text-[#6B4F3B] hover:text-[#543D2D] underline underline-offset-4 transition-colors"
+                  className="font-bold text-[var(--accent)] hover:underline underline-offset-4 transition-colors"
                 >
                   {isSignUp ? 'Log in' : 'Sign up'}
                 </button>
@@ -232,19 +237,19 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
             {/* ROLE SELECTION BAR (User, Worker, Admin) - Shown ONLY during Sign Up */}
             {isSignUp && (
               <div className="mb-4">
-                <label className="block text-[11px] font-bold text-[#6E675F] uppercase tracking-wider mb-2">
+                <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
                   Select Your Role
                 </label>
                 
-                <div className="grid grid-cols-3 gap-2 p-1.5 bg-[#F4F0EA] rounded-xl border border-[#E8E2D9]">
+                <div className="grid grid-cols-3 gap-2 p-1.5 bg-[var(--bg)] rounded-xl border border-[var(--border)]">
                   {/* Role 1: User/Customer */}
                   <button
                     type="button"
                     onClick={() => setSelectedRole('CUSTOMER')}
                     className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 ${
                       selectedRole === 'CUSTOMER'
-                        ? 'bg-[#6B4F3B] text-white shadow-md shadow-[#6B4F3B]/25 scale-[1.02]'
-                        : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-white/80'
+                        ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-md scale-[1.02]'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     <UserCheck className="w-4 h-4 shrink-0" />
@@ -257,8 +262,8 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                     onClick={() => setSelectedRole('WORKER')}
                     className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 ${
                       selectedRole === 'WORKER'
-                        ? 'bg-[#6B4F3B] text-white shadow-md shadow-[#6B4F3B]/25 scale-[1.02]'
-                        : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-white/80'
+                        ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-md scale-[1.02]'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     <HardHat className="w-4 h-4 shrink-0" />
@@ -271,8 +276,8 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                     onClick={() => setSelectedRole('ADMIN')}
                     className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 ${
                       selectedRole === 'ADMIN'
-                        ? 'bg-[#6B4F3B] text-white shadow-md shadow-[#6B4F3B]/25 scale-[1.02]'
-                        : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-white/80'
+                        ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-md scale-[1.02]'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     <Building2 className="w-4 h-4 shrink-0" />
@@ -281,8 +286,8 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                 </div>
 
                 {/* Dynamic Role Description Badge */}
-                <div className="mt-2 text-[11px] text-[#6E675F] bg-[#F4F0EA] px-3.5 py-1.5 rounded-lg border border-[#E8E2D9] flex items-center gap-1.5 shadow-sm">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#8B7355] shrink-0" />
+                <div className="mt-2 text-[11px] text-[var(--text-secondary)] bg-[var(--bg)] px-3.5 py-1.5 rounded-lg border border-[var(--border)] flex items-center gap-1.5 shadow-sm">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
                   <span className="truncate">
                     {selectedRole === 'CUSTOMER' && 'Book verified gig workers and cooperative services on-demand.'}
                     {selectedRole === 'WORKER' && 'Join local worker cooperatives, earn fair wages & receive insurance.'}
@@ -293,27 +298,27 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
             )}
 
             {error && (
-              <div className="mb-3 p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
+              <div className="mb-3 p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-medium">
                 {error}
               </div>
             )}
 
             {/* Auth Method Switcher (Email vs Phone OTP) */}
             <div className="flex items-center justify-between mb-2.5 text-xs font-semibold">
-              <span className="text-[#6E675F]">Sign in using:</span>
+              <span className="text-[var(--text-secondary)]">Sign in using:</span>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() => setAuthMethod('email')}
-                  className={`underline-offset-2 ${authMethod === 'email' ? 'text-[#6B4F3B] font-bold underline decoration-[#8B7355]' : 'text-[#8B7355] hover:text-[#6B4F3B]'}`}
+                  className={`underline-offset-2 ${authMethod === 'email' ? 'text-[var(--accent)] font-bold underline decoration-[var(--accent)]' : 'text-[var(--text-secondary)] hover:text-[var(--accent)]'}`}
                 >
                   Email & Password
                 </button>
-                <span className="text-[#E8E2D9]">|</span>
+                <span className="text-[var(--border)]">|</span>
                 <button
                   type="button"
                   onClick={() => setAuthMethod('phone')}
-                  className={`underline-offset-2 ${authMethod === 'phone' ? 'text-[#6B4F3B] font-bold underline decoration-[#8B7355]' : 'text-[#8B7355] hover:text-[#6B4F3B]'}`}
+                  className={`underline-offset-2 ${authMethod === 'phone' ? 'text-[var(--accent)] font-bold underline decoration-[var(--accent)]' : 'text-[var(--text-secondary)] hover:text-[var(--accent)]'}`}
                 >
                   Phone & OTP
                 </button>
@@ -325,16 +330,16 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
               <form onSubmit={handleEmailAuthSubmit} className="space-y-3">
                 {isSignUp && (
                   <div>
-                    <label className="block text-xs font-semibold text-[#2B2824] mb-1">Full Name</label>
+                    <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Full Name</label>
                     <div className="relative">
-                      <UserIcon className="absolute left-3.5 top-2.5 w-4 h-4 text-[#8B7355]" />
+                      <UserIcon className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
                       <input
                         type="text"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="e.g. Aarjav Shukla"
                         required={isSignUp}
-                        className="w-full pl-10 pr-3.5 py-2 bg-white/90 border border-[#E8E2D9] rounded-lg text-xs sm:text-sm text-[#2B2824] placeholder-[#A39C90] focus:outline-none focus:border-[#8B7355] focus:ring-1 focus:ring-[#8B7355]/20 transition-all shadow-sm"
+                        className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm"
                       />
                     </div>
                   </div>
@@ -342,47 +347,47 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
 
                 {isSignUp && selectedRole === 'ADMIN' && (
                   <div>
-                    <label className="block text-xs font-semibold text-[#2B2824] mb-1">Organization / Cooperative Name</label>
+                    <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Organization / Cooperative Name</label>
                     <div className="relative">
-                      <Building2 className="absolute left-3.5 top-2.5 w-4 h-4 text-[#8B7355]" />
+                      <Building2 className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
                       <input
                         type="text"
                         value={orgName}
                         onChange={(e) => setOrgName(e.target.value)}
                         placeholder="e.g. North Delhi Labour Cooperative Society"
                         required={isSignUp && selectedRole === 'ADMIN'}
-                        className="w-full pl-10 pr-3.5 py-2 bg-white/90 border border-[#E8E2D9] rounded-lg text-xs sm:text-sm text-[#2B2824] placeholder-[#A39C90] focus:outline-none focus:border-[#8B7355] focus:ring-1 focus:ring-[#8B7355]/20 transition-all shadow-sm"
+                        className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm"
                       />
                     </div>
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#2B2824] mb-1">Enter your email</label>
+                  <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Enter your email</label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-2.5 w-4 h-4 text-[#8B7355]" />
+                    <Mail className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@email.com"
                       required
-                      className="w-full pl-10 pr-3.5 py-2 bg-white/90 border border-[#E8E2D9] rounded-lg text-xs sm:text-sm text-[#2B2824] placeholder-[#A39C90] focus:outline-none focus:border-[#8B7355] focus:ring-1 focus:ring-[#8B7355]/20 transition-all shadow-sm"
+                      className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#2B2824] mb-1">Password</label>
+                  <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-2.5 w-4 h-4 text-[#8B7355]" />
+                    <Lock className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
                     <input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="your password"
                       required
-                      className="w-full pl-10 pr-3.5 py-2 bg-white/90 border border-[#E8E2D9] rounded-lg text-xs sm:text-sm text-[#2B2824] placeholder-[#A39C90] focus:outline-none focus:border-[#8B7355] focus:ring-1 focus:ring-[#8B7355]/20 transition-all shadow-sm"
+                      className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm"
                     />
                   </div>
                 </div>
@@ -390,7 +395,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-2 py-2.5 px-4 bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-[#6B4F3B]/20 hover:shadow-lg transition-all flex items-center justify-center gap-2 group active:scale-[0.99]"
+                  className="w-full mt-2 py-2.5 px-4 bg-[var(--accent)] hover:opacity-90 text-[var(--accent-cta-text)] font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group active:scale-[0.99]"
                 >
                   <span>{loading ? 'Processing...' : isSignUp ? 'Continue' : 'Sign In'}</span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -400,57 +405,57 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
               <form onSubmit={handlePhoneOtpSubmit} className="space-y-3">
                 {isSignUp && (
                   <div>
-                    <label className="block text-xs font-semibold text-[#2B2824] mb-1">Full Name</label>
+                    <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Full Name</label>
                     <input
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="e.g. Priya Sharma"
-                      className="w-full px-3.5 py-2 bg-white/90 border border-[#E8E2D9] rounded-lg text-xs sm:text-sm text-[#2B2824] placeholder-[#A39C90] focus:outline-none focus:border-[#8B7355] focus:ring-1 focus:ring-[#8B7355]/20 shadow-sm"
+                      className="w-full px-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm"
                     />
                   </div>
                 )}
 
                 {isSignUp && selectedRole === 'ADMIN' && (
                   <div>
-                    <label className="block text-xs font-semibold text-[#2B2824] mb-1">Organization / Cooperative Name</label>
+                    <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Organization / Cooperative Name</label>
                     <div className="relative">
-                      <Building2 className="absolute left-3.5 top-2.5 w-4 h-4 text-[#8B7355]" />
+                      <Building2 className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
                       <input
                         type="text"
                         value={orgName}
                         onChange={(e) => setOrgName(e.target.value)}
                         placeholder="e.g. North Delhi Labour Cooperative Society"
                         required={isSignUp && selectedRole === 'ADMIN'}
-                        className="w-full pl-10 pr-3.5 py-2 bg-white/90 border border-[#E8E2D9] rounded-lg text-xs sm:text-sm text-[#2B2824] placeholder-[#A39C90] focus:outline-none focus:border-[#8B7355] focus:ring-1 focus:ring-[#8B7355]/20 shadow-sm"
+                        className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm"
                       />
                     </div>
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#2B2824] mb-1">Phone Number</label>
+                  <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Phone Number</label>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="9900112233"
                     required
-                    className="w-full px-3.5 py-2 bg-white/90 border border-[#E8E2D9] rounded-lg text-xs sm:text-sm text-[#2B2824] placeholder-[#A39C90] focus:outline-none focus:border-[#8B7355] focus:ring-1 focus:ring-[#8B7355]/20 shadow-sm font-mono"
+                    className="w-full px-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#2B2824] mb-1">Enter OTP (Dev OTP: 123456)</label>
+                  <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Enter OTP (Dev OTP: 123456)</label>
                   <div className="relative">
-                    <KeyRound className="absolute left-3.5 top-2.5 w-4 h-4 text-[#8B7355]" />
+                    <KeyRound className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
                     <input
                       type="text"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
                       placeholder="123456"
                       required
-                      className="w-full pl-10 pr-3.5 py-2 bg-white/90 border border-[#E8E2D9] rounded-lg text-xs sm:text-sm text-[#2B2824] placeholder-[#A39C90] focus:outline-none focus:border-[#8B7355] focus:ring-1 focus:ring-[#8B7355]/20 tracking-widest shadow-sm font-mono"
+                      className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all tracking-widest shadow-sm font-mono"
                     />
                   </div>
                 </div>
@@ -458,7 +463,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-2 py-2.5 px-4 bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-[#6B4F3B]/20 hover:shadow-lg transition-all flex items-center justify-center gap-2 group active:scale-[0.99]"
+                  className="w-full mt-2 py-2.5 px-4 bg-[var(--accent)] hover:opacity-90 text-[var(--accent-cta-text)] font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group active:scale-[0.99]"
                 >
                   <span>{loading ? 'Verifying OTP...' : 'Verify & Continue'}</span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -468,9 +473,9 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
 
             {/* OR DIVIDER */}
             <div className="my-3.5 flex items-center justify-center">
-              <div className="h-px bg-[#E8E2D9] flex-1" />
-              <span className="px-3 text-[10px] font-bold text-[#8B7355] uppercase tracking-wider">OR</span>
-              <div className="h-px bg-[#E8E2D9] flex-1" />
+              <div className="h-px bg-[var(--border)] flex-1" />
+              <span className="px-3 text-[10px] font-bold text-[var(--accent)] uppercase tracking-wider">OR</span>
+              <div className="h-px bg-[var(--border)] flex-1" />
             </div>
 
             {/* GOOGLE SIGN IN BUTTON */}
@@ -478,7 +483,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
               type="button"
               onClick={handleGoogleSignInClick}
               disabled={loading}
-              className="w-full py-2.5 px-4 bg-white hover:bg-[#F4F0EA] border border-[#E8E2D9] hover:border-[#8B7355]/40 text-[#2B2824] font-semibold text-xs sm:text-sm rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-center gap-3 group"
+              className="w-full py-2.5 px-4 bg-[var(--bg)] hover:bg-[var(--border)]/40 border border-[var(--border)] hover:border-[var(--accent)]/40 text-[var(--text-primary)] font-semibold text-xs sm:text-sm rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-center gap-3 group"
             >
               {/* Google Official Multicolor SVG Logo */}
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -504,19 +509,19 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
           </div>
 
           {/* Terms Footer */}
-          <div className="mt-4 text-center text-[10px] text-[#8B7355]/80">
-            By continuing, you agree to SahakarConnect's{' '}
-            <a href="#terms" className="underline hover:text-[#6B4F3B]">Terms of Service</a> and{' '}
-            <a href="#privacy" className="underline hover:text-[#6B4F3B]">Privacy Policy</a>.
+          <div className="mt-4 text-center text-[10px] text-[var(--text-secondary)]">
+            By continuing, you agree to KataLyst's{' '}
+            <a href="#terms" className="underline hover:text-[var(--accent)]">Terms of Service</a> and{' '}
+            <a href="#privacy" className="underline hover:text-[var(--accent)]">Privacy Policy</a>.
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Luxurious warm dark visual matching SahakarConnect theme */}
+        {/* RIGHT COLUMN: Luxurious warm dark visual matching KataLyst theme */}
         <div className="lg:col-span-5 bg-gradient-to-br from-[#2B2824] via-[#3E3027] to-[#543D2D] p-5 sm:p-7 flex flex-col justify-between relative overflow-hidden text-white border-t lg:border-t-0 lg:border-l border-[#8B7355]/20">
           
           {/* Top subtle location header */}
           <div className="flex items-center justify-between text-xs text-[#D5CCBF]/70 z-10">
-            <span className="font-mono text-[11px] tracking-wider uppercase opacity-90">SahakarConnect</span>
+            <span className="font-mono text-[11px] tracking-wider uppercase opacity-90">KataLyst</span>
             <span className="font-mono text-[11px] opacity-80">Delhi · v1.0</span>
           </div>
 
@@ -634,10 +639,10 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
       {/* INTERACTIVE GOOGLE AUTH SELECTOR MODAL */}
       {showGoogleModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-sm bg-[#FAF8F5] rounded-2xl p-6 shadow-2xl border border-[#E8E2D9] relative">
+          <div className="w-full max-w-sm bg-[var(--surface)] rounded-2xl p-6 shadow-2xl border border-[var(--border)] relative">
             <button
               onClick={() => setShowGoogleModal(false)}
-              className="absolute top-4 right-4 text-[#6E675F] hover:text-[#2B2824] p-1 rounded-full hover:bg-[#E8E2D9] transition-all"
+              className="absolute top-4 right-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 rounded-full hover:bg-[var(--border)] transition-all"
             >
               <X className="w-5 h-5" />
             </button>
@@ -661,10 +666,10 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                   d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.7 1.29 6.58l3.99 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
                 />
               </svg>
-              <h3 className="text-base font-bold text-[#2B2824]">Sign in with Google</h3>
-              <p className="text-xs text-[#6E675F] mt-0.5">
-                Choose an account to continue to <strong>SahakarConnect</strong> as{' '}
-                <span className="font-bold text-[#8B7355]">{selectedRole}</span>
+              <h3 className="text-base font-bold text-[var(--text-primary)]">Sign in with Google</h3>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                Choose an account to continue to <strong>KataLyst</strong> as{' '}
+                <span className="font-bold text-[var(--accent)]">{selectedRole}</span>
               </p>
             </div>
 
@@ -672,34 +677,34 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
             <div className="space-y-2 mb-4">
               <button
                 onClick={() => handleSelectGoogleAccount('aarjav.shukla@gmail.com', 'Aarjav Shukla')}
-                className="w-full p-2.5 rounded-xl border border-[#E8E2D9] hover:border-[#8B7355] hover:bg-[#F4F0EA] flex items-center gap-3 transition-all text-left group"
+                className="w-full p-2.5 rounded-xl border border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--bg)] flex items-center gap-3 transition-all text-left group"
               >
-                <div className="w-8 h-8 rounded-full bg-[#8B7355] text-white font-bold text-xs flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] font-bold text-xs flex items-center justify-center shrink-0">
                   A
                 </div>
                 <div className="overflow-hidden">
-                  <div className="text-xs font-bold text-[#2B2824] group-hover:text-[#6B4F3B]">Aarjav Shukla</div>
-                  <div className="text-[11px] text-[#6E675F] truncate">aarjav.shukla@gmail.com</div>
+                  <div className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)]">Aarjav Shukla</div>
+                  <div className="text-[11px] text-[var(--text-secondary)] truncate">aarjav.shukla@gmail.com</div>
                 </div>
               </button>
 
               <button
-                onClick={() => handleSelectGoogleAccount('sahakar.user@gmail.com', 'Sahakar User')}
-                className="w-full p-2.5 rounded-xl border border-[#E8E2D9] hover:border-[#8B7355] hover:bg-[#F4F0EA] flex items-center gap-3 transition-all text-left group"
+                onClick={() => handleSelectGoogleAccount('katalyst.user@gmail.com', 'KataLyst User')}
+                className="w-full p-2.5 rounded-xl border border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--bg)] flex items-center gap-3 transition-all text-left group"
               >
-                <div className="w-8 h-8 rounded-full bg-[#6B4F3B] text-white font-bold text-xs flex items-center justify-center shrink-0">
-                  S
+                <div className="w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] font-bold text-xs flex items-center justify-center shrink-0">
+                  K
                 </div>
                 <div className="overflow-hidden">
-                  <div className="text-xs font-bold text-[#2B2824] group-hover:text-[#6B4F3B]">Sahakar User</div>
-                  <div className="text-[11px] text-[#6E675F] truncate">sahakar.user@gmail.com</div>
+                  <div className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)]">KataLyst User</div>
+                  <div className="text-[11px] text-[var(--text-secondary)] truncate">katalyst.user@gmail.com</div>
                 </div>
               </button>
             </div>
 
             {/* Custom Google Account Input */}
-            <div className="pt-3 border-t border-[#E8E2D9]">
-              <label className="block text-[11px] font-semibold text-[#6E675F] mb-1">Or enter any Google Email:</label>
+            <div className="pt-3 border-t border-[var(--border)]">
+              <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">Or enter any Google Email:</label>
               <div className="flex gap-2">
                 <input
                   type="email"
@@ -709,7 +714,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                     if (!googleNameInput) setGoogleNameInput(e.target.value.split('@')[0]);
                   }}
                   placeholder="your.email@gmail.com"
-                  className="flex-1 px-3 py-1.5 bg-white border border-[#E8E2D9] rounded-lg text-xs text-[#2B2824] focus:outline-none focus:border-[#8B7355]"
+                  className="flex-1 px-3 py-1.5 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]"
                 />
                 <button
                   type="button"
@@ -718,7 +723,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                       handleSelectGoogleAccount(googleEmailInput, googleNameInput || googleEmailInput.split('@')[0]);
                     }
                   }}
-                  className="px-3 py-1.5 bg-[#6B4F3B] hover:bg-[#543D2D] text-white text-xs font-bold rounded-lg transition-colors"
+                  className="px-3 py-1.5 bg-[var(--accent)] hover:opacity-90 text-[var(--accent-cta-text)] text-xs font-bold rounded-lg transition-colors"
                 >
                   Continue
                 </button>
