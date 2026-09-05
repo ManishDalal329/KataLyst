@@ -77,7 +77,7 @@ const CardWaveCanvas: React.FC<{ seed: number }> = ({ seed }) => {
       const numPoints = 160;
 
       ctx.save();
-      
+
       // Draw smooth continuous organic 3D ribbons
       for (let layer = 0; layer < 3; layer++) {
         ctx.beginPath();
@@ -150,10 +150,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
 
   return (
     <div className="space-y-24 py-6 sm:py-12">
-      
+
       {/* Hero Section with Continuously Flowing Canvas */}
       <section className="relative min-h-[520px] sm:min-h-[580px] flex flex-col items-center justify-center text-center px-4 overflow-hidden rounded-3xl border border-[#E8E2D9] bg-gradient-to-b from-[#FAF8F5] via-white to-[#FAF8F5] shadow-xl">
-        
+
         {/* Animated Canvas background */}
         <FlowingCanvas className="opacity-80" />
 
@@ -162,7 +162,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
 
         {/* Content container */}
         <div className="relative z-10 max-w-4xl mx-auto space-y-8 py-12 flex flex-col items-center">
-          
+
           {/* Top Pill Badge */}
           <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#F4F0EA] border border-[#E8E2D9] text-[#6B4F3B] text-xs font-semibold tracking-wide shadow-sm backdrop-blur-md animate-float">
             <Sparkles className="w-3.5 h-3.5 text-[#8B7355]" />
@@ -182,7 +182,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
 
           {/* Single Clear CTA with Dynamic Ambient Glow & Secondary Action */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            
+
             {/* Primary Action: Floating Glow Pill Button */}
             <div className="cta-glow-wrapper">
               <button
@@ -226,7 +226,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
+
           {/* Left Upper Card: Corporate Gig Platforms (Sleek Dark Theme matching Image 3 Left Card) */}
           <div className="rounded-[32px] bg-[#161412] border border-[#2B2724] p-7 space-y-6 shadow-xl flex flex-col justify-between group hover:border-[#403833] transition-all duration-300">
             <div className="space-y-6">
@@ -235,7 +235,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
                 <span className="absolute top-4 left-4 px-3 py-1 bg-[#2D1F1F] text-rose-300/90 border border-rose-500/20 text-[10px] font-semibold uppercase tracking-wider rounded-full backdrop-blur-md">
                   Corporate Gig Platforms
                 </span>
-                
+
                 {/* Subtle 3D Friction Graphic Illustration */}
                 <div className="relative w-28 h-28 flex items-center justify-center">
                   <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-rose-500/15 to-orange-500/5 blur-xl" />
@@ -245,7 +245,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
                   </div>
                 </div>
               </div>
-              
+
               <h3 className="text-xl font-bold text-zinc-100 tracking-tight">Urban Company / Commercial Apps</h3>
 
               <ul className="space-y-3.5 text-sm text-[#A09890]">
@@ -338,7 +338,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
+
           {/* Card 1: Transparent 80/15/5 Split */}
           <TiltCard className="rounded-[32px] bg-gradient-to-b from-[#131D21] via-[#0E1619] to-[#091012] border border-[#22333B] p-7 h-[420px] flex flex-col justify-between relative overflow-hidden group cursor-pointer shadow-2xl">
             <CardWaveCanvas seed={0} />

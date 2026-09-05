@@ -1,18 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { ShieldCheck, User as UserIcon, LogOut, Globe, Briefcase, Vote, Layers, BarChart3, Home } from 'lucide-react';
-import AuthModal from './AuthModal';
 
-interface NavbarProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-}
-
-export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
+export const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { user, logout, quickLoginAs } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'hi' : 'en';
@@ -21,48 +17,48 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
 
   const navItems = [
     {
-      id: 'home',
+      id: '/',
       label: t('nav_home'),
       Icon: Home,
-      onClick: () => setActiveTab('home'),
+      onClick: () => navigate('/'),
     },
     {
-      id: 'services',
+      id: '/services',
       label: t('nav_services'),
       Icon: Briefcase,
-      onClick: () => setActiveTab('services'),
+      onClick: () => navigate('/services'),
     },
     {
-      id: 'worker',
+      id: '/worker',
       label: t('nav_worker_app'),
       Icon: Vote,
       onClick: () => {
         if (!user || user.role !== 'WORKER') {
           quickLoginAs('9711000001', 'WORKER');
         }
-        setActiveTab('worker');
+        navigate('/worker');
       },
     },
     {
-      id: 'coop',
+      id: '/coop',
       label: t('nav_coop_admin'),
       Icon: Layers,
       onClick: () => {
         if (!user || user.role !== 'COOP_ADMIN') {
           quickLoginAs('9810011111', 'COOP_ADMIN');
         }
-        setActiveTab('coop');
+        navigate('/coop');
       },
     },
     {
-      id: 'admin',
+      id: '/admin',
       label: t('nav_gov_admin'),
       Icon: BarChart3,
       onClick: () => {
         if (!user || user.role !== 'GOV_ADMIN') {
           quickLoginAs('9999999999', 'GOV_ADMIN');
         }
-        setActiveTab('admin');
+        navigate('/admin');
       },
     },
   ];
@@ -70,7 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
   // Group contiguous items into active pop-out pills vs. inactive shared capsules
   const groups: { isActive: boolean; items: typeof navItems }[] = [];
   navItems.forEach((item) => {
-    const isActive = activeTab === item.id;
+    const isActive = location.pathname === item.id || (item.id === '/' && location.pathname === '');
     const lastGroup = groups[groups.length - 1];
     if (lastGroup && lastGroup.isActive === isActive) {
       lastGroup.items.push(item);
@@ -82,9 +78,9 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
   return (
     <header className="sticky top-3 z-50 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
       <div className="glass-panel rounded-full border border-[#E8E2D9] bg-[#FAF8F5]/95 backdrop-blur-xl px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 lg:gap-6 shadow-sm">
-        
+
         {/* Brand Logo & Title */}
-        <div className="flex items-center space-x-2.5 shrink-0 cursor-pointer" onClick={() => setActiveTab('home')}>
+        <div className="flex items-center space-x-2.5 shrink-0 cursor-pointer" onClick={() => navigate('/')}>
           <div className="w-9 h-9 rounded-full bg-[#8B7355] flex items-center justify-center shadow-md shadow-[#8B7355]/20 shrink-0">
             <ShieldCheck className="w-5 h-5 text-[#FAF8F5] stroke-[2.5]" />
           </div>
@@ -99,7 +95,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
         <nav className="hidden md:flex items-center space-x-1.5 shrink-0">
           {groups.map((group, groupIdx) =>
             group.isActive ? (
-              // Active Pop-out Pill (Matches reference image active orange/coffee pill design)
+              // Active Pop-out Pill
               <div key={groupIdx} className="flex items-center shrink-0">
                 {group.items.map((item) => {
                   const Icon = item.Icon;
@@ -141,7 +137,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
 
         {/* Right Tools: Language Toggle & User Auth */}
         <div className="flex items-center space-x-2 shrink-0">
-          
+
           {/* Language Selector */}
           <button
             onClick={toggleLanguage}
@@ -152,7 +148,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
             <span>{i18n.language === 'en' ? 'हिन्दी' : 'English'}</span>
           </button>
 
-          {/* User Profile / Quick Login */}
+          {/* User Profile / Login Route Button */}
           {user ? (
             <div className="flex items-center space-x-2 shrink-0">
               <div className="hidden lg:flex flex-col items-end max-w-[130px] xl:max-w-[180px]">
@@ -169,7 +165,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
             </div>
           ) : (
             <button
-              onClick={() => setShowAuthModal(true)}
+              onClick={() => navigate('/login')}
               className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-bold text-xs shadow-md transition-all transform active:scale-95 shrink-0 whitespace-nowrap"
             >
               <UserIcon className="w-3.5 h-3.5 text-white shrink-0" />
@@ -179,20 +175,6 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
 
         </div>
       </div>
-
-      {/* Auth Modal Trigger */}
-      {showAuthModal && (
-        <AuthModal
-          onClose={() => setShowAuthModal(false)}
-          onSuccess={(role) => {
-            setShowAuthModal(false);
-            if (role === 'WORKER') setActiveTab('worker');
-            else if (role === 'COOP_ADMIN') setActiveTab('coop');
-            else if (role === 'GOV_ADMIN') setActiveTab('admin');
-            else setActiveTab('services');
-          }}
-        />
-      )}
     </header>
   );
 };
