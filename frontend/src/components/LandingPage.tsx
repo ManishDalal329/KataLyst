@@ -152,31 +152,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
     <div className="space-y-24 py-6 sm:py-12">
 
       {/* Hero Section with Continuously Flowing Canvas */}
-      <section className="relative min-h-[520px] sm:min-h-[580px] flex flex-col items-center justify-center text-center px-4 overflow-hidden rounded-3xl border border-[#E8E2D9] bg-gradient-to-b from-[#FAF8F5] via-white to-[#FAF8F5] shadow-xl">
+      <section className="relative min-h-[520px] sm:min-h-[580px] flex flex-col items-center justify-center text-center px-4 overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-xl transition-colors duration-200">
 
         {/* Animated Canvas background */}
         <FlowingCanvas className="opacity-80" />
 
         {/* Ambient atmospheric lighting */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#8B7355]/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[var(--accent)]/10 rounded-full blur-[120px] pointer-events-none" />
 
         {/* Content container */}
         <div className="relative z-10 max-w-4xl mx-auto space-y-8 py-12 flex flex-col items-center">
 
           {/* Top Pill Badge */}
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#F4F0EA] border border-[#E8E2D9] text-[#6B4F3B] text-xs font-semibold tracking-wide shadow-sm backdrop-blur-md animate-float">
-            <Sparkles className="w-3.5 h-3.5 text-[#8B7355]" />
+          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[var(--border)] border border-[var(--border)] text-[var(--accent)] text-xs font-semibold tracking-wide shadow-sm backdrop-blur-md animate-float">
+            <Sparkles className="w-3.5 h-3.5 text-[var(--accent)]" />
             <span>National Worker Cooperative Platform</span>
           </div>
 
           {/* Main Title Hierarchy */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-[#2B2824] tracking-tight leading-[1.1] max-w-3xl">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-[var(--text-primary)] tracking-tight leading-[1.1] max-w-3xl">
             Fair Household Services Built Around{' '}
             <span className="gradient-text font-black">Worker Cooperatives</span>
           </h1>
 
           {/* Subtitle with refined readability */}
-          <p className="text-[#524B43] text-base sm:text-lg font-normal leading-relaxed max-w-2xl text-balance">
+          <p className="text-[var(--text-secondary)] text-base sm:text-lg font-normal leading-relaxed max-w-2xl text-balance">
             {t('hero_desc')}
           </p>
 
@@ -187,11 +187,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
             <div className="cta-glow-wrapper">
               <button
                 onClick={onStartBooking}
-                className="relative z-10 flex items-center space-x-3 px-8 py-4 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-extrabold text-base shadow-xl transition-all transform hover:scale-[1.03] active:scale-95 group"
+                className="relative z-10 flex items-center space-x-3 px-8 py-4 rounded-full bg-[var(--accent)] hover:opacity-90 text-[var(--accent-cta-text)] font-extrabold text-base shadow-xl transition-all transform hover:scale-[1.03] active:scale-95 group"
               >
                 <span>Explore Services & Book</span>
-                <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                  <ArrowRight className="w-4 h-4 stroke-[3] text-white" />
+                <div className="w-7 h-7 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                  <ArrowRight className="w-4 h-4 stroke-[3] text-[var(--accent-cta-text)]" />
                 </div>
               </button>
             </div>
@@ -199,11 +199,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
             {/* Secondary Action Link */}
             <button
               onClick={onExploreGov}
-              className="flex items-center space-x-2 px-6 py-3.5 rounded-full bg-white hover:bg-[#F4F0EA] border border-[#E8E2D9] text-[#2B2824] font-semibold text-sm transition-all shadow-sm"
+              className="flex items-center space-x-2 px-6 py-3.5 rounded-full bg-[var(--surface)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text-primary)] font-semibold text-sm transition-all shadow-sm"
             >
-              <Building2 className="w-4 h-4 text-[#8B7355]" />
+              <Building2 className="w-4 h-4 text-[var(--accent)]" />
               <span>Ministry & Admin Portal</span>
-              <ChevronRight className="w-3.5 h-3.5 text-[#857E75]" />
+              <ChevronRight className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
             </button>
 
           </div>
@@ -211,113 +211,113 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
         </div>
       </section>
 
-      {/* SECTION 1: Upper 2 Cards (Styled matching Reference Image 3) */}
+      {/* SECTION 1: Upper 2 Cards */}
       <section className="space-y-8">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <span className="text-xs font-extrabold text-[#6B4F3B] uppercase tracking-widest bg-[#F4F0EA] px-3 py-1 rounded-full border border-[#E8E2D9]">
+          <span className="text-xs font-extrabold text-[var(--accent)] uppercase tracking-widest bg-[var(--border)] px-3 py-1 rounded-full border border-[var(--border)]">
             Cooperative Economics
           </span>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-[#2B2824] tracking-tight">
-            Why SahakarConnect Disrupts Traditional Gig Platforms
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-[var(--text-primary)] tracking-tight">
+            Why KataLyst Disrupts Traditional Gig Platforms
           </h2>
-          <p className="text-xs sm:text-sm text-[#6E675F] leading-relaxed">
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
             Comparing typical commercial gig apps vs. democratic worker cooperative platform model
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-          {/* Left Upper Card: Corporate Gig Platforms (Sleek Dark Theme matching Image 3 Left Card) */}
-          <div className="rounded-[32px] bg-[#161412] border border-[#2B2724] p-7 space-y-6 shadow-xl flex flex-col justify-between group hover:border-[#403833] transition-all duration-300">
+          {/* Left Upper Card: Corporate Gig Platforms */}
+          <div className="rounded-[32px] bg-[var(--surface)] border border-[var(--border)] p-7 space-y-6 shadow-xl flex flex-col justify-between group hover:border-[var(--accent)] transition-all duration-300">
             <div className="space-y-6">
               {/* Upper Visual Header Box */}
-              <div className="h-52 rounded-2xl bg-gradient-to-br from-[#241B1B] via-[#181414] to-[#120F0F] border border-[#3D2929] relative overflow-hidden flex items-center justify-center p-6 group-hover:scale-[1.01] transition-transform duration-300">
-                <span className="absolute top-4 left-4 px-3 py-1 bg-[#2D1F1F] text-rose-300/90 border border-rose-500/20 text-[10px] font-semibold uppercase tracking-wider rounded-full backdrop-blur-md">
+              <div className="h-52 rounded-2xl bg-[var(--border)] border border-[var(--border)] relative overflow-hidden flex items-center justify-center p-6 group-hover:scale-[1.01] transition-transform duration-300">
+                <span className="absolute top-4 left-4 px-3 py-1 bg-rose-950/40 text-rose-400 border border-rose-500/20 text-[10px] font-semibold uppercase tracking-wider rounded-full backdrop-blur-md">
                   Corporate Gig Platforms
                 </span>
 
                 {/* Subtle 3D Friction Graphic Illustration */}
                 <div className="relative w-28 h-28 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-rose-500/15 to-orange-500/5 blur-xl" />
-                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-tr from-[#2D1B1B] to-[#1F1515] border border-rose-500/20 shadow-xl flex flex-col items-center justify-center space-y-1 transform rotate-6 group-hover:rotate-12 transition-transform">
-                    <XCircle className="w-9 h-9 text-rose-400/90" />
-                    <span className="text-[10px] font-mono font-medium text-rose-300/80">30% CUT</span>
+                  <div className="absolute inset-0 rounded-full bg-rose-500/10 blur-xl" />
+                  <div className="w-24 h-24 rounded-3xl bg-[var(--surface)] border border-rose-500/20 shadow-xl flex flex-col items-center justify-center space-y-1 transform rotate-6 group-hover:rotate-12 transition-transform">
+                    <XCircle className="w-9 h-9 text-rose-400" />
+                    <span className="text-[10px] font-mono font-medium text-rose-400">30% CUT</span>
                   </div>
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold text-zinc-100 tracking-tight">Urban Company / Commercial Apps</h3>
+              <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">Commercial / Corporate Gig Apps</h3>
 
-              <ul className="space-y-3.5 text-sm text-[#A09890]">
+              <ul className="space-y-3.5 text-sm text-[var(--text-secondary)]">
                 <li className="flex items-start space-x-3">
-                  <XCircle className="w-4.5 h-4.5 text-rose-400/80 shrink-0 mt-0.5" />
-                  <span><strong className="text-zinc-200 font-medium">20-30% Commission Fee</strong> taken by corporate shareholders</span>
+                  <XCircle className="w-4.5 h-4.5 text-rose-400 shrink-0 mt-0.5" />
+                  <span><strong className="text-[var(--text-primary)] font-medium">20-30% Commission Fee</strong> taken by corporate shareholders</span>
                 </li>
                 <li className="flex items-start space-x-3">
-                  <XCircle className="w-4.5 h-4.5 text-rose-400/80 shrink-0 mt-0.5" />
-                  <span><strong className="text-zinc-200 font-medium">Zero Worker Ownership</strong> — gig workers treated as disposable contractors</span>
+                  <XCircle className="w-4.5 h-4.5 text-rose-400 shrink-0 mt-0.5" />
+                  <span><strong className="text-[var(--text-primary)] font-medium">Zero Worker Ownership</strong> — gig workers treated as disposable contractors</span>
                 </li>
                 <li className="flex items-start space-x-3">
-                  <XCircle className="w-4.5 h-4.5 text-rose-400/80 shrink-0 mt-0.5" />
-                  <span><strong className="text-zinc-200 font-medium">Arbitrary Rate Drops & Bans</strong> without any democratic right to appeal</span>
+                  <XCircle className="w-4.5 h-4.5 text-rose-400 shrink-0 mt-0.5" />
+                  <span><strong className="text-[var(--text-primary)] font-medium">Arbitrary Rate Drops & Bans</strong> without any democratic right to appeal</span>
                 </li>
                 <li className="flex items-start space-x-3">
-                  <XCircle className="w-4.5 h-4.5 text-rose-400/80 shrink-0 mt-0.5" />
+                  <XCircle className="w-4.5 h-4.5 text-rose-400 shrink-0 mt-0.5" />
                   <span>No insurance or welfare funds reinvested into worker families</span>
                 </li>
               </ul>
             </div>
 
             <div className="pt-2">
-              <button className="px-5 py-2 rounded-xl bg-[#24201D] hover:bg-[#332D29] text-xs font-semibold text-zinc-300 border border-zinc-700/50 transition-all shadow-sm">
+              <button className="px-5 py-2 rounded-xl bg-[var(--border)] text-xs font-semibold text-[var(--text-primary)] border border-[var(--border)] transition-all shadow-sm">
                 Learn More
               </button>
             </div>
           </div>
 
-          {/* Right Upper Card: SahakarConnect Cooperatives (Light Warm Theme matching Image 3 Right Card) */}
-          <div className="rounded-[32px] bg-white border border-[#E8E2D9] p-7 space-y-6 shadow-xl shadow-[#8B7355]/5 flex flex-col justify-between group hover:border-[#8B7355]/60 transition-all duration-300">
+          {/* Right Upper Card: KataLyst Cooperatives */}
+          <div className="rounded-[32px] bg-[var(--surface)] border border-[var(--border)] p-7 space-y-6 shadow-xl flex flex-col justify-between group hover:border-[var(--accent)] transition-all duration-300">
             <div className="space-y-6">
               {/* Upper Visual Header Box */}
-              <div className="h-52 rounded-2xl bg-gradient-to-br from-[#FAF3EA] via-[#F4EBE0] to-[#EAE0CF] border border-[#E8E2D9] relative overflow-hidden flex items-center justify-center p-6 group-hover:scale-[1.01] transition-transform duration-300">
-                <span className="absolute top-4 left-4 px-3 py-1 bg-[#6B4F3B] text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-md">
-                  SahakarConnect Model
+              <div className="h-52 rounded-2xl bg-[var(--border)] border border-[var(--border)] relative overflow-hidden flex items-center justify-center p-6 group-hover:scale-[1.01] transition-transform duration-300">
+                <span className="absolute top-4 left-4 px-3 py-1 bg-[var(--accent)] text-[var(--accent-cta-text)] text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-md">
+                  KataLyst Model
                 </span>
 
                 {/* Glossy 3D Gold/Bronze Token Illustration */}
                 <div className="relative w-28 h-28 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#8B7355]/30 to-[#6B4F3B]/20 blur-xl animate-pulse" />
-                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-tr from-[#FAF8F5] to-[#F4F0EA] border border-[#8B7355]/40 shadow-2xl flex flex-col items-center justify-center space-y-1 transform -rotate-6 group-hover:-rotate-12 transition-transform">
-                    <CheckCircle2 className="w-10 h-10 text-[#8B7355]" />
-                    <span className="text-[10px] font-mono font-bold text-[#6B4F3B]">80% WORKER</span>
+                  <div className="absolute inset-0 rounded-full bg-[var(--accent)]/20 blur-xl animate-pulse" />
+                  <div className="w-24 h-24 rounded-3xl bg-[var(--surface)] border border-[var(--accent)]/40 shadow-2xl flex flex-col items-center justify-center space-y-1 transform -rotate-6 group-hover:-rotate-12 transition-transform">
+                    <CheckCircle2 className="w-10 h-10 text-[var(--accent)]" />
+                    <span className="text-[10px] font-mono font-bold text-[var(--accent)]">80% WORKER</span>
                   </div>
                 </div>
               </div>
 
-              <h3 className="text-2xl font-black text-[#2B2824] tracking-tight">SahakarConnect Cooperatives</h3>
+              <h3 className="text-2xl font-black text-[var(--text-primary)] tracking-tight">KataLyst Cooperatives</h3>
 
-              <ul className="space-y-3.5 text-sm text-[#2B2824]">
+              <ul className="space-y-3.5 text-sm text-[var(--text-primary)]">
                 <li className="flex items-start space-x-3">
-                  <CheckCircle2 className="w-5 h-5 text-[#8B7355] shrink-0 mt-0.5" />
-                  <span><strong className="text-[#2B2824] font-extrabold">80% Direct to Worker</strong> — maximum earnings per booking</span>
+                  <CheckCircle2 className="w-5 h-5 text-[var(--accent)] shrink-0 mt-0.5" />
+                  <span><strong className="text-[var(--text-primary)] font-extrabold">80% Direct to Worker</strong> — maximum earnings per booking</span>
                 </li>
                 <li className="flex items-start space-x-3">
-                  <CheckCircle2 className="w-5 h-5 text-[#8B7355] shrink-0 mt-0.5" />
-                  <span><strong className="text-[#2B2824] font-extrabold">15% Cooperative Fund</strong> — worker health insurance & equipment grants</span>
+                  <CheckCircle2 className="w-5 h-5 text-[var(--accent)] shrink-0 mt-0.5" />
+                  <span><strong className="text-[var(--text-primary)] font-extrabold">15% Cooperative Fund</strong> — worker health insurance & equipment grants</span>
                 </li>
                 <li className="flex items-start space-x-3">
-                  <CheckCircle2 className="w-5 h-5 text-[#8B7355] shrink-0 mt-0.5" />
-                  <span><strong className="text-[#2B2824] font-extrabold">5% Platform Fee</strong> — lean open-technology maintenance</span>
+                  <CheckCircle2 className="w-5 h-5 text-[var(--accent)] shrink-0 mt-0.5" />
+                  <span><strong className="text-[var(--text-primary)] font-extrabold">5% Platform Fee</strong> — lean open-technology maintenance</span>
                 </li>
                 <li className="flex items-start space-x-3">
-                  <CheckCircle2 className="w-5 h-5 text-[#8B7355] shrink-0 mt-0.5" />
-                  <span><strong className="text-[#2B2824] font-extrabold">1-Member-1-Vote Governance</strong> — workers vote on rate revisions</span>
+                  <CheckCircle2 className="w-5 h-5 text-[var(--accent)] shrink-0 mt-0.5" />
+                  <span><strong className="text-[var(--text-primary)] font-extrabold">1-Member-1-Vote Governance</strong> — workers vote on rate revisions</span>
                 </li>
               </ul>
             </div>
 
             <div className="pt-2">
-              <button className="px-6 py-2.5 rounded-xl bg-[#2B2824] hover:bg-[#6B4F3B] text-xs font-bold text-white transition-all shadow-md">
+              <button className="px-6 py-2.5 rounded-xl bg-[var(--accent)] text-[var(--accent-cta-text)] text-xs font-bold transition-all shadow-md">
                 Learn More
               </button>
             </div>
@@ -326,13 +326,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
         </div>
       </section>
 
-      {/* SECTION 2: Lower 3 Cards (Styled matching Reference Image 2 with 3D Hover Tilt) */}
+      {/* SECTION 2: Lower 3 Cards */}
       <section className="space-y-8">
         <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <span className="text-xs font-extrabold text-[#6B4F3B] uppercase tracking-widest bg-[#F4F0EA] px-3 py-1 rounded-full border border-[#E8E2D9]">
+          <span className="text-xs font-extrabold text-[var(--accent)] uppercase tracking-widest bg-[var(--border)] px-3 py-1 rounded-full border border-[var(--border)]">
             Core Platform Pillars
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2B2824] tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
             Built for Transparency, Equity & Intelligence
           </h2>
         </div>

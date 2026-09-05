@@ -220,14 +220,14 @@ export const CustomerPortal: React.FC = () => {
                 /* Card matching Image 5 (Reference 5) design */
                 <div
                   key={worker.id}
-                  className="rounded-3xl border border-[#E8E2D9] bg-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between group"
+                  className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between group"
                 >
 
                   <div>
                     {/* Top Decorative Banner */}
                     <div className={`h-24 bg-gradient-to-r ${gradientCover} relative p-3 flex justify-between items-start`}>
-                      <div className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-white/80 backdrop-blur-sm text-[10px] font-bold text-[#2B2824] shadow-sm">
-                        <ShieldCheck className="w-3 h-3 text-[#8B7355]" />
+                      <div className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-[var(--overlay-bg)] backdrop-blur-sm text-[10px] font-bold text-[var(--overlay-text)] border border-[var(--border)] shadow-sm">
+                        <ShieldCheck className="w-3 h-3 text-[var(--accent)]" />
                         <span>Verified Member</span>
                       </div>
 
@@ -236,34 +236,34 @@ export const CustomerPortal: React.FC = () => {
                         <div
                           onMouseEnter={() => setActiveTooltipId(worker.id)}
                           onMouseLeave={() => setActiveTooltipId(null)}
-                          className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-[#6B4F3B] text-white text-xs font-bold cursor-pointer shadow-md"
+                          className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] text-xs font-bold cursor-pointer shadow-md"
                         >
-                          <Sparkles className="w-3 h-3 text-amber-200" />
+                          <Sparkles className="w-3 h-3 text-[var(--accent-cta-text)]" />
                           <span>{worker.matchScore || 92}% Match</span>
                         </div>
 
                         {/* Tooltip Popup explaining scoring logic */}
                         {activeTooltipId === worker.id && worker.matchBreakdown && (
-                          <div className="absolute right-0 top-8 z-30 w-64 p-3 rounded-2xl bg-[#2B2824] border border-[#6E675F] shadow-2xl text-[11px] text-[#FAF8F5] space-y-1.5 pointer-events-none">
-                            <div className="font-bold text-white text-xs border-b border-[#524B43] pb-1 mb-1 flex items-center justify-between">
+                          <div className="absolute right-0 top-8 z-30 w-64 p-3 rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-2xl text-[11px] text-[var(--text-primary)] space-y-1.5 pointer-events-none">
+                            <div className="font-bold text-[var(--text-primary)] text-xs border-b border-[var(--border)] pb-1 mb-1 flex items-center justify-between">
                               <span>Smart Match Transparency</span>
-                              <span className="text-amber-300">{worker.matchScore}%</span>
+                              <span className="text-[var(--accent)]">{worker.matchScore}%</span>
                             </div>
                             <div className="flex justify-between">
                               <span>Proximity Score (40%):</span>
-                              <span className="font-mono text-white">{worker.matchBreakdown.proximityScore}% ({worker.matchBreakdown.distanceKm}km)</span>
+                              <span className="font-mono text-[var(--text-primary)]">{worker.matchBreakdown.proximityScore}% ({worker.matchBreakdown.distanceKm}km)</span>
                             </div>
                             <div className="flex justify-between">
                               <span>Rating Score (30%):</span>
-                              <span className="font-mono text-white">{worker.matchBreakdown.ratingScore}%</span>
+                              <span className="font-mono text-[var(--text-primary)]">{worker.matchBreakdown.ratingScore}%</span>
                             </div>
                             <div className="flex justify-between">
                               <span>Availability (20%):</span>
-                              <span className="font-mono text-white">{worker.matchBreakdown.availabilityScore}%</span>
+                              <span className="font-mono text-[var(--text-primary)]">{worker.matchBreakdown.availabilityScore}%</span>
                             </div>
                             <div className="flex justify-between">
                               <span>Exact Skill Match (10%):</span>
-                              <span className="font-mono text-white">{worker.matchBreakdown.skillMatchScore}%</span>
+                              <span className="font-mono text-[var(--text-primary)]">{worker.matchBreakdown.skillMatchScore}%</span>
                             </div>
                           </div>
                         )}
@@ -275,19 +275,19 @@ export const CustomerPortal: React.FC = () => {
                       <img
                         src={avatarUrl}
                         alt={workerName}
-                        className="w-16 h-16 rounded-full border-4 border-white object-cover shadow-md bg-white"
+                        className="w-16 h-16 rounded-full border-4 border-[var(--surface)] object-cover shadow-md bg-[var(--surface)]"
                       />
                     </div>
 
                     {/* Card Content Details */}
                     <div className="px-5 space-y-3">
                       <div>
-                        <h3 className="font-extrabold text-[#2B2824] text-lg leading-tight group-hover:text-[#6B4F3B] transition-colors">
+                        <h3 className="font-extrabold text-[var(--text-primary)] text-lg leading-tight group-hover:text-[var(--accent)] transition-colors">
                           {workerName}
                         </h3>
-                        <p className="text-xs font-semibold text-[#8B7355] mt-0.5">{worker.cooperative?.name}</p>
-                        <div className="flex items-center space-x-1 mt-1 text-[#6E675F] text-[11px]">
-                          <MapPin className="w-3 h-3 text-[#8B7355]" />
+                        <p className="text-xs font-semibold text-[var(--accent)] mt-0.5">{worker.cooperative?.name}</p>
+                        <div className="flex items-center space-x-1 mt-1 text-[var(--text-secondary)] text-[11px]">
+                          <MapPin className="w-3 h-3 text-[var(--accent)]" />
                           <span>{worker.cooperative?.district}, {worker.cooperative?.state}</span>
                         </div>
                       </div>
@@ -295,23 +295,23 @@ export const CustomerPortal: React.FC = () => {
                       {/* Skills Badges */}
                       <div className="flex flex-wrap gap-1.5 pt-1">
                         {worker.skills.split(',').map((skill: string, idx: number) => (
-                          <span key={idx} className="px-2.5 py-1 rounded-lg bg-[#F4F0EA] border border-[#E8E2D9] text-[11px] font-medium text-[#6B4F3B]">
+                          <span key={idx} className="px-2.5 py-1 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[11px] font-medium text-[var(--accent)]">
                             {skill.trim()}
                           </span>
                         ))}
                       </div>
 
                       {/* Stats Divider Row */}
-                      <div className="flex items-center justify-between text-xs pt-3 border-t border-[#E8E2D9]">
+                      <div className="flex items-center justify-between text-xs pt-3 border-t border-[var(--border)]">
                         <div className="flex items-center space-x-1.5">
                           <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                          <span className="font-extrabold text-[#2B2824] text-sm">{worker.rating_avg.toFixed(1)}</span>
-                          <span className="text-[#857E75] text-[11px]">(15+ jobs)</span>
+                          <span className="font-extrabold text-[var(--text-primary)] text-sm">{worker.rating_avg.toFixed(1)}</span>
+                          <span className="text-[var(--text-secondary)] text-[11px]">(15+ jobs)</span>
                         </div>
 
                         <div className="text-right">
-                          <span className="text-[11px] text-[#6E675F]">Base Rate: </span>
-                          <span className="text-base font-black text-[#2B2824]">₹{categoryAmount}</span>
+                          <span className="text-[11px] text-[var(--text-secondary)]">Base Rate: </span>
+                          <span className="text-base font-black text-[var(--text-primary)]">₹{categoryAmount}</span>
                         </div>
                       </div>
                     </div>
@@ -327,10 +327,10 @@ export const CustomerPortal: React.FC = () => {
                           categoryId
                         });
                       }}
-                      className="w-full py-3 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-extrabold text-xs shadow-md transition-all flex items-center justify-center space-x-2 group-hover:shadow-lg"
+                      className="w-full py-3 rounded-full bg-[var(--accent)] hover:opacity-90 text-[var(--accent-cta-text)] font-extrabold text-xs shadow-md transition-all flex items-center justify-center space-x-2 group-hover:shadow-lg"
                     >
                       <span>Book Service & View Breakdown</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-3.5 h-3.5 text-[var(--accent-cta-text)]" />
                     </button>
                   </div>
 
@@ -348,18 +348,18 @@ export const CustomerPortal: React.FC = () => {
 
             <button
               onClick={() => setSelectedWorker(null)}
-              className="absolute top-4 right-4 text-[#857E75] hover:text-[#2B2824] p-1 rounded-full hover:bg-[#F4F0EA]"
+              className="absolute top-4 right-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 rounded-full hover:bg-[var(--border)]"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div>
-              <h3 className="text-xl font-extrabold text-[#2B2824]">Confirm Booking & Transparent Pricing</h3>
-              <p className="text-xs text-[#6E675F] mt-0.5">Booking with {selectedWorker.user?.name} ({selectedWorker.cooperative?.name})</p>
+              <h3 className="text-xl font-extrabold text-[var(--text-primary)]">Confirm Booking & Transparent Pricing</h3>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">Booking with {selectedWorker.user?.name} ({selectedWorker.cooperative?.name})</p>
             </div>
 
             {bookingSuccessMsg ? (
-              <div className="p-4 rounded-2xl bg-[#F4F0EA] border border-[#8B7355]/40 text-[#6B4F3B] text-sm font-bold text-center">
+              <div className="p-4 rounded-2xl bg-[var(--bg)] border border-[var(--border)] text-[var(--accent)] text-sm font-bold text-center">
                 {bookingSuccessMsg}
               </div>
             ) : (
@@ -367,58 +367,58 @@ export const CustomerPortal: React.FC = () => {
 
                 {/* Address & Instructions */}
                 <div>
-                  <label className="block text-xs font-bold text-[#6E675F] uppercase tracking-wider mb-1">Service Address</label>
+                  <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">Service Address</label>
                   <input
                     type="text"
                     value={bookingAddress}
                     onChange={(e) => setBookingAddress(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E2D9] rounded-xl text-xs font-semibold text-[#2B2824] focus:outline-none focus:border-[#6B4F3B]"
+                    className="w-full px-3.5 py-2.5 bg-[var(--bg)] border border-[var(--border)] rounded-xl text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#6E675F] uppercase tracking-wider mb-1">Instructions / Notes</label>
+                  <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">Instructions / Notes</label>
                   <input
                     type="text"
                     value={instructions}
                     onChange={(e) => setInstructions(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E2D9] rounded-xl text-xs font-semibold text-[#2B2824] focus:outline-none focus:border-[#6B4F3B]"
+                    className="w-full px-3.5 py-2.5 bg-[var(--bg)] border border-[var(--border)] rounded-xl text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]"
                   />
                 </div>
 
                 {/* 80/15/5 Payout Breakdown Card */}
-                <div className="p-4 rounded-2xl bg-[#F4F0EA] border border-[#E8E2D9] space-y-2.5">
-                  <div className="flex items-center space-x-1.5 text-xs font-bold text-[#6B4F3B] border-b border-[#E8E2D9] pb-2">
-                    <ShieldCheck className="w-4 h-4 text-[#8B7355]" />
+                <div className="p-4 rounded-2xl bg-[var(--bg)] border border-[var(--border)] space-y-2.5">
+                  <div className="flex items-center space-x-1.5 text-xs font-bold text-[var(--accent)] border-b border-[var(--border)] pb-2">
+                    <ShieldCheck className="w-4 h-4 text-[var(--accent)]" />
                     <span>Transparent Payout Guarantee (Cooperative Model)</span>
                   </div>
 
-                  <div className="flex justify-between text-xs text-[#524B43]">
+                  <div className="flex justify-between text-xs text-[var(--text-secondary)]">
                     <span>Worker Direct Share (80%):</span>
-                    <span className="font-bold text-[#2B2824]">₹{(selectedWorker.categoryAmount * 0.80).toFixed(2)}</span>
+                    <span className="font-bold text-[var(--text-primary)]">₹{(selectedWorker.categoryAmount * 0.80).toFixed(2)}</span>
                   </div>
 
-                  <div className="flex justify-between text-xs text-[#524B43]">
+                  <div className="flex justify-between text-xs text-[var(--text-secondary)]">
                     <span>Cooperative Welfare Fund (15%):</span>
-                    <span className="font-bold text-[#8B7355]">₹{(selectedWorker.categoryAmount * 0.15).toFixed(2)}</span>
+                    <span className="font-bold text-[var(--accent)]">₹{(selectedWorker.categoryAmount * 0.15).toFixed(2)}</span>
                   </div>
 
-                  <div className="flex justify-between text-xs text-[#524B43]">
+                  <div className="flex justify-between text-xs text-[var(--text-secondary)]">
                     <span>Platform Tech Maintenance (5%):</span>
-                    <span className="font-bold text-[#6E675F]">₹{(selectedWorker.categoryAmount * 0.05).toFixed(2)}</span>
+                    <span className="font-bold text-[var(--text-secondary)]">₹{(selectedWorker.categoryAmount * 0.05).toFixed(2)}</span>
                   </div>
 
-                  <div className="flex justify-between text-sm font-extrabold text-[#2B2824] pt-2 border-t border-[#E8E2D9]">
+                  <div className="flex justify-between text-sm font-extrabold text-[var(--text-primary)] pt-2 border-t border-[var(--border)]">
                     <span>Total Service Rate:</span>
-                    <span className="text-[#6B4F3B] text-base font-black">₹{selectedWorker.categoryAmount.toFixed(2)}</span>
+                    <span className="text-[var(--accent)] text-base font-black">₹{selectedWorker.categoryAmount.toFixed(2)}</span>
                   </div>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3.5 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-extrabold text-sm shadow-md transition-all"
+                  className="w-full py-3.5 rounded-full bg-[var(--accent)] hover:opacity-90 text-[var(--accent-cta-text)] font-extrabold text-sm shadow-md transition-all"
                 >
                   {isSubmitting ? 'Confirming Booking...' : 'Confirm Booking & Notify Worker'}
                 </button>
@@ -431,45 +431,45 @@ export const CustomerPortal: React.FC = () => {
 
       {/* Customer Booking History & Real-Time Status Tracker */}
       {user && (
-        <section className="space-y-4 pt-6 border-t border-[#E8E2D9]">
-          <h2 className="text-xl font-extrabold text-[#2B2824]">My Active & Past Bookings</h2>
+        <section className="space-y-4 pt-6 border-t border-[var(--border)]">
+          <h2 className="text-xl font-extrabold text-[var(--text-primary)]">My Active & Past Bookings</h2>
 
           {myBookings.length === 0 ? (
-            <div className="p-6 rounded-3xl bg-white border border-[#E8E2D9] text-center text-[#6E675F] text-xs">
+            <div className="p-6 rounded-3xl bg-[var(--surface)] border border-[var(--border)] text-center text-[var(--text-secondary)] text-xs">
               No bookings requested yet. Click "Book Service" above to get started.
             </div>
           ) : (
             <div className="space-y-3">
               {myBookings.map((b) => (
-                <div key={b.id} className="p-5 rounded-2xl bg-white border border-[#E8E2D9] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div key={b.id} className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                   <div>
                     <div className="flex items-center space-x-2">
-                      <span className="font-extrabold text-[#2B2824] text-base">{b.category?.name || 'Household Service'}</span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${b.status === 'COMPLETED' ? 'bg-[#F4F0EA] text-[#6B4F3B] border border-[#8B7355]/40' :
-                        b.status === 'IN_PROGRESS' ? 'bg-amber-50 text-amber-800 border border-amber-200' :
-                          b.status === 'ACCEPTED' ? 'bg-blue-50 text-blue-800 border border-blue-200' :
-                            'bg-stone-100 text-stone-700'
+                      <span className="font-extrabold text-[var(--text-primary)] text-base">{b.category?.name || 'Household Service'}</span>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${b.status === 'COMPLETED' ? 'bg-[var(--bg)] text-[var(--accent)] border border-[var(--border)]' :
+                        b.status === 'IN_PROGRESS' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30' :
+                          b.status === 'ACCEPTED' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/30' :
+                            'bg-[var(--bg)] text-[var(--text-secondary)] border border-[var(--border)]'
                         }`}>
                         {b.status}
                       </span>
                     </div>
 
-                    <p className="text-xs text-[#6E675F] mt-1">Worker: <strong className="text-[#2B2824]">{b.worker?.user?.name}</strong> ({b.worker?.cooperative?.name})</p>
-                    <p className="text-[11px] text-[#857E75]">{b.address}</p>
+                    <p className="text-xs text-[var(--text-secondary)] mt-1">Worker: <strong className="text-[var(--text-primary)]">{b.worker?.user?.name}</strong> ({b.worker?.cooperative?.name})</p>
+                    <p className="text-[11px] text-[var(--text-secondary)]">{b.address}</p>
                   </div>
 
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
-                      <div className="text-base font-black text-[#6B4F3B]">₹{b.amount}</div>
+                      <div className="text-base font-black text-[var(--accent)]">₹{b.amount}</div>
                       {b.payout && (
-                        <div className="text-[10px] text-[#6E675F]">Worker 80%: ₹{b.payout.worker_share}</div>
+                        <div className="text-[10px] text-[var(--text-secondary)]">Worker 80%: ₹{b.payout.worker_share}</div>
                       )}
                     </div>
 
                     {b.status === 'COMPLETED' && !b.rating && (
                       <button
                         onClick={() => setRatingBooking(b)}
-                        className="px-3.5 py-1.5 rounded-full bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900 text-xs font-bold transition-all"
+                        className="px-3.5 py-1.5 rounded-full bg-[var(--accent)]/10 hover:bg-[var(--accent)]/20 border border-[var(--accent)]/30 text-[var(--accent)] text-xs font-bold transition-all"
                       >
                         Rate Service
                       </button>
@@ -484,23 +484,23 @@ export const CustomerPortal: React.FC = () => {
 
       {/* Rating Modal */}
       {ratingBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2B2824]/60 backdrop-blur-sm">
-          <div className="relative w-full max-w-sm p-6 rounded-3xl border border-[#E8E2D9] bg-white shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm p-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl space-y-4">
             <button
               onClick={() => setRatingBooking(null)}
-              className="absolute top-3 right-3 text-[#857E75] hover:text-[#2B2824]"
+              className="absolute top-3 right-3 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg font-bold text-[#2B2824] text-center">Rate Your Service Experience</h3>
+            <h3 className="text-lg font-bold text-[var(--text-primary)] text-center">Rate Your Service Experience</h3>
 
             <div className="flex justify-center space-x-2">
               {[1, 2, 3, 4, 5].map((s) => (
                 <Star
                   key={s}
                   onClick={() => setRatingScore(s)}
-                  className={`w-8 h-8 cursor-pointer transition-all ${s <= ratingScore ? 'text-amber-500 fill-amber-500 scale-110' : 'text-[#D5CCBF]'
+                  className={`w-8 h-8 cursor-pointer transition-all ${s <= ratingScore ? 'text-amber-500 fill-amber-500 scale-110' : 'text-[var(--border)]'
                     }`}
                 />
               ))}
@@ -509,14 +509,14 @@ export const CustomerPortal: React.FC = () => {
             <textarea
               value={ratingComment}
               onChange={(e) => setRatingComment(e.target.value)}
-              className="w-full p-3 bg-[#FAF8F5] border border-[#E8E2D9] rounded-2xl text-xs text-[#2B2824] focus:outline-none focus:border-[#6B4F3B]"
+              className="w-full p-3 bg-[var(--bg)] border border-[var(--border)] rounded-2xl text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]"
               rows={3}
               placeholder="Leave feedback..."
             />
 
             <button
               onClick={handleRatingSubmit}
-              className="w-full py-3 rounded-full bg-[#6B4F3B] text-white font-bold text-xs shadow-md"
+              className="w-full py-3 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] font-bold text-xs shadow-md"
             >
               Submit Rating & Review
             </button>

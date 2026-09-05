@@ -104,42 +104,42 @@ export const CoopAdminPortal: React.FC = () => {
   };
 
   if (!coopData) {
-    return <div className="p-8 text-center text-[#6E675F] text-sm">Loading Cooperative Admin workspace...</div>;
+    return <div className="p-8 text-center text-[var(--text-secondary)] text-sm">Loading Cooperative Admin workspace...</div>;
   }
 
   return (
     <div className="space-y-6 py-4">
 
       {/* Top Banner: Cooperative Overview & Fund Balance */}
-      <div className="p-6 rounded-3xl border border-[#E8E2D9] bg-gradient-to-r from-white via-[#FAF8F5] to-[#F4F0EA] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors duration-200">
         <div>
           <div className="flex items-center space-x-2">
-            <Building2 className="w-6 h-6 text-[#8B7355]" />
-            <h1 className="text-2xl font-extrabold text-[#2B2824]">{coopData.name}</h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#F4F0EA] text-[#6B4F3B] border border-[#E8E2D9] text-[10px] font-extrabold uppercase">
+            <Building2 className="w-6 h-6 text-[var(--accent)]" />
+            <h1 className="text-2xl font-extrabold text-[var(--text-primary)]">{coopData.name}</h1>
+            <span className="px-2.5 py-0.5 rounded-full bg-[var(--border)] text-[var(--accent)] border border-[var(--border)] text-[10px] font-extrabold uppercase">
               {coopData.status}
             </span>
           </div>
-          <p className="text-xs text-[#6E675F] mt-1">
-            Reg. No: <strong className="text-[#2B2824]">{coopData.registration_no}</strong> • District: <strong className="text-[#2B2824]">{coopData.district}, {coopData.state}</strong>
+          <p className="text-xs text-[var(--text-secondary)] mt-1">
+            Reg. No: <strong className="text-[var(--text-primary)]">{coopData.registration_no}</strong> • District: <strong className="text-[var(--text-primary)]">{coopData.district}, {coopData.state}</strong>
           </p>
         </div>
 
         {/* 15% Accumulated Coop Welfare Fund Balance Card */}
-        <div className="px-5 py-3 rounded-2xl border border-[#E8E2D9] bg-[#F4F0EA] text-right">
-          <div className="text-xs font-semibold text-[#6E675F]">Cooperative Reserve Fund (15% Accumulation)</div>
-          <div className="text-2xl font-black text-[#6B4F3B]">₹{coopData.fund_balance.toFixed(2)}</div>
-          <div className="text-[10px] text-[#857E75]">Used for worker health, training & equipment</div>
+        <div className="px-5 py-3 rounded-2xl border border-[var(--border)] bg-[var(--bg)] text-right">
+          <div className="text-xs font-semibold text-[var(--text-secondary)]">Cooperative Reserve Fund (15% Accumulation)</div>
+          <div className="text-2xl font-black text-[var(--accent)]">₹{coopData.fund_balance.toFixed(2)}</div>
+          <div className="text-[10px] text-[var(--text-secondary)]">Used for worker health, training & equipment</div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center space-x-2 border-b border-[#E8E2D9] pb-3">
+      <div className="flex items-center space-x-2 border-b border-[var(--border)] pb-3">
         <button
           onClick={() => setActiveTab('members')}
           className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 ${activeTab === 'members'
-            ? 'bg-[#6B4F3B] text-white shadow-sm'
-            : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
+            ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-sm'
+            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]'
             }`}
         >
           <UserPlus className="w-4 h-4" />
@@ -149,8 +149,8 @@ export const CoopAdminPortal: React.FC = () => {
         <button
           onClick={() => setActiveTab('rates')}
           className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 ${activeTab === 'rates'
-            ? 'bg-[#6B4F3B] text-white shadow-sm'
-            : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
+            ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-sm'
+            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]'
             }`}
         >
           <DollarSign className="w-4 h-4" />
@@ -160,8 +160,8 @@ export const CoopAdminPortal: React.FC = () => {
         <button
           onClick={() => setActiveTab('proposals')}
           className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 ${activeTab === 'proposals'
-            ? 'bg-[#6B4F3B] text-white shadow-sm'
-            : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
+            ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-sm'
+            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]'
             }`}
         >
           <Vote className="w-4 h-4" />
@@ -173,10 +173,10 @@ export const CoopAdminPortal: React.FC = () => {
       {activeTab === 'members' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-[#2B2824]">Cooperative Worker Roster</h2>
+            <h2 className="text-base font-extrabold text-[var(--text-primary)]">Cooperative Worker Roster</h2>
             <button
               onClick={() => setShowAddMember(true)}
-              className="flex items-center space-x-1.5 px-4 py-2 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-extrabold text-xs shadow-sm"
+              className="flex items-center space-x-1.5 px-4 py-2 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] font-extrabold text-xs shadow-sm hover:opacity-90 transition-all"
             >
               <Plus className="w-4 h-4" />
               <span>Add / Verify Worker Member</span>
@@ -185,20 +185,20 @@ export const CoopAdminPortal: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {coopData.workers?.map((w: any) => (
-              <div key={w.id} className="p-5 rounded-2xl bg-white border border-[#E8E2D9] space-y-2 shadow-sm">
+              <div key={w.id} className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] space-y-2 shadow-sm">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-extrabold text-[#2B2824] text-base">{w.user?.name}</h3>
-                    <p className="text-xs text-[#6E675F]">{w.user?.phone}</p>
+                    <h3 className="font-extrabold text-[var(--text-primary)] text-base">{w.user?.name}</h3>
+                    <p className="text-xs text-[var(--text-secondary)]">{w.user?.phone}</p>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#F4F0EA] text-[#6B4F3B] border border-[#8B7355]/30 text-[10px] font-bold uppercase">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[var(--border)] text-[var(--accent)] border border-[var(--border)] text-[10px] font-bold uppercase">
                     {w.verification_status}
                   </span>
                 </div>
 
-                <p className="text-xs text-[#524B43]">Skills: <span className="text-[#6E675F]">{w.skills}</span></p>
-                <div className="flex items-center justify-between text-xs text-[#857E75] pt-2 border-t border-[#E8E2D9]">
-                  <span>Rating: <strong className="text-amber-600">★ {w.rating_avg.toFixed(1)}</strong></span>
+                <p className="text-xs text-[var(--text-secondary)]">Skills: <span className="text-[var(--text-primary)]">{w.skills}</span></p>
+                <div className="flex items-center justify-between text-xs text-[var(--text-secondary)] pt-2 border-t border-[var(--border)]">
+                  <span>Rating: <strong className="text-amber-500">★ {w.rating_avg.toFixed(1)}</strong></span>
                   <span>Jobs Completed: {w.bookings?.length || 0}</span>
                 </div>
               </div>
@@ -209,16 +209,16 @@ export const CoopAdminPortal: React.FC = () => {
 
       {/* Add Member Modal */}
       {showAddMember && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2B2824]/60 backdrop-blur-sm">
-          <div className="relative w-full max-w-md p-6 rounded-3xl border border-[#E8E2D9] bg-white shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-[#2B2824]">Add New Worker Member</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="relative w-full max-w-md p-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl space-y-4">
+            <h3 className="text-lg font-bold text-[var(--text-primary)]">Add New Worker Member</h3>
             <form onSubmit={handleAddMember} className="space-y-3">
               <input
                 type="text"
                 placeholder="Full Name"
                 value={memberName}
                 onChange={(e) => setMemberName(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E2D9] rounded-xl text-xs text-[#2B2824]"
+                className="w-full px-3.5 py-2.5 bg-[var(--bg)] border border-[var(--border)] text-[var(--text-primary)] rounded-xl text-xs focus:outline-none focus:border-[var(--accent)]"
                 required
               />
               <input
@@ -226,7 +226,7 @@ export const CoopAdminPortal: React.FC = () => {
                 placeholder="Phone Number (10 digits)"
                 value={memberPhone}
                 onChange={(e) => setMemberPhone(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E2D9] rounded-xl text-xs text-[#2B2824]"
+                className="w-full px-3.5 py-2.5 bg-[var(--bg)] border border-[var(--border)] text-[var(--text-primary)] rounded-xl text-xs focus:outline-none focus:border-[var(--accent)]"
                 required
               />
               <input
@@ -234,20 +234,20 @@ export const CoopAdminPortal: React.FC = () => {
                 placeholder="Skills (Comma-separated)"
                 value={memberSkills}
                 onChange={(e) => setMemberSkills(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E2D9] rounded-xl text-xs text-[#2B2824]"
+                className="w-full px-3.5 py-2.5 bg-[var(--bg)] border border-[var(--border)] text-[var(--text-primary)] rounded-xl text-xs focus:outline-none focus:border-[var(--accent)]"
                 required
               />
               <div className="flex space-x-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowAddMember(false)}
-                  className="w-1/2 py-2.5 rounded-full bg-[#F4F0EA] text-[#6E675F] text-xs font-bold"
+                  className="w-1/2 py-2.5 rounded-full bg-[var(--border)] text-[var(--text-secondary)] text-xs font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 py-2.5 rounded-full bg-[#6B4F3B] text-white text-xs font-bold shadow-md"
+                  className="w-1/2 py-2.5 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] text-xs font-bold shadow-md"
                 >
                   Register Worker
                 </button>
@@ -261,10 +261,10 @@ export const CoopAdminPortal: React.FC = () => {
       {activeTab === 'rates' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-[#2B2824]">Cooperative Category Rates Configuration</h2>
+            <h2 className="text-base font-extrabold text-[var(--text-primary)]">Cooperative Category Rates Configuration</h2>
             <button
               onClick={() => setShowAddRate(true)}
-              className="flex items-center space-x-1.5 px-4 py-2 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-extrabold text-xs shadow-sm"
+              className="flex items-center space-x-1.5 px-4 py-2 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] font-extrabold text-xs shadow-sm hover:opacity-90 transition-all"
             >
               <Plus className="w-4 h-4" />
               <span>Define Custom Category Base Rate</span>
@@ -273,11 +273,11 @@ export const CoopAdminPortal: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {coopData.serviceCategories?.map((cat: any) => (
-              <div key={cat.id} className="p-5 rounded-2xl bg-white border border-[#E8E2D9] space-y-2 shadow-sm">
-                <h3 className="font-extrabold text-[#2B2824] text-base">{cat.name}</h3>
-                <p className="text-xs text-[#6E675F]">{cat.description}</p>
-                <div className="text-xl font-black text-[#6B4F3B] pt-2 border-t border-[#E8E2D9]">
-                  ₹{cat.base_rate.toFixed(2)} <span className="text-xs font-normal text-[#857E75]">base rate</span>
+              <div key={cat.id} className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] space-y-2 shadow-sm">
+                <h3 className="font-extrabold text-[var(--text-primary)] text-base">{cat.name}</h3>
+                <p className="text-xs text-[var(--text-secondary)]">{cat.description}</p>
+                <div className="text-xl font-black text-[var(--accent)] pt-2 border-t border-[var(--border)]">
+                  ₹{cat.base_rate.toFixed(2)} <span className="text-xs font-normal text-[var(--text-secondary)]">base rate</span>
                 </div>
               </div>
             ))}
@@ -289,10 +289,10 @@ export const CoopAdminPortal: React.FC = () => {
       {activeTab === 'proposals' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-[#2B2824]">Democratic Governance Proposals</h2>
+            <h2 className="text-base font-extrabold text-[var(--text-primary)]">Democratic Governance Proposals</h2>
             <button
               onClick={() => setShowAddProposal(true)}
-              className="flex items-center space-x-1.5 px-4 py-2 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-extrabold text-xs shadow-sm"
+              className="flex items-center space-x-1.5 px-4 py-2 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] font-extrabold text-xs shadow-sm hover:opacity-90 transition-all"
             >
               <Plus className="w-4 h-4" />
               <span>Create New Member Proposal</span>
@@ -301,16 +301,16 @@ export const CoopAdminPortal: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {coopData.proposals?.map((prop: any) => (
-              <div key={prop.id} className="p-5 rounded-2xl bg-white border border-[#E8E2D9] space-y-3 shadow-sm">
+              <div key={prop.id} className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] space-y-3 shadow-sm">
                 <div className="flex items-start justify-between">
-                  <h3 className="font-extrabold text-[#2B2824] text-sm">{prop.title}</h3>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#F4F0EA] text-[#6B4F3B] text-[10px] font-bold uppercase">
+                  <h3 className="font-extrabold text-[var(--text-primary)] text-sm">{prop.title}</h3>
+                  <span className="px-2.5 py-0.5 rounded-full bg-[var(--border)] text-[var(--accent)] border border-[var(--border)] text-[10px] font-bold uppercase">
                     {prop.status}
                   </span>
                 </div>
-                <p className="text-xs text-[#6E675F]">{prop.description}</p>
-                <div className="text-[11px] text-[#857E75] border-t border-[#E8E2D9] pt-2">
-                  Options: <strong className="text-[#2B2824]">{prop.options}</strong>
+                <p className="text-xs text-[var(--text-secondary)]">{prop.description}</p>
+                <div className="text-[11px] text-[var(--text-secondary)] border-t border-[var(--border)] pt-2">
+                  Options: <strong className="text-[var(--text-primary)]">{prop.options}</strong>
                 </div>
               </div>
             ))}
@@ -320,23 +320,23 @@ export const CoopAdminPortal: React.FC = () => {
 
       {/* Add Proposal Modal */}
       {showAddProposal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2B2824]/60 backdrop-blur-sm">
-          <div className="relative w-full max-w-md p-6 rounded-3xl border border-[#E8E2D9] bg-white shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-[#2B2824]">Create New Governance Proposal</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="relative w-full max-w-md p-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl space-y-4">
+            <h3 className="text-lg font-bold text-[var(--text-primary)]">Create New Governance Proposal</h3>
             <form onSubmit={handleCreateProposal} className="space-y-3">
               <input
                 type="text"
                 placeholder="Proposal Title (e.g. Rate revision for Monsoon)"
                 value={proposalTitle}
                 onChange={(e) => setProposalTitle(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E2D9] rounded-xl text-xs text-[#2B2824]"
+                className="w-full px-3.5 py-2.5 bg-[var(--bg)] border border-[var(--border)] text-[var(--text-primary)] rounded-xl text-xs focus:outline-none focus:border-[var(--accent)]"
                 required
               />
               <textarea
                 placeholder="Detailed proposal description..."
                 value={proposalDesc}
                 onChange={(e) => setProposalDesc(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E2D9] rounded-xl text-xs text-[#2B2824]"
+                className="w-full px-3.5 py-2.5 bg-[var(--bg)] border border-[var(--border)] text-[var(--text-primary)] rounded-xl text-xs focus:outline-none focus:border-[var(--accent)]"
                 rows={3}
                 required
               />
@@ -345,20 +345,20 @@ export const CoopAdminPortal: React.FC = () => {
                 placeholder="Options (Comma-separated e.g. Yes, No, Abstain)"
                 value={proposalOptions}
                 onChange={(e) => setProposalOptions(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#E8E2D9] rounded-xl text-xs text-[#2B2824]"
+                className="w-full px-3.5 py-2.5 bg-[var(--bg)] border border-[var(--border)] text-[var(--text-primary)] rounded-xl text-xs focus:outline-none focus:border-[var(--accent)]"
                 required
               />
               <div className="flex space-x-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowAddProposal(false)}
-                  className="w-1/2 py-2.5 rounded-full bg-[#F4F0EA] text-[#6E675F] text-xs font-bold"
+                  className="w-1/2 py-2.5 rounded-full bg-[var(--border)] text-[var(--text-secondary)] text-xs font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 py-2.5 rounded-full bg-[#6B4F3B] text-white text-xs font-bold shadow-md"
+                  className="w-1/2 py-2.5 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] text-xs font-bold shadow-md"
                 >
                   Publish Proposal
                 </button>
