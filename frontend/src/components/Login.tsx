@@ -63,7 +63,8 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
   }, []);
 
   const handleAuthComplete = (roleParam?: string) => {
-    const targetRole = roleParam || (user ? user.role : 'CUSTOMER');
+    const rawRole = roleParam || user?.role || (isSignUp ? (selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole) : 'CUSTOMER');
+    const targetRole = rawRole === 'ADMIN' ? 'COOP_ADMIN' : rawRole;
     if (onSuccess) {
       onSuccess(targetRole);
     } else {
@@ -96,11 +97,11 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
     setError('');
 
     try {
-      const mappedRole = selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole;
+      const mappedRole = isSignUp ? (selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole) : undefined;
       const displayName = isSignUp 
         ? (selectedRole === 'ADMIN' && orgName ? `${fullName} (${orgName})` : fullName)
         : undefined;
-      await loginWithEmail(email, password, mappedRole, displayName, isSignUp, orgName);
+      await loginWithEmail(email, password, mappedRole || 'CUSTOMER', displayName, isSignUp, orgName);
       handleAuthComplete(mappedRole);
     } catch (err: any) {
       setError(err?.message || 'Authentication failed. Please try again.');
@@ -123,7 +124,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
     setError('');
 
     try {
-      const mappedRole = selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole;
+      const mappedRole = isSignUp ? (selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole) : undefined;
       const displayName = isSignUp 
         ? (selectedRole === 'ADMIN' && orgName ? `${fullName} (${orgName})` : fullName)
         : undefined;
@@ -147,12 +148,12 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
           callback: async (response: any) => {
             if (response.credential) {
               const payload = JSON.parse(atob(response.credential.split('.')[1]));
-              const mappedRole = selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole;
+              const mappedRole = isSignUp ? (selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole) : undefined;
               await loginWithGoogle({
                 email: payload.email,
                 name: payload.name,
                 picture: payload.picture
-              }, mappedRole);
+              }, mappedRole || 'CUSTOMER');
               handleAuthComplete(mappedRole);
             }
           }
@@ -171,12 +172,12 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
     setLoading(true);
     setShowGoogleModal(false);
     try {
-      const mappedRole = selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole;
+      const mappedRole = isSignUp ? (selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole) : undefined;
       await loginWithGoogle({
         email: acctEmail,
         name: acctName,
         picture: 'https://lh3.googleusercontent.com/a/default-user=s96-c'
-      }, mappedRole);
+      }, mappedRole || 'CUSTOMER');
       handleAuthComplete(mappedRole);
     } catch (err: any) {
       setError('Google Sign-in failed');

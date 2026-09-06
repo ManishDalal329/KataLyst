@@ -75,12 +75,12 @@ export const Navbar: React.FC = () => {
       case 'WORKER':
         return '/worker';
       case 'COOP_ADMIN':
-        return '/coop-admin';
+        return '/coop';
       case 'GOV_ADMIN':
-        return '/gov-portal';
+        return '/admin';
       case 'CUSTOMER':
       default:
-        return '/customer';
+        return '/services';
     }
   };
 

@@ -35,12 +35,12 @@ export const getRoleRoute = (role?: string): string => {
     case 'WORKER':
       return '/worker';
     case 'COOP_ADMIN':
-      return '/coop-admin';
+      return '/coop';
     case 'GOV_ADMIN':
-      return '/gov-portal';
+      return '/admin';
     case 'CUSTOMER':
     default:
-      return '/customer';
+      return '/services';
   }
 };
 
@@ -116,6 +116,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     } else {
       sessionUser = await login(email, pass);
+      if (role && sessionUser.role !== mappedRole) {
+        sessionUser = updateUserProfile(sessionUser.id, { role: mappedRole });
+      }
     }
 
     setUser(sessionUser);
