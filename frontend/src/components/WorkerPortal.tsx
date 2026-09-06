@@ -300,7 +300,7 @@ export const WorkerPortal: React.FC = () => {
 
   return (
     <div className="space-y-6 py-4">
-      
+
       {/* Top Banner: Worker Status & Availability Toggle */}
       <div className="p-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors duration-200">
         <div>
@@ -321,19 +321,16 @@ export const WorkerPortal: React.FC = () => {
             <span className="text-xs font-extrabold text-[#2B2824]">Status:</span>
             <button
               onClick={toggleAvailability}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-extrabold text-xs transition-all shadow-sm ${
-                isAvailable
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-extrabold text-xs transition-all shadow-sm ${isAvailable
                   ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
                   : 'bg-[#E8E2D9] hover:bg-[#D5CCBF] text-[#6E675F]'
-              }`}
+                }`}
             >
               <Power className="w-3.5 h-3.5" />
               <span>{isAvailable ? t('avail_toggle_online') : t('avail_toggle_offline')}</span>
             </button>
           </div>
-          <span className="text-[10px] text-[#857E75]">
-            Manual toggle drives live online customer count
-          </span>
+
         </div>
       </div>
 
@@ -341,11 +338,10 @@ export const WorkerPortal: React.FC = () => {
       <div className="flex items-center space-x-2 border-b border-[#E8E2D9] pb-3 overflow-x-auto">
         <button
           onClick={() => setActiveTab('jobs')}
-          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${
-            activeTab === 'jobs'
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${activeTab === 'jobs'
               ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-sm'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]'
-          }`}
+            }`}
         >
           <Clock className="w-4 h-4" />
           <span>
@@ -360,11 +356,10 @@ export const WorkerPortal: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('earnings')}
-          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${
-            activeTab === 'earnings'
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${activeTab === 'earnings'
               ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-sm'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]'
-          }`}
+            }`}
         >
           <TrendingUp className="w-4 h-4" />
           <span>{t('tab_earnings')}</span>
@@ -372,11 +367,10 @@ export const WorkerPortal: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('governance')}
-          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${
-            activeTab === 'governance'
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${activeTab === 'governance'
               ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-sm'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]'
-          }`}
+            }`}
         >
           <Vote className="w-4 h-4" />
           <span>{t('tab_governance')} ({proposals.length})</span>
@@ -490,22 +484,21 @@ export const WorkerPortal: React.FC = () => {
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       {/* Status Badges */}
                       <div className="flex items-center space-x-2">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase ${
-                          status === 'Pending' ? 'bg-stone-100 text-stone-700 border border-stone-200' :
-                          status === 'Accepted' ? 'bg-blue-50 text-blue-800 border border-blue-200' :
-                          status === 'Confirmed' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
-                          status === 'In Progress' ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse' :
-                          status === 'Pending Price Approval' ? 'bg-purple-100 text-purple-900 border border-purple-300 animate-pulse' :
-                          status === 'Completed' ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' :
-                          status === 'Cancelled' ? 'bg-red-50 text-red-800 border border-red-200' :
-                          'bg-stone-100 text-stone-600 border border-stone-200'
-                        }`}>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase ${status === 'Pending' ? 'bg-stone-100 text-stone-700 border border-stone-200' :
+                            status === 'Accepted' ? 'bg-blue-50 text-blue-800 border border-blue-200' :
+                              status === 'Confirmed' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
+                                status === 'In Progress' ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse' :
+                                  status === 'Pending Price Approval' ? 'bg-purple-100 text-purple-900 border border-purple-300 animate-pulse' :
+                                    status === 'Completed' ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' :
+                                      status === 'Cancelled' ? 'bg-red-50 text-red-800 border border-red-200' :
+                                        'bg-stone-100 text-stone-600 border border-stone-200'
+                          }`}>
                           {status === 'Pending' ? 'Pending (Open to Accept)' :
-                           status === 'Accepted' ? 'Accepted (Awaiting Customer Confirmation)' :
-                           status === 'Confirmed' ? 'Confirmed (Customer Selected You!)' :
-                           status === 'Pending Price Approval' ? 'Waiting for customer to approve revised amount' :
-                           status === 'Closed' ? 'Closed (Customer picked another member)' :
-                           status}
+                            status === 'Accepted' ? 'Accepted (Awaiting Customer Confirmation)' :
+                              status === 'Confirmed' ? 'Confirmed (Customer Selected You!)' :
+                                status === 'Pending Price Approval' ? 'Waiting for customer to approve revised amount' :
+                                  status === 'Closed' ? 'Closed (Customer picked another member)' :
+                                    status}
                         </span>
 
                         {status === 'Closed' && (
@@ -688,7 +681,7 @@ export const WorkerPortal: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
+
             {/* Proposals List */}
             <div className="space-y-4">
               <h3 className="text-sm font-extrabold text-[#2B2824]">{t('open_proposals_title')}</h3>
@@ -702,17 +695,15 @@ export const WorkerPortal: React.FC = () => {
                   <div
                     key={prop.id}
                     onClick={() => setSelectedProposal(prop)}
-                    className={`p-5 rounded-2xl border cursor-pointer transition-all space-y-3 ${
-                      selectedProposal?.id === prop.id
+                    className={`p-5 rounded-2xl border cursor-pointer transition-all space-y-3 ${selectedProposal?.id === prop.id
                         ? 'border-[#6B4F3B] bg-[#F4F0EA] shadow-md'
                         : 'border-[#E8E2D9] bg-white hover:border-[#8B7355]'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start justify-between">
                       <h4 className="font-extrabold text-[#2B2824] text-sm">{prop.title}</h4>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                        prop.status === 'OPEN' ? 'bg-[#F4F0EA] text-[#6B4F3B] border border-[#8B7355]/30' : 'bg-[#E8E2D9] text-[#6E675F]'
-                      }`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${prop.status === 'OPEN' ? 'bg-[#F4F0EA] text-[#6B4F3B] border border-[#8B7355]/30' : 'bg-[#E8E2D9] text-[#6E675F]'
+                        }`}>
                         {prop.status}
                       </span>
                     </div>
@@ -750,18 +741,17 @@ export const WorkerPortal: React.FC = () => {
                       <label className="block text-xs font-bold text-[#6E675F] uppercase tracking-wider">
                         {t('cast_vote')}
                       </label>
-                      
+
                       <div className="space-y-2">
                         {(selectedProposal.optionsList || selectedProposal.options.split(',')).map((opt: string, idx: number) => {
                           const optionText = opt.trim();
                           return (
                             <label
                               key={idx}
-                              className={`flex items-center space-x-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                                voteChoice === optionText
+                              className={`flex items-center space-x-3 p-3 rounded-xl border cursor-pointer transition-all ${voteChoice === optionText
                                   ? 'border-[var(--accent)] bg-[var(--bg)] text-[var(--text-primary)] font-bold'
                                   : 'border-[var(--border)] bg-[var(--bg)] text-[var(--text-secondary)] hover:bg-[var(--border)]/30'
-                              }`}
+                                }`}
                             >
                               <input
                                 type="radio"

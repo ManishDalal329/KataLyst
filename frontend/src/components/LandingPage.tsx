@@ -343,9 +343,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
           <TiltCard className="rounded-[32px] bg-gradient-to-b from-[#131D21] via-[#0E1619] to-[#091012] border border-[#22333B] p-7 h-[420px] flex flex-col justify-between relative overflow-hidden group cursor-pointer shadow-2xl">
             <CardWaveCanvas seed={0} />
             <div className="z-10 flex justify-between items-start">
-              <span className="px-3 py-1 rounded-full bg-[#8B7355]/15 border border-[#8B7355]/30 text-[#DBC5A5] text-[10px] font-mono font-bold uppercase tracking-wider backdrop-blur-md">
-                01 / Financial Split
-              </span>
+
               <DollarSign className="w-5 h-5 text-[#DBC5A5]" />
             </div>
 
@@ -363,9 +361,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
           <TiltCard className="rounded-[32px] bg-gradient-to-b from-[#131D21] via-[#0E1619] to-[#091012] border border-[#22333B] p-7 h-[420px] flex flex-col justify-between relative overflow-hidden group cursor-pointer shadow-2xl">
             <CardWaveCanvas seed={1} />
             <div className="z-10 flex justify-between items-start">
-              <span className="px-3 py-1 rounded-full bg-[#8B7355]/15 border border-[#8B7355]/30 text-[#DBC5A5] text-[10px] font-mono font-bold uppercase tracking-wider backdrop-blur-md">
-                02 / Governance
-              </span>
+
               <Vote className="w-5 h-5 text-[#DBC5A5]" />
             </div>
 
@@ -383,9 +379,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartBooking, onExpl
           <TiltCard className="rounded-[32px] bg-gradient-to-b from-[#131D21] via-[#0E1619] to-[#091012] border border-[#22333B] p-7 h-[420px] flex flex-col justify-between relative overflow-hidden group cursor-pointer shadow-2xl">
             <CardWaveCanvas seed={2} />
             <div className="z-10 flex justify-between items-start">
-              <span className="px-3 py-1 rounded-full bg-[#8B7355]/15 border border-[#8B7355]/30 text-[#DBC5A5] text-[10px] font-mono font-bold uppercase tracking-wider backdrop-blur-md">
-                03 / Match Engine
-              </span>
+
               <Sparkles className="w-5 h-5 text-[#DBC5A5]" />
             </div>
 

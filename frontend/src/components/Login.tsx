@@ -16,7 +16,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
 
   const [isSignUp, setIsSignUp] = useState(location.pathname === '/signup');
   const [selectedRole, setSelectedRole] = useState<'CUSTOMER' | 'WORKER' | 'ADMIN'>('CUSTOMER');
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -98,7 +98,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
 
     try {
       const mappedRole = isSignUp ? (selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole) : undefined;
-      const displayName = isSignUp 
+      const displayName = isSignUp
         ? (selectedRole === 'ADMIN' && orgName ? `${fullName} (${orgName})` : fullName)
         : undefined;
       await loginWithEmail(email, password, mappedRole || 'CUSTOMER', displayName, isSignUp, orgName);
@@ -125,7 +125,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
 
     try {
       const mappedRole = isSignUp ? (selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole) : undefined;
-      const displayName = isSignUp 
+      const displayName = isSignUp
         ? (selectedRole === 'ADMIN' && orgName ? `${fullName} (${orgName})` : fullName)
         : undefined;
       await loginWithOtp(phone, otp, mappedRole, displayName);
@@ -140,7 +140,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
   // Google Sign-In handler
   const handleGoogleSignInClick = () => {
     const googleClientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID;
-    
+
     if (googleClientId && (window as any).google?.accounts?.id) {
       try {
         (window as any).google.accounts.id.initialize({
@@ -194,21 +194,21 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
 
       {/* Container matching glass-panel style with max height restricted to 100vh */}
       <div className="w-full max-w-5xl max-h-[calc(100vh-2rem)] bg-[var(--surface)] backdrop-blur-xl rounded-3xl border border-[var(--border)] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 relative z-10 my-auto">
-        
+
         {/* LEFT COLUMN: Auth Form */}
         <div className="lg:col-span-7 p-5 sm:p-8 md:p-9 flex flex-col justify-between relative overflow-y-auto">
-          
+
           {/* Top Brand Logo */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <div 
+              <div
                 className="flex items-center space-x-2.5 cursor-pointer text-[var(--text-primary)] hover:opacity-90 transition-opacity"
                 onClick={handleHomeClick}
               >
                 <KatalystLogo className="h-9 w-auto" />
               </div>
 
-              <button 
+              <button
                 onClick={handleHomeClick}
                 className="px-3 py-1.5 rounded-full bg-[var(--border)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:opacity-80 transition-all flex items-center gap-1"
               >
@@ -242,17 +242,16 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                 <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
                   Select Your Role
                 </label>
-                
+
                 <div className="grid grid-cols-3 gap-2 p-1.5 bg-[var(--bg)] rounded-xl border border-[var(--border)]">
                   {/* Role 1: User/Customer */}
                   <button
                     type="button"
                     onClick={() => setSelectedRole('CUSTOMER')}
-                    className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 ${
-                      selectedRole === 'CUSTOMER'
-                        ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-md scale-[1.02]'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                    }`}
+                    className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 ${selectedRole === 'CUSTOMER'
+                      ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-md scale-[1.02]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                      }`}
                   >
                     <UserCheck className="w-4 h-4 shrink-0" />
                     <span className="truncate w-full text-center">User (Book)</span>
@@ -262,11 +261,10 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                   <button
                     type="button"
                     onClick={() => setSelectedRole('WORKER')}
-                    className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 ${
-                      selectedRole === 'WORKER'
-                        ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-md scale-[1.02]'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                    }`}
+                    className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 ${selectedRole === 'WORKER'
+                      ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-md scale-[1.02]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                      }`}
                   >
                     <HardHat className="w-4 h-4 shrink-0" />
                     <span className="truncate w-full text-center">Worker (Job)</span>
@@ -276,11 +274,10 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                   <button
                     type="button"
                     onClick={() => setSelectedRole('ADMIN')}
-                    className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 ${
-                      selectedRole === 'ADMIN'
-                        ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-md scale-[1.02]'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                    }`}
+                    className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 ${selectedRole === 'ADMIN'
+                      ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-md scale-[1.02]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                      }`}
                   >
                     <Building2 className="w-4 h-4 shrink-0" />
                     <span className="truncate w-full text-center">Admin / Org</span>
@@ -307,7 +304,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
 
             {/* Auth Method Switcher (Email vs Phone OTP) */}
             <div className="flex items-center justify-between mb-2.5 text-xs font-semibold">
-              <span className="text-[var(--text-secondary)]">Sign in using:</span>
+              <span className="text-[var(--text-secondary)]"></span>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -520,16 +517,16 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
 
         {/* RIGHT COLUMN: Luxurious warm dark visual matching KataLyst theme */}
         <div className="lg:col-span-5 bg-gradient-to-br from-[#2B2824] via-[#3E3027] to-[#543D2D] p-5 sm:p-7 flex flex-col justify-between relative overflow-hidden text-white border-t lg:border-t-0 lg:border-l border-[#8B7355]/20">
-          
+
           {/* Top subtle location header */}
           <div className="flex items-center justify-between text-xs text-[#D5CCBF]/70 z-10">
             <span className="font-mono text-[11px] tracking-wider uppercase opacity-90">KataLyst</span>
-            <span className="font-mono text-[11px] opacity-80">Delhi · v1.0</span>
+
           </div>
 
           {/* Center Golden Iridescent Lotus Visual */}
           <div className="relative my-auto flex flex-col items-center justify-center py-6 z-10">
-            
+
             {/* Ambient Background Glow Spheres */}
             <div className="absolute w-64 h-64 rounded-full bg-gradient-to-tr from-[#8B7355]/30 via-[#6B4F3B]/30 to-[#D5CCBF]/20 blur-3xl animate-pulse" />
             <div className="absolute w-40 h-40 rounded-full bg-[#8B7355]/15 blur-2xl -top-4 -right-4" />
@@ -631,9 +628,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
           </div>
 
           {/* Bottom Tagline matching main website */}
-          <div className="z-10 text-center lg:text-left text-xs text-[#D5CCBF]/70 font-mono tracking-tight">
-            Designed by humans · Evolved by AI
-          </div>
+
         </div>
 
       </div>
