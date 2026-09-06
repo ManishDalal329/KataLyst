@@ -132,9 +132,9 @@ export const CoopAdminPortal: React.FC = () => {
 
   return (
     <div className="space-y-6 py-4">
-      
+
       {/* Top Banner: Cooperative Overview & Fund Balance */}
-      <div className="p-6 rounded-3xl border border-[#E8E2D9] bg-gradient-to-r from-white via-[#FAF8F5] to-[#F4F0EA] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors duration-200">
         <div>
           <div className="flex items-center space-x-2">
             <Building2 className="w-6 h-6 text-[#8B7355]" />

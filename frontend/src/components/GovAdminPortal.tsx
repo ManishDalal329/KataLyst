@@ -124,48 +124,48 @@ export const GovAdminPortal: React.FC = () => {
     <div className="space-y-8 py-4">
       
       {/* Government Admin Header */}
-      <div className="p-6 rounded-3xl border border-[#E8E2D9] bg-gradient-to-r from-white via-[#FAF8F5] to-[#F4F0EA] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors duration-200">
         <div>
           <div className="flex items-center space-x-2">
-            <Landmark className="w-6 h-6 text-[#8B7355]" />
-            <h1 className="text-2xl font-extrabold text-[#2B2824]">{t('gov_portal_title')}</h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#8B7355]/10 text-[#6B4F3B] border border-[#8B7355]/20 text-[10px] font-extrabold uppercase">
-              {t('official_portal_badge')}
+            <Landmark className="w-6 h-6 text-[var(--accent)]" />
+            <h1 className="text-2xl font-extrabold text-[var(--text-primary)]">Ministry of Cooperation Admin Portal</h1>
+            <span className="px-2.5 py-0.5 rounded-full bg-[var(--border)] text-[var(--accent)] border border-[var(--border)] text-[10px] font-extrabold uppercase">
+              Official Portal
             </span>
           </div>
-          <p className="text-xs text-[#6E675F] mt-1">{t('gov_portal_sub')}</p>
+          <p className="text-xs text-[var(--text-secondary)] mt-1">National Worker Cooperative Regulatory & Platform Analytics Dashboard</p>
         </div>
 
         <div className="text-right">
-          <span className="text-[11px] text-[#6E675F]">{t('total_coops_kpi')}:</span>
-          <div className="text-xl font-extrabold text-[#6B4F3B]">{overview?.totalCoops || cooperatives.length} {t('approved')}</div>
+          <span className="text-[11px] text-[var(--text-secondary)]">Total Registered Cooperatives:</span>
+          <div className="text-xl font-extrabold text-[var(--accent)]">{overview?.totalCoops || cooperatives.length} Approved Coops</div>
         </div>
       </div>
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl border border-[#E8E2D9] bg-white shadow-sm space-y-1">
-          <span className="text-xs text-[#6E675F] font-semibold">{t('total_gmv_kpi')}</span>
-          <div className="text-2xl font-extrabold text-[#2B2824]">₹{overview?.totalGMV?.toLocaleString() || '45,280.00'}</div>
-          <span className="text-[10px] text-[#8B7355] font-bold">100% Transparent Flow</span>
+        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm space-y-1">
+          <span className="text-xs text-[var(--text-secondary)] font-semibold">Total Platform GMV</span>
+          <div className="text-2xl font-extrabold text-[var(--text-primary)]">₹{overview?.totalGMV || '0.00'}</div>
+          <span className="text-[10px] text-[var(--accent)] font-bold">100% Transparent Financial Flow</span>
         </div>
 
-        <div className="p-5 rounded-2xl border border-[#E8E2D9] bg-white shadow-sm space-y-1">
-          <span className="text-xs text-[#6E675F] font-semibold">{t('worker_payouts_kpi')}</span>
-          <div className="text-2xl font-extrabold text-[#6B4F3B]">₹{overview?.totalWorkerPayouts?.toLocaleString() || '36,224.00'}</div>
-          <span className="text-[10px] text-[#6E675F]">Direct Worker Accounts</span>
+        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm space-y-1">
+          <span className="text-xs text-[var(--text-secondary)] font-semibold">Worker Payouts (80%)</span>
+          <div className="text-2xl font-extrabold text-[var(--accent)]">₹{overview?.totalWorkerPayouts || '0.00'}</div>
+          <span className="text-[10px] text-[var(--text-secondary)]">Directly into Worker Accounts</span>
         </div>
 
-        <div className="p-5 rounded-2xl border border-[#E8E2D9] bg-white shadow-sm space-y-1">
-          <span className="text-xs text-[#6E675F] font-semibold">{t('coop_funds_kpi')}</span>
-          <div className="text-2xl font-extrabold text-[#8B7355]">₹{overview?.totalCoopFunds?.toLocaleString() || '6,792.00'}</div>
-          <span className="text-[10px] text-[#6E675F]">Welfare & Equipment Reserve</span>
+        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm space-y-1">
+          <span className="text-xs text-[var(--text-secondary)] font-semibold">Coop Reserve Funds (15%)</span>
+          <div className="text-2xl font-extrabold text-[var(--accent)]">₹{overview?.totalCoopFunds || '0.00'}</div>
+          <span className="text-[10px] text-[var(--text-secondary)]">Worker Welfare & Equipment</span>
         </div>
 
-        <div className="p-5 rounded-2xl border border-[#E8E2D9] bg-white shadow-sm space-y-1">
-          <span className="text-xs text-[#6E675F] font-semibold">{t('platform_fees_kpi')}</span>
-          <div className="text-2xl font-extrabold text-[#2B2824]">₹{overview?.totalPlatformFees?.toLocaleString() || '2,264.00'}</div>
-          <span className="text-[10px] text-[#6E675F]">Cloud & Open Tech Cost</span>
+        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm space-y-1">
+          <span className="text-xs text-[var(--text-secondary)] font-semibold">Platform Tech Fee (5%)</span>
+          <div className="text-2xl font-extrabold text-[var(--text-primary)]">₹{overview?.totalPlatformFees || '0.00'}</div>
+          <span className="text-[10px] text-[var(--text-secondary)]">Open-Source Tech Maintenance</span>
         </div>
       </div>
 
@@ -173,40 +173,40 @@ export const GovAdminPortal: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Chart 1: Category Demand */}
-        <div className="p-6 rounded-2xl border border-[#E8E2D9] bg-white shadow-sm space-y-4">
-          <h3 className="text-sm font-extrabold text-[#2B2824] flex items-center space-x-2">
-            <BarChart3 className="w-4 h-4 text-[#8B7355]" />
-            <span>{t('demand_by_category')}</span>
+        <div className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm space-y-4">
+          <h3 className="text-sm font-extrabold text-[var(--text-primary)] flex items-center space-x-2">
+            <BarChart3 className="w-4 h-4 text-[var(--accent)]" />
+            <span>Service Bookings Demand by Category</span>
           </h3>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={categoryDemand}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E8E2D9" />
-                <XAxis dataKey="name" stroke="#6E675F" fontSize={10} angle={-15} textAnchor="end" height={50} />
-                <YAxis stroke="#6E675F" fontSize={11} />
-                <Tooltip contentStyle={{ backgroundColor: '#FAF8F5', borderColor: '#E8E2D9', borderRadius: '12px', color: '#2B2824' }} />
-                <Bar dataKey="bookings" name="Bookings" fill="#6B4F3B" radius={[6, 6, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="name" stroke="var(--text-secondary)" fontSize={10} angle={-15} textAnchor="end" height={50} />
+                <YAxis stroke="var(--text-secondary)" fontSize={11} />
+                <Tooltip contentStyle={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)', borderRadius: '12px', color: 'var(--text-primary)' }} />
+                <Bar dataKey="bookings" name="Total Bookings" fill="var(--accent)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Chart 2: District Distribution */}
-        <div className="p-6 rounded-2xl border border-[#E8E2D9] bg-white shadow-sm space-y-4">
-          <h3 className="text-sm font-extrabold text-[#2B2824] flex items-center space-x-2">
-            <TrendingUp className="w-4 h-4 text-[#8B7355]" />
-            <span>{t('demand_by_district')}</span>
+        <div className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm space-y-4">
+          <h3 className="text-sm font-extrabold text-[var(--text-primary)] flex items-center space-x-2">
+            <TrendingUp className="w-4 h-4 text-[var(--accent)]" />
+            <span>Cooperative Service Coverage by District</span>
           </h3>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={districtDemand}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E8E2D9" />
-                <XAxis dataKey="district" stroke="#6E675F" fontSize={11} />
-                <YAxis stroke="#6E675F" fontSize={11} />
-                <Tooltip contentStyle={{ backgroundColor: '#FAF8F5', borderColor: '#E8E2D9', borderRadius: '12px', color: '#2B2824' }} />
-                <Bar dataKey="bookings" name="Bookings" fill="#8B7355" radius={[6, 6, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="district" stroke="var(--text-secondary)" fontSize={11} />
+                <YAxis stroke="var(--text-secondary)" fontSize={11} />
+                <Tooltip contentStyle={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)', borderRadius: '12px', color: 'var(--text-primary)' }} />
+                <Bar dataKey="bookings" name="Bookings" fill="var(--accent)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -216,43 +216,43 @@ export const GovAdminPortal: React.FC = () => {
 
       {/* Cooperative Directory & Registration Approval Section */}
       <section className="space-y-4">
-        <h2 className="text-lg font-extrabold text-[#2B2824]">{t('all_registered_coops')}</h2>
+        <h2 className="text-lg font-extrabold text-[var(--text-primary)]">Cooperative Approval Directory</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {cooperatives.map((coop) => (
-            <div key={coop.id} className="p-5 rounded-2xl border border-[#E8E2D9] bg-white shadow-sm space-y-3">
+            <div key={coop.id} className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm space-y-3">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="font-extrabold text-[#2B2824] text-sm">{coop.name}</h3>
-                  <p className="text-xs text-[#6E675F]">{coop.district}, {coop.state}</p>
+                  <h3 className="font-extrabold text-[var(--text-primary)] text-sm">{coop.name}</h3>
+                  <p className="text-xs text-[var(--text-secondary)]">{coop.district}, {coop.state}</p>
                 </div>
                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                  coop.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
-                  coop.status === 'REJECTED' ? 'bg-red-50 text-red-800 border border-red-200' :
-                  'bg-amber-50 text-amber-800 border border-amber-200'
+                  coop.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                  coop.status === 'REJECTED' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
+                  'bg-amber-500/10 text-amber-500 border border-amber-500/20'
                 }`}>
                   {coop.status}
                 </span>
               </div>
 
-              <div className="text-xs text-[#2B2824] space-y-1 pt-2 border-t border-[#E8E2D9]">
-                <div>{t('coop_registration')}: <span className="font-mono text-[#6E675F]">{coop.registration_no}</span></div>
-                <div>Admin: <span className="text-[#6E675F]">{coop.admin?.name || 'Admin'} ({coop.admin?.phone || '—'})</span></div>
-                <div>Members: <span className="font-bold text-[#2B2824]">{coop.workers?.length || 5} registered</span></div>
-                <div>{t('fund_balance_card')}: <span className="font-bold text-[#6B4F3B]">₹{coop.fund_balance}</span></div>
+              <div className="text-xs text-[var(--text-primary)] space-y-1 pt-2 border-t border-[var(--border)]">
+                <div>Reg. No: <span className="font-mono text-[var(--text-secondary)]">{coop.registration_no}</span></div>
+                <div>Admin: <span className="text-[var(--text-secondary)]">{coop.admin?.name} ({coop.admin?.phone})</span></div>
+                <div>Members: <span className="font-bold text-[var(--text-primary)]">{coop.workers?.length || 0} registered workers</span></div>
+                <div>Fund Balance: <span className="font-bold text-[var(--accent)]">₹{coop.fund_balance}</span></div>
               </div>
 
               {coop.status === 'PENDING' && (
                 <div className="flex space-x-2 pt-2">
                   <button
                     onClick={() => handleUpdateCoopStatus(coop.id, 'APPROVED')}
-                    className="w-1/2 py-1.5 rounded-xl bg-[#6B4F3B] hover:bg-[#543d2e] text-white font-extrabold text-xs shadow-sm transition-all"
+                    className="w-1/2 py-1.5 rounded-xl bg-[var(--accent)] text-[var(--accent-cta-text)] font-extrabold text-xs shadow-sm transition-all hover:opacity-90"
                   >
                     {t('action_approve')}
                   </button>
                   <button
                     onClick={() => handleUpdateCoopStatus(coop.id, 'REJECTED')}
-                    className="w-1/2 py-1.5 rounded-xl bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 font-bold text-xs shadow-sm transition-all"
+                    className="w-1/2 py-1.5 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 font-bold text-xs shadow-sm transition-all"
                   >
                     {t('action_reject')}
                   </button>
@@ -264,22 +264,22 @@ export const GovAdminPortal: React.FC = () => {
       </section>
 
       {/* Flagged Cooperatives Section */}
-      {flaggedCoops.length > 0 ? (
-        <section className="p-6 rounded-2xl border border-red-200 bg-red-50/60 shadow-sm space-y-3">
-          <div className="flex items-center space-x-2 text-red-700 font-extrabold text-sm">
-            <AlertTriangle className="w-5 h-5 text-red-600" />
-            <span>{t('flagged_coops_title')}</span>
+      {flaggedCoops.length > 0 && (
+        <section className="p-6 rounded-2xl border border-red-500/30 bg-red-500/10 shadow-sm space-y-3">
+          <div className="flex items-center space-x-2 text-red-500 font-extrabold text-sm">
+            <AlertTriangle className="w-5 h-5 text-red-500" />
+            <span>Flagged Cooperatives Requiring Ministry Audit</span>
           </div>
 
           <div className="space-y-2">
             {flaggedCoops.map((coop) => (
-              <div key={coop.id} className="p-3 rounded-xl bg-white border border-red-200 flex items-center justify-between text-xs shadow-sm">
+              <div key={coop.id} className="p-3 rounded-xl bg-[var(--surface)] border border-red-500/20 flex items-center justify-between text-xs shadow-sm">
                 <div>
-                  <strong className="text-[#2B2824]">{coop.name}</strong> ({coop.district})
-                  <div className="text-[11px] text-red-600 mt-0.5">{t('flag_reason')}: {coop.reason}</div>
+                  <strong className="text-[var(--text-primary)]">{coop.name}</strong> ({coop.district})
+                  <div className="text-[11px] text-red-500 mt-0.5">Reason: {coop.reason}</div>
                 </div>
-                <div className="text-right font-mono text-[#6E675F]">
-                  Avg Rating: <span className="text-amber-600 font-bold">{coop.avgRating} ★</span>
+                <div className="text-right font-mono text-[var(--text-secondary)]">
+                  Avg Rating: <span className="text-amber-500 font-bold">{coop.avgRating} ★</span>
                 </div>
               </div>
             ))}

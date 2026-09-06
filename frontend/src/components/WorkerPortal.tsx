@@ -245,7 +245,7 @@ export const WorkerPortal: React.FC = () => {
     <div className="space-y-6 py-4">
       
       {/* Top Banner: Worker Status & Availability Toggle */}
-      <div className="p-6 rounded-3xl border border-[#E8E2D9] bg-gradient-to-r from-white via-[#FAF8F5] to-[#F4F0EA] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors duration-200">
         <div>
           <div className="flex items-center space-x-2">
             <h1 className="text-2xl font-extrabold text-[#2B2824]">{user?.name || t('worker_portal_title')}</h1>
@@ -286,8 +286,8 @@ export const WorkerPortal: React.FC = () => {
           onClick={() => setActiveTab('jobs')}
           className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${
             activeTab === 'jobs'
-              ? 'bg-[#6B4F3B] text-white shadow-sm'
-              : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
+              ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-sm'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]'
           }`}
         >
           <Clock className="w-4 h-4" />
@@ -305,8 +305,8 @@ export const WorkerPortal: React.FC = () => {
           onClick={() => setActiveTab('earnings')}
           className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${
             activeTab === 'earnings'
-              ? 'bg-[#6B4F3B] text-white shadow-sm'
-              : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
+              ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-sm'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]'
           }`}
         >
           <TrendingUp className="w-4 h-4" />
@@ -317,8 +317,8 @@ export const WorkerPortal: React.FC = () => {
           onClick={() => setActiveTab('governance')}
           className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${
             activeTab === 'governance'
-              ? 'bg-[#6B4F3B] text-white shadow-sm'
-              : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
+              ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-sm'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]'
           }`}
         >
           <Vote className="w-4 h-4" />
@@ -564,8 +564,8 @@ export const WorkerPortal: React.FC = () => {
       {/* Tab 3: Cooperative Governance (1 Member 1 Vote) */}
       {!loading && activeTab === 'governance' && (
         <div className="space-y-6">
-          <div className="p-5 rounded-2xl border border-[#E8E2D9] bg-[#F4F0EA] flex items-start space-x-3">
-            <ShieldCheck className="w-6 h-6 text-[#8B7355] shrink-0 mt-0.5" />
+          <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg)] flex items-start space-x-3">
+            <ShieldCheck className="w-6 h-6 text-[var(--accent)] shrink-0 mt-0.5" />
             <div>
               <h3 className="text-sm font-extrabold text-[#2B2824]">{t('governance_title')}</h3>
               <p className="text-xs text-[#524B43] mt-0.5">
@@ -616,7 +616,7 @@ export const WorkerPortal: React.FC = () => {
             </div>
 
             {/* Voting & Results Panel */}
-            <div className="p-6 rounded-3xl bg-white border border-[#E8E2D9] space-y-4 shadow-sm">
+            <div className="p-6 rounded-3xl bg-[var(--surface)] border border-[var(--border)] space-y-4 shadow-sm">
               {selectedProposal ? (
                 <>
                   <div>
@@ -646,8 +646,8 @@ export const WorkerPortal: React.FC = () => {
                               key={idx}
                               className={`flex items-center space-x-3 p-3 rounded-xl border cursor-pointer transition-all ${
                                 voteChoice === optionText
-                                  ? 'border-[#6B4F3B] bg-[#F4F0EA] text-[#2B2824] font-bold'
-                                  : 'border-[#E8E2D9] bg-[#FAF8F5] text-[#524B43] hover:bg-[#F4F0EA]'
+                                  ? 'border-[var(--accent)] bg-[var(--bg)] text-[var(--text-primary)] font-bold'
+                                  : 'border-[var(--border)] bg-[var(--bg)] text-[var(--text-secondary)] hover:bg-[var(--border)]/30'
                               }`}
                             >
                               <input
@@ -656,7 +656,7 @@ export const WorkerPortal: React.FC = () => {
                                 value={optionText}
                                 checked={voteChoice === optionText}
                                 onChange={(e) => setVoteChoice(e.target.value)}
-                                className="accent-[#6B4F3B]"
+                                className="accent-[var(--accent)]"
                               />
                               <span className="text-xs">{optionText}</span>
                             </label>
@@ -667,7 +667,7 @@ export const WorkerPortal: React.FC = () => {
                       <button
                         onClick={() => handleVoteSubmit(selectedProposal.id)}
                         disabled={!voteChoice}
-                        className="w-full py-3 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white font-extrabold text-xs shadow-md disabled:opacity-50 transition-all"
+                        className="w-full py-3 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] font-extrabold text-xs shadow-md disabled:opacity-50 transition-all"
                       >
                         {t('submit_vote_btn')}
                       </button>
@@ -680,13 +680,13 @@ export const WorkerPortal: React.FC = () => {
 
                     {selectedProposal.optionsBreakdown?.map((item: any, idx: number) => (
                       <div key={idx} className="space-y-1">
-                        <div className="flex justify-between text-xs text-[#2B2824] font-semibold">
+                        <div className="flex justify-between text-xs text-[var(--text-primary)] font-semibold">
                           <span>{item.option}</span>
-                          <span className="text-[#6B4F3B] font-mono">{item.percentage}% ({item.votes} votes)</span>
+                          <span className="text-[var(--accent)] font-mono">{item.percentage}% ({item.votes} votes)</span>
                         </div>
-                        <div className="w-full h-2.5 bg-[#F4F0EA] rounded-full overflow-hidden border border-[#E8E2D9]">
+                        <div className="w-full h-2.5 bg-[var(--bg)] rounded-full overflow-hidden border border-[var(--border)]">
                           <div
-                            className="h-full bg-[#6B4F3B] rounded-full transition-all duration-500"
+                            className="h-full bg-[var(--accent)] rounded-full transition-all duration-500"
                             style={{ width: `${item.percentage}%` }}
                           />
                         </div>

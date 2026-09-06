@@ -1,11 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { fetchApi } from '../services/api';
+import {
+  UserRole,
+  SessionUser,
+  StoredUser,
+  getCurrentUser,
+  signup,
+  login,
+  logout as logoutSession,
+  authenticateWithGoogle,
+  authenticateWithOtp,
+  updateUserProfile
+} from '../lib/auth';
 
-export interface User {
-  id: string;
-  name: string;
-  phone: string;
-  role: 'CUSTOMER' | 'WORKER' | 'COOP_ADMIN' | 'GOV_ADMIN';
+export interface User extends SessionUser {
   lang_pref?: string;
   workerProfile?: any;
 }
@@ -13,8 +20,11 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  loginWithOtp: (phone: string, otp: string, role?: string, name?: string) => Promise<User>;
-  quickLoginAs: (phone: string, role?: string, name?: string) => Promise<User>;
+  loginWithOtp: (phone: string, otp: string, role?: string, name?: string) => Promise<void>;
+  loginWithGoogle: (googleUser: { email: string; name: string; picture?: string }, role: string) => Promise<void>;
+  loginWithEmail: (email: string, pass: string, role: string, name?: string, isSignUp?: boolean, orgName?: string) => Promise<void>;
+  quickLoginAs: (phone: string, role?: string, name?: string) => Promise<void>;
+  updateProfile: (updatedFields: Partial<StoredUser>) => void;
   logout: () => void;
   isLoading: boolean;
   getRoleRoute: (role?: string) => string;
@@ -53,74 +63,84 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(() => {
-    const savedToken = localStorage.getItem('sahakar_token');
-    if (savedToken && isTokenExpired(savedToken)) {
-      localStorage.removeItem('sahakar_token');
-      localStorage.removeItem('sahakar_user');
-      return null;
-    }
-    return savedToken;
-  });
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Initialize session state from sahakar_session on page load
   useEffect(() => {
-    if (token) {
-      if (isTokenExpired(token)) {
-        logout();
-      } else {
-        const savedUser = localStorage.getItem('sahakar_user');
-        if (savedUser) {
-          try {
-            setUser(JSON.parse(savedUser));
-          } catch (e) {
-            logout();
-          }
-        }
-      }
+    const sessionUser = getCurrentUser();
+    if (sessionUser) {
+      setUser(sessionUser);
+      setToken('session_token_' + sessionUser.id);
     } else {
       setUser(null);
+      setToken(null);
     }
     setIsLoading(false);
-  }, [token]);
-
-  // Listen for global session expiration dispatched by fetchApi
-  useEffect(() => {
-    const handleExpired = () => {
-      logout();
-    };
-    window.addEventListener('sahakar:session_expired', handleExpired);
-    return () => {
-      window.removeEventListener('sahakar:session_expired', handleExpired);
-    };
   }, []);
 
-  const loginWithOtp = async (phone: string, otp: string, role?: string, name?: string): Promise<User> => {
-    const data = await fetchApi('/auth/otp/verify', {
-      method: 'POST',
-      body: JSON.stringify({ phone, otp, role, name })
-    });
-
-    setToken(data.token);
-    setUser(data.user);
-    localStorage.setItem('sahakar_token', data.token);
-    localStorage.setItem('sahakar_user', JSON.stringify(data.user));
-    return data.user;
+  const loginWithOtp = async (phone: string, otp: string, role?: string, name?: string) => {
+    const mappedRole = (role || 'CUSTOMER') as UserRole;
+    const sessionUser = await authenticateWithOtp(phone, otp, mappedRole, name);
+    setUser(sessionUser);
+    setToken('session_token_' + sessionUser.id);
   };
 
-  const quickLoginAs = async (phone: string, role?: string, name?: string): Promise<User> => {
-    return await loginWithOtp(phone, '123456', role, name);
+  const loginWithGoogle = async (googleUser: { email: string; name: string; picture?: string }, role: string) => {
+    const mappedRole = (role || 'CUSTOMER') as UserRole;
+    const sessionUser = await authenticateWithGoogle(googleUser, mappedRole);
+    setUser(sessionUser);
+    setToken('session_token_' + sessionUser.id);
+  };
+
+  const loginWithEmail = async (
+    email: string,
+    pass: string,
+    role: string,
+    name?: string,
+    isSignUp?: boolean,
+    orgName?: string
+  ) => {
+    const mappedRole = (role || 'CUSTOMER') as UserRole;
+    let sessionUser: SessionUser;
+
+    if (isSignUp) {
+      const displayName = name || email.split('@')[0] || 'Sahakar Member';
+      sessionUser = await signup({
+        name: displayName,
+        email,
+        password: pass,
+        role: mappedRole,
+        orgName
+      });
+    } else {
+      sessionUser = await login(email, pass);
+    }
+
+    setUser(sessionUser);
+    setToken('session_token_' + sessionUser.id);
+  };
+
+  const quickLoginAs = async (phone: string, role?: string, name?: string) => {
+    await loginWithOtp(phone, '123456', role, name);
+  };
+
+  const updateProfile = (updatedFields: Partial<StoredUser>) => {
+    if (!user) return;
+    const updated = updateUserProfile(user.id, updatedFields);
+    setUser(updated);
   };
 
   const logout = () => {
+    logoutSession();
     setUser(null);
     setToken(null);
-    localStorage.removeItem('sahakar_token');
-    localStorage.removeItem('sahakar_user');
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loginWithOtp, quickLoginAs, logout, isLoading, getRoleRoute }}>
+    <AuthContext.Provider
+      value={{ user, token, loginWithOtp, loginWithGoogle, loginWithEmail, quickLoginAs, updateProfile, logout, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );
