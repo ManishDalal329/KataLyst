@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { rankWorker } from '../services/matchingService';
 import { authenticateJWT, AuthenticatedRequest, requireRoles } from '../middleware/auth';
+import { emitWorkerAvailabilityChanged } from '../socket';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -121,6 +122,8 @@ router.patch('/:id/availability', authenticateJWT, requireRoles(['WORKER', 'COOP
       where: { id: req.params.id },
       data: { availability_status: Boolean(availability_status) }
     });
+
+    emitWorkerAvailabilityChanged(worker.id, Boolean(availability_status));
 
     return res.json(worker);
   } catch (err) {

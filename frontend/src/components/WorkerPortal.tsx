@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { fetchApi } from '../services/api';
+import { getSocket } from '../services/socket';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { Vote, DollarSign, CheckCircle2, Clock, MapPin, Power, TrendingUp, ShieldCheck, BarChart3, AlertCircle, Loader2, Sparkles } from 'lucide-react';
+import {
+  Vote, DollarSign, CheckCircle2, Clock, MapPin, Power,
+  TrendingUp, ShieldCheck, BarChart3, AlertCircle, Loader2,
+  Sparkles, Radio, Ban, X, ArrowRight, User
+} from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 export const WorkerPortal: React.FC = () => {
@@ -15,24 +20,51 @@ export const WorkerPortal: React.FC = () => {
   const [isAvailable, setIsAvailable] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
   
-  // Jobs & Bookings
+  // Requests Feed (Requirement 4) & Bookings
+  const [workerRequests, setWorkerRequests] = useState<any[]>([]);
   const [myBookings, setMyBookings] = useState<any[]>([]);
   const [proposals, setProposals] = useState<any[]>([]);
   const [selectedProposal, setSelectedProposal] = useState<any | null>(null);
   const [voteChoice, setVoteChoice] = useState<string>('');
   const [votingMsg, setVotingMsg] = useState('');
 
+  // Worker Cancellation / Decline State (Requirement 3)
+  const [cancellingRequest, setCancellingRequest] = useState<any | null>(null);
+  const [declineReason, setDeclineReason] = useState<string>('Not available now');
+  const [declineCustomNotes, setDeclineCustomNotes] = useState<string>('');
+  const [isSubmittingCancellation, setIsSubmittingCancellation] = useState<boolean>(false);
+
   useEffect(() => {
     loadWorkerData();
   }, [user]);
 
+  // WebSocket real-time listener for incoming requests and status changes
+  useEffect(() => {
+    const socket = getSocket();
+    const handleUpdate = () => {
+      loadWorkerRequests();
+    };
+
+    socket.on('new_service_request', handleUpdate);
+    socket.on('request_confirmed', handleUpdate);
+    socket.on('request_status_changed', handleUpdate);
+    socket.on('global_request_update', handleUpdate);
+
+    return () => {
+      socket.off('new_service_request', handleUpdate);
+      socket.off('request_confirmed', handleUpdate);
+      socket.off('request_status_changed', handleUpdate);
+      socket.off('global_request_update', handleUpdate);
+    };
+  }, []);
+
   const loadWorkerData = async () => {
     setLoading(true);
     try {
-      const bookingsData = await fetchApi('/bookings/mine');
-      if (Array.isArray(bookingsData)) {
-        setMyBookings(bookingsData);
-      }
+      await Promise.all([
+        loadWorkerRequests(),
+        loadWorkerBookings()
+      ]);
 
       if (user?.workerProfile) {
         setWorkerProfile(user.workerProfile);
@@ -58,6 +90,28 @@ export const WorkerPortal: React.FC = () => {
     }
   };
 
+  const loadWorkerRequests = async () => {
+    try {
+      const data = await fetchApi('/requests/worker-feed');
+      if (Array.isArray(data)) {
+        setWorkerRequests(data);
+      }
+    } catch (e) {
+      console.error('Failed to load worker feed requests', e);
+    }
+  };
+
+  const loadWorkerBookings = async () => {
+    try {
+      const bookingsData = await fetchApi('/bookings/mine');
+      if (Array.isArray(bookingsData)) {
+        setMyBookings(bookingsData);
+      }
+    } catch (e) {
+      console.error('Failed to load worker bookings', e);
+    }
+  };
+
   const loadProposals = async (coopId: string) => {
     try {
       const data = await fetchApi(`/cooperatives/${coopId}/proposals`);
@@ -72,6 +126,7 @@ export const WorkerPortal: React.FC = () => {
     }
   };
 
+  // 4. Availability Toggle (Manual Only - Not Session/App-Open Based)
   const toggleAvailability = async () => {
     const nextState = !isAvailable;
     setIsAvailable(nextState);
@@ -87,15 +142,65 @@ export const WorkerPortal: React.FC = () => {
     }
   };
 
-  const updateJobStatus = async (bookingId: string, status: string) => {
+  // Worker Action: Accept Request
+  const handleAcceptRequest = async (requestId: string) => {
     try {
-      await fetchApi(`/bookings/${bookingId}/status`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status })
+      await fetchApi(`/requests/${requestId}/accept`, {
+        method: 'POST'
       });
-      loadWorkerData();
+      loadWorkerRequests();
     } catch (e: any) {
       alert(e.message || t('error'));
+    }
+  };
+
+  // Worker Action: Start Work
+  const handleStartWork = async (requestId: string) => {
+    try {
+      await fetchApi(`/requests/${requestId}/start`, {
+        method: 'POST'
+      });
+      loadWorkerRequests();
+    } catch (e: any) {
+      alert(e.message || t('error'));
+    }
+  };
+
+  // Worker Action: Complete Work
+  const handleCompleteWork = async (requestId: string) => {
+    try {
+      await fetchApi(`/requests/${requestId}/complete`, {
+        method: 'POST'
+      });
+      await loadWorkerRequests();
+      await loadWorkerBookings();
+    } catch (e: any) {
+      alert(e.message || t('error'));
+    }
+  };
+
+  // 5. Worker Cancellation / Decline (Requirement 3)
+  const handleWorkerCancel = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cancellingRequest) return;
+
+    setIsSubmittingCancellation(true);
+    try {
+      await fetchApi(`/requests/${cancellingRequest.id}/worker-cancel`, {
+        method: 'POST',
+        body: JSON.stringify({
+          reason: declineReason,
+          notes: declineReason === 'Other' ? declineCustomNotes.trim() : ''
+        })
+      });
+      setCancellingRequest(null);
+      setDeclineReason('Not available now');
+      setDeclineCustomNotes('');
+      loadWorkerRequests();
+    } catch (e: any) {
+      alert(e.message || t('error'));
+    } finally {
+      setIsSubmittingCancellation(false);
     }
   };
 
@@ -120,11 +225,11 @@ export const WorkerPortal: React.FC = () => {
   };
 
   // Earnings aggregation
-  const completedJobs = myBookings.filter(b => b.status === 'COMPLETED');
-  const totalEarned = completedJobs.reduce((sum, b) => sum + (b.payout?.worker_share || (b.amount * 0.80)), 0);
-  const totalCoopFundContributed = completedJobs.reduce((sum, b) => sum + (b.payout?.cooperative_share || (b.amount * 0.15)), 0);
+  const completedBookings = myBookings.filter(b => b.status === 'COMPLETED');
+  const totalEarned = completedBookings.reduce((sum, b) => sum + (b.payout?.worker_share || (b.amount * 0.80)), 0);
+  const totalCoopFundContributed = completedBookings.reduce((sum, b) => sum + (b.payout?.cooperative_share || (b.amount * 0.15)), 0);
 
-  const earningsChartData = (completedJobs.length > 0 ? completedJobs.slice(-6) : [
+  const earningsChartData = (completedBookings.length > 0 ? completedBookings.slice(-6) : [
     { amount: 499, payout: { worker_share: 399.20, cooperative_share: 74.85 } },
     { amount: 699, payout: { worker_share: 559.20, cooperative_share: 104.85 } },
     { amount: 549, payout: { worker_share: 439.20, cooperative_share: 82.35 } }
@@ -134,7 +239,7 @@ export const WorkerPortal: React.FC = () => {
     CoopFund15Pct: Number((b.payout?.cooperative_share || b.amount * 0.15).toFixed(2))
   }));
 
-  const pendingJobsCount = myBookings.filter(b => b.status !== 'COMPLETED').length;
+  const pendingRequestsCount = workerRequests.filter(r => r.workerSpecificStatus === 'Pending').length;
 
   return (
     <div className="space-y-6 py-4">
@@ -149,24 +254,29 @@ export const WorkerPortal: React.FC = () => {
             </span>
           </div>
           <p className="text-xs text-[#6E675F] mt-1">
-            {workerProfile?.cooperative?.name || 'Delhi NCR Urban Workers Cooperative'}
+            {workerProfile?.cooperative?.name || 'Delhi NCR Urban Workers Cooperative'} • Skills: {workerProfile?.skills || 'Plumbing, Repair'}
           </p>
         </div>
 
-        {/* Availability Toggle */}
-        <div className="flex items-center space-x-3 bg-[#FAF8F5] px-4 py-2.5 rounded-2xl border border-[#E8E2D9]">
-          <span className="text-xs font-bold text-[#2B2824]">{t('status')}:</span>
-          <button
-            onClick={toggleAvailability}
-            className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl font-extrabold text-xs transition-all shadow-sm ${
-              isAvailable
-                ? 'bg-[#6B4F3B] text-white shadow-md'
-                : 'bg-[#E8E2D9] text-[#6E675F]'
-            }`}
-          >
-            <Power className="w-3.5 h-3.5 text-white" />
-            <span>{isAvailable ? t('worker_avail_online') : t('worker_avail_offline')}</span>
-          </button>
+        {/* 4. Manual Availability Toggle */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 bg-[#FAF8F5] p-3 rounded-2xl border border-[#E8E2D9]">
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-extrabold text-[#2B2824]">Status:</span>
+            <button
+              onClick={toggleAvailability}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-extrabold text-xs transition-all shadow-sm ${
+                isAvailable
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
+                  : 'bg-[#E8E2D9] hover:bg-[#D5CCBF] text-[#6E675F]'
+              }`}
+            >
+              <Power className="w-3.5 h-3.5" />
+              <span>{isAvailable ? t('avail_toggle_online') : t('avail_toggle_offline')}</span>
+            </button>
+          </div>
+          <span className="text-[10px] text-[#857E75]">
+            Manual toggle drives live online customer count
+          </span>
         </div>
       </div>
 
@@ -181,7 +291,14 @@ export const WorkerPortal: React.FC = () => {
           }`}
         >
           <Clock className="w-4 h-4" />
-          <span>{t('tab_assigned_jobs')} ({pendingJobsCount})</span>
+          <span>
+            {t('tab_requests_pool')} ({workerRequests.length})
+            {pendingRequestsCount > 0 && (
+              <span className="ml-1.5 px-1.5 py-0.2 bg-amber-400 text-[#2B2824] rounded-full text-[10px] font-black">
+                {pendingRequestsCount} new
+              </span>
+            )}
+          </span>
         </button>
 
         <button
@@ -216,78 +333,175 @@ export const WorkerPortal: React.FC = () => {
         </div>
       ) : null}
 
-      {/* Tab 1: Job Feed & Lifecycle Management */}
+      {/* Tab 1: Requests Feed & Lifecycle Management */}
       {!loading && activeTab === 'jobs' && (
         <div className="space-y-4">
-          <h2 className="text-base font-extrabold text-[#2B2824]">{t('tab_assigned_jobs')}</h2>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-extrabold text-[#2B2824]">
+                Field Service Requests
+              </h2>
+              <p className="text-xs text-[#6E675F]">
+                Open indefinitely until confirmed or cancelled. Faster acceptances reward first responders.
+              </p>
+            </div>
+            <button
+              onClick={loadWorkerRequests}
+              className="text-xs font-extrabold text-[#6B4F3B] hover:underline"
+            >
+              Refresh Feed
+            </button>
+          </div>
 
-          {myBookings.length === 0 ? (
+          {workerRequests.length === 0 ? (
             <div className="p-8 text-center bg-white border border-[#E8E2D9] text-[#6E675F] text-xs rounded-3xl space-y-2">
               <AlertCircle className="w-8 h-8 text-[#8B7355] mx-auto opacity-50" />
-              <div className="font-bold text-sm text-[#2B2824]">{t('jobs_empty_title')}</div>
-              <p className="max-w-md mx-auto">{t('jobs_empty_desc')}</p>
+              <div className="font-bold text-sm text-[#2B2824]">No Service Requests Available</div>
+              <p className="max-w-md mx-auto">
+                No active customer requests in your specialized service fields right now. Keep your status set to &quot;Available Now&quot; to receive new broadcast alerts.
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
-              {myBookings.map((job) => {
-                const workerShare = job.payout?.worker_share || (job.amount * 0.80);
+              {workerRequests.map((reqItem) => {
+                const status = reqItem.workerSpecificStatus;
+                const payout = reqItem.payoutBreakdown;
+
                 return (
-                  <div key={job.id} className="p-5 rounded-2xl bg-white border border-[#E8E2D9] space-y-3 shadow-sm">
+                  <div
+                    key={reqItem.id}
+                    className="p-5 rounded-2xl bg-white border border-[#E8E2D9] space-y-3 shadow-sm hover:shadow-md transition-all"
+                  >
+                    {/* Header Row */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#E8E2D9] pb-3">
                       <div>
-                        <span className="font-extrabold text-[#2B2824] text-base">{job.category?.name || 'Service Booking'}</span>
-                        <div className="text-xs text-[#6E675F] mt-0.5">
-                          {t('customer_label')}: <strong className="text-[#2B2824]">{job.customer?.name}</strong> ({job.customer?.phone})
+                        <div className="flex items-center space-x-2">
+                          <span className="font-extrabold text-[#2B2824] text-base">
+                            {reqItem.category?.name} • <span className="text-[#6B4F3B]">{reqItem.problem_type}</span>
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FAF8F5] border border-[#E8E2D9] text-[#6E675F]">
+                            {reqItem.work_level} Level
+                          </span>
                         </div>
-                        <div className="flex items-center space-x-1 text-xs text-[#857E75] mt-1">
-                          <MapPin className="w-3.5 h-3.5 text-[#8B7355]" />
-                          <span>{job.address}</span>
+
+                        <div className="text-xs text-[#6E675F] mt-1 flex flex-wrap items-center gap-3">
+                          <div className="flex items-center space-x-1">
+                            <Clock className="w-3.5 h-3.5 text-[#8B7355]" />
+                            <span>
+                              {new Date(reqItem.scheduled_time).toLocaleString('en-IN', {
+                                dateStyle: 'medium',
+                                timeStyle: 'short'
+                              })}
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <MapPin className="w-3.5 h-3.5 text-[#8B7355]" />
+                            <span>{reqItem.address}</span>
+                          </div>
                         </div>
+
+                        {reqItem.instructions && (
+                          <p className="text-[11px] text-[#857E75] mt-1 italic">
+                            &quot;{reqItem.instructions}&quot;
+                          </p>
+                        )}
                       </div>
 
-                      <div className="text-right">
-                        <div className="text-xs text-[#6E675F]">{t('earnings_cut')}:</div>
-                        <div className="text-xl font-black text-[#6B4F3B]">₹{workerShare.toFixed(2)}</div>
-                        <div className="text-[10px] text-[#857E75]">{t('total_payable')}: ₹{job.amount}</div>
+                      {/* Transparent 80% Payout Badge */}
+                      <div className="text-right bg-[#FAF8F5] p-2.5 rounded-xl border border-[#E8E2D9]">
+                        <div className="text-[10px] font-bold text-[#6E675F] uppercase">
+                          {t('worker_share_label')} (80%)
+                        </div>
+                        <div className="text-lg font-black text-[#6B4F3B]">
+                          ₹{payout?.workerShare?.toFixed(2) || (reqItem.amount * 0.8).toFixed(2)}
+                        </div>
+                        <div className="text-[10px] text-[#857E75]">
+                          Customer Total: ₹{reqItem.amount.toFixed(2)}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Status Actions */}
+                    {/* Status & Actions Row */}
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase ${
-                        job.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
-                        job.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-900 border border-amber-300' :
-                        job.status === 'ACCEPTED' ? 'bg-blue-50 text-blue-800 border border-blue-200' :
-                        'bg-stone-100 text-stone-700 border border-[#E8E2D9]'
-                      }`}>
-                        {t('status')}: {job.status}
-                      </span>
-
+                      {/* Status Badges */}
                       <div className="flex items-center space-x-2">
-                        {job.status === 'REQUESTED' && (
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase ${
+                          status === 'Pending' ? 'bg-stone-100 text-stone-700 border border-stone-200' :
+                          status === 'Accepted' ? 'bg-blue-50 text-blue-800 border border-blue-200' :
+                          status === 'Confirmed' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
+                          status === 'In Progress' ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse' :
+                          status === 'Completed' ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' :
+                          status === 'Cancelled' ? 'bg-red-50 text-red-800 border border-red-200' :
+                          'bg-stone-100 text-stone-600 border border-stone-200'
+                        }`}>
+                          {status === 'Pending' ? 'Pending (Open to Accept)' :
+                           status === 'Accepted' ? 'Accepted (Awaiting Customer Confirmation)' :
+                           status === 'Confirmed' ? 'Confirmed (Customer Selected You!)' :
+                           status === 'Closed' ? 'Closed (Customer picked another member)' :
+                           status}
+                        </span>
+
+                        {status === 'Closed' && (
+                          <span className="text-[11px] text-[#857E75]">
+                            {t('request_closed_notice')}
+                          </span>
+                        )}
+
+                        {status === 'Cancelled' && reqItem.cancellationReason && (
+                          <span className="text-[11px] text-red-600">
+                            Reason: &quot;{reqItem.cancellationReason}&quot;
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Action Buttons based on status */}
+                      <div className="flex items-center space-x-2">
+                        {/* 1. Pending: Worker can Accept */}
+                        {status === 'Pending' && (
                           <button
-                            onClick={() => updateJobStatus(job.id, 'ACCEPTED')}
-                            className="px-4 py-1.5 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white text-xs font-extrabold shadow-sm"
+                            onClick={() => handleAcceptRequest(reqItem.id)}
+                            className="px-4 py-1.5 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white text-xs font-extrabold shadow-sm transition-all"
                           >
                             {t('action_accept')}
                           </button>
                         )}
 
-                        {job.status === 'ACCEPTED' && (
+                        {/* 2. Accepted: Can cancel acceptance before confirmed */}
+                        {status === 'Accepted' && (
                           <button
-                            onClick={() => updateJobStatus(job.id, 'IN_PROGRESS')}
-                            className="px-4 py-1.5 rounded-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-extrabold shadow-sm"
+                            onClick={() => setCancellingRequest(reqItem)}
+                            className="px-3.5 py-1.5 rounded-full bg-stone-100 hover:bg-red-50 hover:text-red-700 text-[#6E675F] text-xs font-bold transition-all border border-[#E8E2D9]"
                           >
-                            {t('action_start')}
+                            Withdraw Acceptance
                           </button>
                         )}
 
-                        {job.status === 'IN_PROGRESS' && (
+                        {/* 3. Confirmed: Start Work or Cancel */}
+                        {status === 'Confirmed' && (
+                          <>
+                            <button
+                              onClick={() => setCancellingRequest(reqItem)}
+                              className="px-3.5 py-1.5 rounded-full bg-stone-100 hover:bg-red-50 hover:text-red-700 text-[#6E675F] text-xs font-bold transition-all border border-[#E8E2D9]"
+                            >
+                              Cancel Booking
+                            </button>
+                            <button
+                              onClick={() => handleStartWork(reqItem.id)}
+                              className="px-4 py-1.5 rounded-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-extrabold shadow-sm transition-all"
+                            >
+                              {t('action_start')}
+                            </button>
+                          </>
+                        )}
+
+                        {/* 4. In Progress: Complete Work */}
+                        {status === 'In Progress' && (
                           <button
-                            onClick={() => updateJobStatus(job.id, 'COMPLETED')}
-                            className="px-4 py-1.5 rounded-full bg-[#6B4F3B] hover:bg-[#543D2D] text-white text-xs font-extrabold shadow-md"
+                            onClick={() => handleCompleteWork(reqItem.id)}
+                            className="px-4 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-md transition-all flex items-center space-x-1"
                           >
-                            {t('action_complete')}
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>{t('action_complete')}</span>
                           </button>
                         )}
                       </div>
@@ -307,19 +521,23 @@ export const WorkerPortal: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-5 rounded-2xl bg-white border border-[#E8E2D9] shadow-sm">
               <div className="text-xs text-[#6E675F] font-semibold">{t('worker_share_kpi')}</div>
-              <div className="text-2xl font-black text-[#6B4F3B] mt-1">₹{totalEarned > 0 ? totalEarned.toFixed(2) : '3,840.00'}</div>
+              <div className="text-2xl font-black text-[#6B4F3B] mt-1">
+                ₹{totalEarned > 0 ? totalEarned.toFixed(2) : '3,840.00'}
+              </div>
               <div className="text-[10px] text-[#857E75] mt-1">{t('payout_status_released')}</div>
             </div>
 
             <div className="p-5 rounded-2xl bg-white border border-[#E8E2D9] shadow-sm">
               <div className="text-xs text-[#6E675F] font-semibold">{t('coop_fund_share')}</div>
-              <div className="text-2xl font-black text-[#8B7355] mt-1">₹{totalCoopFundContributed > 0 ? totalCoopFundContributed.toFixed(2) : '720.00'}</div>
+              <div className="text-2xl font-black text-[#8B7355] mt-1">
+                ₹{totalCoopFundContributed > 0 ? totalCoopFundContributed.toFixed(2) : '720.00'}
+              </div>
               <div className="text-[10px] text-[#857E75] mt-1">{t('welfare_fund_desc')}</div>
             </div>
 
             <div className="p-5 rounded-2xl bg-white border border-[#E8E2D9] shadow-sm">
               <div className="text-xs text-[#6E675F] font-semibold">{t('completed_jobs_kpi')}</div>
-              <div className="text-2xl font-black text-[#2B2824] mt-1">{completedJobs.length || 8}</div>
+              <div className="text-2xl font-black text-[#2B2824] mt-1">{completedBookings.length || 8}</div>
               <div className="text-[10px] text-[#857E75] mt-1">100% transparent fee calculation</div>
             </div>
           </div>
@@ -483,6 +701,88 @@ export const WorkerPortal: React.FC = () => {
               )}
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* 5. Modal: Worker Decline/Cancellation with Optional Reason Dropdown (Requirement 3) */}
+      {cancellingRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2B2824]/60 backdrop-blur-sm animate-fadeIn">
+          <div className="relative w-full max-w-md p-6 rounded-3xl border border-[#E8E2D9] bg-white shadow-2xl space-y-4">
+            <button
+              onClick={() => {
+                setCancellingRequest(null);
+                setDeclineReason('Not available now');
+                setDeclineCustomNotes('');
+              }}
+              className="absolute top-4 right-4 text-[#857E75] hover:text-[#2B2824]"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div>
+              <h3 className="text-lg font-extrabold text-[#2B2824]">Decline Job Acceptance</h3>
+              <p className="text-xs text-[#6E675F] mt-0.5">
+                {cancellingRequest.category?.name} • {cancellingRequest.problem_type}
+              </p>
+            </div>
+
+            <form onSubmit={handleWorkerCancel} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-[#6E675F] uppercase tracking-wider">
+                  Reason for Declining (Optional)
+                </label>
+                <select
+                  value={declineReason}
+                  onChange={(e) => setDeclineReason(e.target.value)}
+                  className="w-full px-4 py-3 bg-[#FAF8F5] border border-[#E8E2D9] rounded-2xl text-xs font-bold text-[#2B2824] focus:outline-none focus:border-[#6B4F3B] shadow-sm"
+                >
+                  <option value="Not available now">Not available now</option>
+                  <option value="Too far">Too far</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              {declineReason === 'Other' && (
+                <div className="space-y-1.5 animate-fadeIn">
+                  <label className="block text-[11px] font-bold text-[#8B7355] uppercase tracking-wider">
+                    Additional Details (Optional)
+                  </label>
+                  <textarea
+                    value={declineCustomNotes}
+                    onChange={(e) => setDeclineCustomNotes(e.target.value)}
+                    placeholder="e.g., Prior commitment ran late"
+                    className="w-full p-3 bg-[#FAF8F5] border border-[#E8E2D9] rounded-2xl text-xs text-[#2B2824] focus:outline-none focus:border-[#6B4F3B]"
+                    rows={2}
+                  />
+                </div>
+              )}
+
+              <p className="text-[11px] text-[#857E75]">
+                Declining frees this slot so another waiting cooperative member can be accepted and confirmed.
+              </p>
+
+              <div className="flex items-center space-x-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCancellingRequest(null);
+                    setDeclineReason('Not available now');
+                    setDeclineCustomNotes('');
+                  }}
+                  className="flex-1 py-2.5 rounded-full border border-[#E8E2D9] text-xs font-bold text-[#6E675F] hover:bg-[#F4F0EA]"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingCancellation}
+                  className="flex-1 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold shadow-sm transition-all disabled:opacity-50"
+                >
+                  {isSubmittingCancellation ? t('loading') : 'Confirm Decline'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

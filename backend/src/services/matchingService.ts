@@ -4,9 +4,11 @@ export interface MatchScoreDetails {
   breakdown: {
     proximityScore: number;
     ratingScore: number;
+    reliabilityScore: number;
     availabilityScore: number;
     skillMatchScore: number;
     distanceKm: number;
+    declineRatio: number;
   };
 }
 
@@ -33,6 +35,9 @@ export function rankWorker(
     availability_status: boolean;
     lat: number | null;
     lng: number | null;
+    total_accepted_requests?: number;
+    total_declined_requests?: number;
+    reliability_score?: number;
   },
   reqLat?: number,
   reqLng?: number,
@@ -52,6 +57,13 @@ export function rankWorker(
   // Availability score (1 or 0)
   const availabilityScore = worker.availability_status ? 1.0 : 0.0;
 
+  // Reliability tracking: compute decline ratio (declines / total accepted)
+  // Higher declines lead to lower reliability score and lower overall rank
+  const totalAccepted = worker.total_accepted_requests || 0;
+  const totalDeclined = worker.total_declined_requests || 0;
+  const declineRatio = totalAccepted > 0 ? Math.min(1, totalDeclined / totalAccepted) : 0;
+  const reliabilityScore = Math.max(0, 1 - declineRatio);
+
   // Exact skill match (1, 0.5, or 0)
   let skillMatchScore = 0.5;
   if (categoryName) {
@@ -64,12 +76,14 @@ export function rankWorker(
     }
   }
 
-  // Weighted total match score formula (0 to 1)
+  // Weighted total match score formula:
+  // Proximity: 35%, Rating: 25%, Reliability: 15%, Availability: 15%, Skill Match: 10%
   const matchScoreRaw =
-    0.4 * proximityScore +
-    0.3 * ratingScore +
-    0.2 * availabilityScore +
-    0.1 * skillMatchScore;
+    0.35 * proximityScore +
+    0.25 * ratingScore +
+    0.15 * reliabilityScore +
+    0.15 * availabilityScore +
+    0.10 * skillMatchScore;
 
   const matchScorePct = Number((matchScoreRaw * 100).toFixed(1));
 
@@ -79,9 +93,11 @@ export function rankWorker(
     breakdown: {
       proximityScore: Number((proximityScore * 100).toFixed(1)),
       ratingScore: Number((ratingScore * 100).toFixed(1)),
+      reliabilityScore: Number((reliabilityScore * 100).toFixed(1)),
       availabilityScore: Number((availabilityScore * 100).toFixed(1)),
       skillMatchScore: Number((skillMatchScore * 100).toFixed(1)),
-      distanceKm
+      distanceKm,
+      declineRatio: Number((declineRatio * 100).toFixed(1))
     }
   };
 }

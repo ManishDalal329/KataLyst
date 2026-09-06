@@ -19,6 +19,7 @@ model User {
   cooperativesAdmin Cooperative[] @relation("CoopAdmin")
   workerProfile     Worker?
   customerBookings  Booking[]     @relation("CustomerBookings")
+  serviceRequests   ServiceRequest[] @relation("CustomerRequests")
 }
 
 model Cooperative {
@@ -46,23 +47,29 @@ model Worker {
   verification_status String   @default("PENDING") // PENDING, VERIFIED, REJECTED
   rating_avg          Float    @default(0.0)
   availability_status Boolean  @default(false)
+  reliability_score   Float    @default(100.0)
+  total_accepted_requests Int   @default(0)
+  total_declined_requests Int   @default(0)
   lat                 Float?
   lng                 Float?
 
-  user        User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  cooperative Cooperative @relation(fields: [cooperative_id], references: [id])
-  bookings    Booking[]
-  votes       Vote[]
+  user               User                @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  cooperative        Cooperative         @relation(fields: [cooperative_id], references: [id])
+  bookings           Booking[]
+  votes              Vote[]
+  confirmedRequests  ServiceRequest[]    @relation("ConfirmedWorker")
+  requestAcceptances RequestAcceptance[]
 }
 
 model ServiceCategory {
-  id             String       @id @default(uuid())
-  name           String
-  description    String
-  base_rate      Float
-  cooperative_id String?
-  cooperative    Cooperative? @relation(fields: [cooperative_id], references: [id])
-  bookings       Booking[]
+  id              String           @id @default(uuid())
+  name            String
+  description     String
+  base_rate       Float
+  cooperative_id  String?
+  cooperative     Cooperative?     @relation(fields: [cooperative_id], references: [id])
+  bookings        Booking[]
+  serviceRequests ServiceRequest[]
 }
 
 model Booking {
@@ -77,11 +84,53 @@ model Booking {
   amount         Float
   created_at     DateTime @default(now())
 
-  customer User            @relation("CustomerBookings", fields: [customer_id], references: [id])
-  worker   Worker          @relation(fields: [worker_id], references: [id])
-  category ServiceCategory @relation(fields: [category_id], references: [id])
-  payout   Payout?
-  rating   Rating?
+  customer       User            @relation("CustomerBookings", fields: [customer_id], references: [id])
+  worker         Worker          @relation(fields: [worker_id], references: [id])
+  category       ServiceCategory @relation(fields: [category_id], references: [id])
+  payout         Payout?
+  rating         Rating?
+  serviceRequest ServiceRequest?
+}
+
+model ServiceRequest {
+  id                  String   @id @default(uuid())
+  customer_id         String
+  category_id         String
+  problem_type        String
+  work_level          String   // LOW, MODERATE, HIGH
+  amount              Float
+  scheduled_time      DateTime
+  address             String
+  instructions        String?
+  status              String   @default("RAISED") // RAISED, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED
+  selected_worker_id  String?
+  cancellation_reason String?
+  cancelled_by        String?  // CUSTOMER, WORKER
+  created_at          DateTime @default(now())
+  work_started_at     DateTime?
+  work_completed_at   DateTime?
+  booking_id          String?  @unique
+
+  customer        User                @relation("CustomerRequests", fields: [customer_id], references: [id])
+  category        ServiceCategory     @relation(fields: [category_id], references: [id])
+  selected_worker Worker?             @relation("ConfirmedWorker", fields: [selected_worker_id], references: [id])
+  acceptances     RequestAcceptance[]
+  booking         Booking?            @relation(fields: [booking_id], references: [id])
+}
+
+model RequestAcceptance {
+  id                  String    @id @default(uuid())
+  request_id          String
+  worker_id           String
+  status              String    @default("ACCEPTED") // ACCEPTED, CONFIRMED, CLOSED, CANCELLED
+  cancellation_reason String?
+  created_at          DateTime  @default(now())
+  cancelled_at        DateTime?
+
+  request ServiceRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+  worker  Worker         @relation(fields: [worker_id], references: [id])
+
+  @@unique([request_id, worker_id])
 }
 
 model Payout {

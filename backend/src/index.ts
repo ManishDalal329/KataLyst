@@ -11,6 +11,7 @@ import bookingRoutes from './routes/bookingRoutes';
 import cooperativeRoutes from './routes/cooperativeRoutes';
 import governanceRoutes from './routes/governanceRoutes';
 import adminRoutes from './routes/adminRoutes';
+import requestRoutes from './routes/requestRoutes';
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/workers', workerRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/requests', requestRoutes);
 app.use('/api/cooperatives', cooperativeRoutes);
 app.use('/api', governanceRoutes);
 app.use('/api/admin', adminRoutes);
