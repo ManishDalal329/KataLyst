@@ -921,33 +921,33 @@ export const CustomerPortal: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Price Revision Approval Card (Requirement 4 & 5) */}
+                    {/* Price Revision Approval Card */}
                     {reqItem.status === 'PENDING_PRICE_APPROVAL' && (
-                      <div className="p-4 rounded-2xl bg-purple-50 border-2 border-purple-300 space-y-3">
+                      <div className="p-4 sm:p-5 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border-2 border-purple-200 dark:border-purple-800/60 space-y-3.5 transition-colors">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2 text-[#2B2824] font-extrabold text-sm">
-                            <DollarSign className="w-4 h-4 text-purple-700" />
+                          <div className="flex items-center space-x-2 text-purple-900 dark:text-purple-200 font-extrabold text-sm">
+                            <DollarSign className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                             <span>Payout Adjustment Requested by Worker</span>
                           </div>
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-200 text-purple-900 uppercase">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-200 dark:bg-purple-900/60 text-purple-950 dark:text-purple-200 uppercase border border-purple-300 dark:border-purple-700/50">
                             Action Required
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-white p-3 rounded-xl border border-purple-200">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-white dark:bg-[var(--surface)] p-3.5 rounded-xl border border-purple-100 dark:border-[var(--border)] shadow-sm">
                           <div>
-                            <span className="text-[#6E675F] block text-[11px]">Original Quoted Total:</span>
-                            <span className="text-base font-extrabold text-[#2B2824] line-through">₹{reqItem.amount.toFixed(2)}</span>
+                            <span className="text-stone-500 dark:text-[var(--text-secondary)] block text-[11px] font-medium">Original Quoted Total:</span>
+                            <span className="text-base font-extrabold text-stone-800 dark:text-[var(--text-primary)] line-through">₹{reqItem.amount.toFixed(2)}</span>
                           </div>
                           <div>
-                            <span className="text-[#6E675F] block text-[11px]">Proposed Revised Total:</span>
-                            <span className="text-base font-black text-purple-800">₹{reqItem.proposed_total?.toFixed(2)}</span>
+                            <span className="text-stone-500 dark:text-[var(--text-secondary)] block text-[11px] font-medium">Proposed Revised Total:</span>
+                            <span className="text-base font-black text-purple-700 dark:text-purple-300">₹{reqItem.proposed_total?.toFixed(2)}</span>
                           </div>
                         </div>
 
-                        <div className="text-xs text-[#2B2824]">
-                          <strong className="text-purple-900">Worker&apos;s Stated Reason:</strong>
-                          <p className="italic text-[#6E675F] mt-0.5 bg-white p-2.5 rounded-xl border border-purple-200">
+                        <div className="text-xs text-stone-900 dark:text-[var(--text-primary)]">
+                          <strong className="text-purple-900 dark:text-purple-200 font-extrabold">Worker&apos;s Stated Reason:</strong>
+                          <p className="italic text-stone-700 dark:text-[var(--text-secondary)] mt-1 bg-white dark:bg-[var(--surface)] p-3 rounded-xl border border-purple-100 dark:border-[var(--border)] font-medium shadow-sm">
                             &quot;{reqItem.proposed_reason}&quot;
                           </p>
                         </div>
@@ -956,7 +956,7 @@ export const CustomerPortal: React.FC = () => {
                           <button
                             onClick={() => handleApprovePrice(reqItem.id)}
                             disabled={isProcessingPriceApproval === reqItem.id}
-                            className="px-5 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm transition-all flex items-center space-x-1.5 disabled:opacity-50"
+                            className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition-all flex items-center space-x-1.5 disabled:opacity-50 active:scale-95"
                           >
                             {isProcessingPriceApproval === reqItem.id ? (
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -969,7 +969,7 @@ export const CustomerPortal: React.FC = () => {
                           <button
                             onClick={() => handleRejectPrice(reqItem.id)}
                             disabled={isProcessingPriceApproval === reqItem.id}
-                            className="px-4 py-2 rounded-full bg-stone-100 hover:bg-red-50 hover:text-red-700 hover:border-red-300 text-[#6E675F] font-bold text-xs border border-[#E8E2D9] transition-all disabled:opacity-50"
+                            className="px-4 py-2.5 rounded-full bg-white dark:bg-[var(--surface)] hover:bg-red-50 dark:hover:bg-red-500/10 text-stone-700 dark:text-[var(--text-secondary)] hover:text-red-700 dark:hover:text-red-400 font-bold text-xs border border-stone-200 dark:border-[var(--border)] hover:border-red-300 dark:hover:border-red-500/40 transition-all disabled:opacity-50 active:scale-95 shadow-sm"
                           >
                             Reject & Keep Original (₹{reqItem.amount.toFixed(2)})
                           </button>

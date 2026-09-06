@@ -265,7 +265,7 @@ export async function login(email: string, password: string): Promise<SessionUse
  */
 export async function authenticateWithGoogle(
   googleUser: { email: string; name: string; picture?: string },
-  role: UserRole
+  role?: UserRole
 ): Promise<SessionUser> {
   const cleanEmail = googleUser.email.trim().toLowerCase();
   const users = getUsers();
@@ -284,6 +284,9 @@ export async function authenticateWithGoogle(
       createdAt: new Date().toISOString()
     };
     users.push(user);
+    saveUsers(users);
+  } else if (role && user.role !== role) {
+    user.role = role;
     saveUsers(users);
   }
 
@@ -304,8 +307,6 @@ export async function authenticateWithOtp(
   name?: string
 ): Promise<{ user: SessionUser; token: string }> {
   const cleanPhone = phone.trim();
-  const defaultRole = role || 'CUSTOMER';
-  const defaultName = name || (defaultRole === 'WORKER' ? 'Worker Member' : defaultRole === 'COOP_ADMIN' ? 'Coop Admin' : 'User Member');
 
   try {
     const res = await fetch('/api/auth/otp/verify', {
@@ -314,8 +315,8 @@ export async function authenticateWithOtp(
       body: JSON.stringify({
         phone: cleanPhone,
         otp: otp || '123456',
-        role: defaultRole,
-        name: defaultName
+        role: role,
+        name: name
       })
     });
     if (res.ok) {
@@ -330,6 +331,8 @@ export async function authenticateWithOtp(
   const users = getUsers();
   let user = users.find((u) => u.phone === cleanPhone || u.email === cleanPhone);
   if (!user) {
+    const defaultRole = role || 'CUSTOMER';
+    const defaultName = name || (defaultRole === 'WORKER' ? 'Worker Member' : defaultRole === 'COOP_ADMIN' ? 'Coop Admin' : 'User Member');
     const dummyHash = await hashPassword('otp_login_protected');
     user = {
       id: 'otp_' + Math.random().toString(36).substring(2, 9),

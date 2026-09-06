@@ -20,10 +20,10 @@ export interface User extends SessionUser {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  loginWithOtp: (phone: string, otp: string, role?: string, name?: string) => Promise<void>;
-  loginWithGoogle: (googleUser: { email: string; name: string; picture?: string }, role: string) => Promise<void>;
-  loginWithEmail: (email: string, pass: string, role: string, name?: string, isSignUp?: boolean, orgName?: string) => Promise<void>;
-  quickLoginAs: (phone: string, role?: string, name?: string) => Promise<void>;
+  loginWithOtp: (phone: string, otp: string, role?: string, name?: string) => Promise<User>;
+  loginWithGoogle: (googleUser: { email: string; name: string; picture?: string }, role?: string) => Promise<User>;
+  loginWithEmail: (email: string, pass: string, role?: string, name?: string, isSignUp?: boolean, orgName?: string) => Promise<User>;
+  quickLoginAs: (phone: string, role?: string, name?: string) => Promise<User>;
   updateProfile: (updatedFields: Partial<StoredUser>) => void;
   logout: () => void;
   isLoading: boolean;
@@ -80,29 +80,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  const loginWithOtp = async (phone: string, otp: string, role?: string, name?: string) => {
-    const mappedRole = (role || 'CUSTOMER') as UserRole;
+  const loginWithOtp = async (phone: string, otp: string, role?: string, name?: string): Promise<User> => {
+    const mappedRole = role ? (role as UserRole) : undefined;
     const { user: sessionUser, token: authToken } = await authenticateWithOtp(phone, otp, mappedRole, name);
     setUser(sessionUser);
     setToken(authToken);
+    return sessionUser;
   };
 
-  const loginWithGoogle = async (googleUser: { email: string; name: string; picture?: string }, role: string) => {
-    const mappedRole = (role || 'CUSTOMER') as UserRole;
+  const loginWithGoogle = async (googleUser: { email: string; name: string; picture?: string }, role?: string): Promise<User> => {
+    const mappedRole = role ? (role as UserRole) : undefined;
     const sessionUser = await authenticateWithGoogle(googleUser, mappedRole);
     setUser(sessionUser);
-    setToken('session_token_' + sessionUser.id);
+    const authToken = 'session_token_' + sessionUser.id;
+    setToken(authToken);
+    return sessionUser;
   };
 
   const loginWithEmail = async (
     email: string,
     pass: string,
-    role: string,
+    role?: string,
     name?: string,
     isSignUp?: boolean,
     orgName?: string
-  ) => {
-    const mappedRole = (role || 'CUSTOMER') as UserRole;
+  ): Promise<User> => {
+    const mappedRole = role ? (role as UserRole) : undefined;
     let sessionUser: SessionUser;
 
     if (isSignUp) {
@@ -111,22 +114,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name: displayName,
         email,
         password: pass,
-        role: mappedRole,
+        role: mappedRole || 'CUSTOMER',
         orgName
       });
     } else {
       sessionUser = await login(email, pass);
-      if (role && sessionUser.role !== mappedRole) {
+      if (role && mappedRole && sessionUser.role !== mappedRole) {
         sessionUser = updateUserProfile(sessionUser.id, { role: mappedRole });
       }
     }
 
     setUser(sessionUser);
     setToken('session_token_' + sessionUser.id);
+    return sessionUser;
   };
 
-  const quickLoginAs = async (phone: string, role?: string, name?: string) => {
-    await loginWithOtp(phone, '123456', role, name);
+  const quickLoginAs = async (phone: string, role?: string, name?: string): Promise<User> => {
+    return await loginWithOtp(phone, '123456', role, name);
   };
 
   const updateProfile = (updatedFields: Partial<StoredUser>) => {

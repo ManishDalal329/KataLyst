@@ -581,33 +581,33 @@ export const WorkerPortal: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Pending Price Approval Details Box for Worker (Requirement 3) */}
+                    {/* Pending Price Approval Details Box for Worker */}
                     {status === 'Pending Price Approval' && (
-                      <div className="p-3.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-950 text-xs space-y-1">
-                        <div className="font-extrabold flex items-center space-x-1.5 text-purple-900">
-                          <Clock className="w-4 h-4 text-purple-700 animate-spin" />
+                      <div className="p-3.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 text-stone-900 dark:text-[var(--text-primary)] text-xs space-y-1 transition-colors shadow-sm">
+                        <div className="font-extrabold flex items-center space-x-1.5 text-purple-900 dark:text-purple-300">
+                          <Clock className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-spin" />
                           <span>Waiting for customer to approve revised amount</span>
                         </div>
-                        <div className="text-[11px] text-purple-800">
-                          Proposed Total: <strong>₹{reqItem.proposed_total?.toFixed(2)}</strong> (Worker Payout: ₹{((reqItem.proposed_total || 0) * 0.8).toFixed(2)})
+                        <div className="text-[11px] text-purple-950 dark:text-[var(--text-secondary)]">
+                          Proposed Total: <strong className="text-purple-800 dark:text-purple-300 font-extrabold">₹{reqItem.proposed_total?.toFixed(2)}</strong> (Worker Payout: ₹{((reqItem.proposed_total || 0) * 0.8).toFixed(2)})
                         </div>
-                        <div className="text-[11px] text-purple-800 italic">
+                        <div className="text-[11px] text-purple-900 dark:text-[var(--text-secondary)] italic">
                           Reason: &quot;{reqItem.proposed_reason}&quot;
                         </div>
                       </div>
                     )}
 
-                    {/* Customer Rejection Callout Box for Worker (Requirement 5) */}
+                    {/* Customer Rejection Callout Box for Worker */}
                     {status === 'In Progress' && reqItem.price_rejection_note && (
-                      <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 text-xs space-y-1">
-                        <div className="font-extrabold text-amber-900 flex items-center space-x-1.5">
-                          <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+                      <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-amber-950 dark:text-[var(--text-primary)] text-xs space-y-1 transition-colors shadow-sm">
+                        <div className="font-extrabold text-amber-900 dark:text-amber-300 flex items-center space-x-1.5">
+                          <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                           <span>Customer Rejected Previous Price Proposal</span>
                         </div>
-                        <div className="text-[11px] text-amber-800">
+                        <div className="text-[11px] text-amber-900 dark:text-[var(--text-secondary)]">
                           Note: &quot;{reqItem.price_rejection_note}&quot;
                         </div>
-                        <div className="text-[11px] text-amber-800">
+                        <div className="text-[11px] text-amber-900 dark:text-[var(--text-secondary)]">
                           You can now mark the job completed at the original quoted amount (₹{reqItem.amount.toFixed(2)}) or submit a new revised proposal after discussing with the customer.
                         </div>
                       </div>
@@ -892,34 +892,34 @@ export const WorkerPortal: React.FC = () => {
 
       {/* 6. Modal: Worker Mark as Completed & Payout Adjustment Form (Requirement 1) */}
       {completingRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2B2824]/60 backdrop-blur-sm animate-fadeIn">
-          <div className="relative w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-[#E8E2D9] bg-white shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="relative w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl space-y-5 text-[var(--text-primary)]">
             <button
               onClick={() => setCompletingRequest(null)}
-              className="absolute top-4 right-4 text-[#857E75] hover:text-[#2B2824] p-1.5 rounded-full hover:bg-[#F4F0EA]"
+              className="absolute top-4 right-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 rounded-full hover:bg-[var(--border)] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div>
-              <span className="text-[10px] font-extrabold text-[#8B7355] uppercase tracking-widest">
+              <span className="text-[10px] font-extrabold text-[var(--accent)] uppercase tracking-widest">
                 Job Completion & Payout Adjustment
               </span>
-              <h3 className="text-xl font-extrabold text-[#2B2824] mt-0.5">
+              <h3 className="text-xl font-extrabold text-[var(--text-primary)] mt-0.5">
                 Mark Service as Completed
               </h3>
-              <p className="text-xs text-[#6E675F]">
+              <p className="text-xs text-[var(--text-secondary)]">
                 {completingRequest.category?.name} • {completingRequest.problem_type}
               </p>
             </div>
 
-            {/* Read-Only Original Payout Info (Requirement 1) */}
-            <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E8E2D9] space-y-1 text-xs">
-              <div className="flex justify-between text-[#6E675F]">
+            {/* Read-Only Original Payout Info */}
+            <div className="p-4 rounded-2xl bg-[var(--bg)] border border-[var(--border)] space-y-1 text-xs">
+              <div className="flex justify-between text-[var(--text-secondary)]">
                 <span>Original Customer Total:</span>
-                <strong className="text-[#2B2824]">₹{completingRequest.amount.toFixed(2)}</strong>
+                <strong className="text-[var(--text-primary)]">₹{completingRequest.amount.toFixed(2)}</strong>
               </div>
-              <div className="flex justify-between text-[#6B4F3B] font-extrabold">
+              <div className="flex justify-between text-[var(--accent)] font-extrabold">
                 <span>Original Payout (80%):</span>
                 <span>Original: ₹{(completingRequest.amount * 0.8).toFixed(2)} (80% of ₹{completingRequest.amount.toFixed(2)})</span>
               </div>
@@ -928,7 +928,7 @@ export const WorkerPortal: React.FC = () => {
             <form onSubmit={handleCompleteWorkSubmit} className="space-y-4">
               {/* Revised Customer Total Input */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-[#6E675F] uppercase tracking-wider">
+                <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
                   Revised Customer Total (₹) *
                 </label>
                 <input
@@ -938,11 +938,11 @@ export const WorkerPortal: React.FC = () => {
                   value={revisedTotalInput}
                   onChange={(e) => setRevisedTotalInput(e.target.value)}
                   placeholder="e.g. 748.50"
-                  className="w-full px-4 py-3 bg-[#FAF8F5] border border-[#E8E2D9] rounded-2xl text-sm font-extrabold text-[#2B2824] focus:outline-none focus:border-[#6B4F3B] shadow-sm"
+                  className="w-full px-4 py-3 bg-[var(--bg)] border border-[var(--border)] rounded-2xl text-sm font-extrabold text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] shadow-sm"
                   required
                 />
                 {Number(revisedTotalInput) > 0 && Math.abs(Number(revisedTotalInput) - completingRequest.amount) > 0.01 && (
-                  <div className="text-[11px] font-extrabold text-[#6B4F3B] pt-0.5">
+                  <div className="text-[11px] font-extrabold text-[var(--accent)] pt-0.5">
                     Revised Worker Payout (80%): ₹{(Number(revisedTotalInput) * 0.8).toFixed(2)}
                   </div>
                 )}
@@ -951,18 +951,18 @@ export const WorkerPortal: React.FC = () => {
               {/* Reason for change (Required if amount changed) */}
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <label className="block text-xs font-bold text-[#6E675F] uppercase tracking-wider">
+                  <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
                     Reason for Change {Math.abs(Number(revisedTotalInput) - completingRequest.amount) > 0.01 ? '*' : '(Optional)'}
                   </label>
                   {Math.abs(Number(revisedTotalInput) - completingRequest.amount) > 0.01 && (
-                    <span className="text-[10px] text-amber-700 font-extrabold">Customer Approval Required</span>
+                    <span className="text-[10px] text-amber-500 font-extrabold">Customer Approval Required</span>
                   )}
                 </div>
                 <textarea
                   value={revisedReasonInput}
                   onChange={(e) => setRevisedReasonInput(e.target.value)}
                   placeholder="e.g. Additional pipe section needed replacement, not visible during initial assessment."
-                  className="w-full p-3 bg-[#FAF8F5] border border-[#E8E2D9] rounded-2xl text-xs text-[#2B2824] focus:outline-none focus:border-[#6B4F3B]"
+                  className="w-full p-3 bg-[var(--bg)] border border-[var(--border)] rounded-2xl text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]"
                   rows={3}
                   required={Math.abs(Number(revisedTotalInput) - completingRequest.amount) > 0.01}
                 />
@@ -972,7 +972,7 @@ export const WorkerPortal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setCompletingRequest(null)}
-                  className="flex-1 py-3 rounded-full border border-[#E8E2D9] text-xs font-bold text-[#6E675F] hover:bg-[#F4F0EA]"
+                  className="flex-1 py-3 rounded-full border border-[var(--border)] text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--border)] transition-colors"
                 >
                   Cancel
                 </button>

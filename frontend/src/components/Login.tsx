@@ -101,8 +101,8 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
       const displayName = isSignUp
         ? (selectedRole === 'ADMIN' && orgName ? `${fullName} (${orgName})` : fullName)
         : undefined;
-      await loginWithEmail(email, password, mappedRole || 'CUSTOMER', displayName, isSignUp, orgName);
-      handleAuthComplete(mappedRole);
+      const loggedUser = await loginWithEmail(email, password, mappedRole, displayName, isSignUp, orgName);
+      handleAuthComplete(loggedUser?.role || mappedRole);
     } catch (err: any) {
       setError(err?.message || 'Authentication failed. Please try again.');
     } finally {
@@ -128,8 +128,8 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
       const displayName = isSignUp
         ? (selectedRole === 'ADMIN' && orgName ? `${fullName} (${orgName})` : fullName)
         : undefined;
-      await loginWithOtp(phone, otp, mappedRole, displayName);
-      handleAuthComplete(mappedRole);
+      const loggedUser = await loginWithOtp(phone, otp, mappedRole, displayName);
+      handleAuthComplete(loggedUser?.role || mappedRole);
     } catch (err: any) {
       setError(err?.message || 'OTP Verification failed');
     } finally {
@@ -149,12 +149,12 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
             if (response.credential) {
               const payload = JSON.parse(atob(response.credential.split('.')[1]));
               const mappedRole = isSignUp ? (selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole) : undefined;
-              await loginWithGoogle({
+              const loggedUser = await loginWithGoogle({
                 email: payload.email,
                 name: payload.name,
                 picture: payload.picture
-              }, mappedRole || 'CUSTOMER');
-              handleAuthComplete(mappedRole);
+              }, mappedRole);
+              handleAuthComplete(loggedUser?.role || mappedRole);
             }
           }
         });
@@ -173,12 +173,12 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
     setShowGoogleModal(false);
     try {
       const mappedRole = isSignUp ? (selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole) : undefined;
-      await loginWithGoogle({
+      const loggedUser = await loginWithGoogle({
         email: acctEmail,
         name: acctName,
         picture: 'https://lh3.googleusercontent.com/a/default-user=s96-c'
-      }, mappedRole || 'CUSTOMER');
-      handleAuthComplete(mappedRole);
+      }, mappedRole);
+      handleAuthComplete(loggedUser?.role || mappedRole);
     } catch (err: any) {
       setError('Google Sign-in failed');
     } finally {
