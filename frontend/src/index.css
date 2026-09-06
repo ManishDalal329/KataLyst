@@ -22,6 +22,11 @@
   --accent: #C99968;
   --accent-cta-text: #1A1815;
   --accent-muted: #7A6F5C;
+  color-scheme: dark;
+}
+
+[data-theme='light'], :root {
+  color-scheme: light;
 }
 
 @layer base {
@@ -61,7 +66,8 @@
   background-color: var(--surface) !important;
 }
 
-[data-theme='dark'] .bg-\[\#FAF8F5\] {
+[data-theme='dark'] .bg-\[\#FAF8F5\],
+[data-theme='dark'] .bg-\[\#FAF8F5\]\/50 {
   background-color: var(--bg) !important;
 }
 
@@ -69,7 +75,8 @@
   background-color: var(--border) !important;
 }
 
-[data-theme='dark'] .border-\[\#E8E2D9\] {
+[data-theme='dark'] .border-\[\#E8E2D9\],
+[data-theme='dark'] .border-\[\#D5CCBF\] {
   border-color: var(--border) !important;
 }
 
@@ -79,7 +86,8 @@
 
 [data-theme='dark'] .text-\[\#6E675F\],
 [data-theme='dark'] .text-\[\#857E75\],
-[data-theme='dark'] .text-\[\#524B43\] {
+[data-theme='dark'] .text-\[\#524B43\],
+[data-theme='dark'] .text-\[\#6B6862\] {
   color: var(--text-secondary) !important;
 }
 
@@ -98,8 +106,14 @@
   background-color: var(--accent-muted) !important;
 }
 
-[data-theme='dark'] .hover\:bg-\[\#E8E2D9\]:hover {
+[data-theme='dark'] .hover\:bg-\[\#E8E2D9\]:hover,
+[data-theme='dark'] .hover\:bg-\[\#FAF8F5\]:hover {
+  background-color: var(--border) !important;
+}
+
+[data-theme='dark'] select option {
   background-color: var(--surface) !important;
+  color: var(--text-primary) !important;
 }
 
 /* Warm ambient glow button effect */

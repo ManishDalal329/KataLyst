@@ -37,7 +37,11 @@ export const authenticateJWT = (req: AuthenticatedRequest, res: Response, next: 
 
 export const requireRoles = (roles: string[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    if (!req.user) {
+      return res.status(403).json({ error: 'Access denied: insufficient permissions' });
+    }
+    const effectiveRole = req.user.role === 'USER' ? 'CUSTOMER' : req.user.role;
+    if (!roles.includes(req.user.role) && !roles.includes(effectiveRole)) {
       return res.status(403).json({ error: 'Access denied: insufficient permissions' });
     }
     next();

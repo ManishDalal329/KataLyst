@@ -23,8 +23,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSuccess }) => {
     setLoading(true);
     setError('');
     try {
-      const loggedUser = await loginWithOtp(phone, otp, role, name || undefined);
-      onSuccess(loggedUser.role || role);
+      await loginWithOtp(phone, otp, role, name || undefined);
+      onSuccess(role);
     } catch (err: any) {
       setError(err.message || t('auth_failed'));
     } finally {
@@ -36,8 +36,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSuccess }) => {
     setLoading(true);
     setError('');
     try {
-      const loggedUser = await quickLoginAs(phoneNum, targetRole);
-      onSuccess(loggedUser.role || targetRole);
+      await quickLoginAs(phoneNum, targetRole);
+      onSuccess(targetRole);
     } catch (err: any) {
       setError(err.message || t('auth_failed'));
     } finally {

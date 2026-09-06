@@ -1,16 +1,17 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { KatalystLogo } from './KatalystLogo';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { ThemeToggle } from './ThemeToggle';
-import { ShieldCheck, User as UserIcon, LogOut, Globe, Briefcase, Vote, Layers, BarChart3, Home } from 'lucide-react';
+import { ShieldCheck, User as UserIcon, LogOut, Globe, Briefcase, Vote, Layers, BarChart3, Home, Menu, X } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'hi' : 'en';
@@ -106,6 +107,7 @@ export const Navbar: React.FC = () => {
                   return (
                     <Link
                       key={item.id}
+                      to={item.id}
                       onClick={item.onClick}
                       className="px-3.5 py-1.5 rounded-2xl bg-[var(--accent)] text-[var(--accent-cta-text)] font-bold text-xs shadow-md flex items-center space-x-1.5 transition-all transform scale-[1.02] whitespace-nowrap"
                     >
@@ -126,6 +128,7 @@ export const Navbar: React.FC = () => {
                   return (
                     <Link
                       key={item.id}
+                      to={item.id}
                       onClick={item.onClick}
                       className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition-all flex items-center space-x-1.5 whitespace-nowrap"
                     >

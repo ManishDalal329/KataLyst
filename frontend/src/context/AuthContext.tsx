@@ -69,9 +69,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Initialize session state from sahakar_session on page load
   useEffect(() => {
     const sessionUser = getCurrentUser();
+    const storedToken = localStorage.getItem('sahakar_token');
     if (sessionUser) {
       setUser(sessionUser);
-      setToken('session_token_' + sessionUser.id);
+      setToken(storedToken || 'session_token_' + sessionUser.id);
     } else {
       setUser(null);
       setToken(null);
@@ -81,9 +82,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loginWithOtp = async (phone: string, otp: string, role?: string, name?: string) => {
     const mappedRole = (role || 'CUSTOMER') as UserRole;
-    const sessionUser = await authenticateWithOtp(phone, otp, mappedRole, name);
+    const { user: sessionUser, token: authToken } = await authenticateWithOtp(phone, otp, mappedRole, name);
     setUser(sessionUser);
-    setToken('session_token_' + sessionUser.id);
+    setToken(authToken);
   };
 
   const loginWithGoogle = async (googleUser: { email: string; name: string; picture?: string }, role: string) => {
@@ -139,7 +140,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-      value={{ user, token, loginWithOtp, loginWithGoogle, loginWithEmail, quickLoginAs, updateProfile, logout, isLoading }}
+      value={{ user, token, loginWithOtp, loginWithGoogle, loginWithEmail, quickLoginAs, updateProfile, logout, isLoading, getRoleRoute }}
     >
       {children}
     </AuthContext.Provider>

@@ -104,9 +104,14 @@ model ServiceRequest {
   instructions        String?
   status              String   @default("RAISED") // RAISED, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED
   selected_worker_id  String?
-  cancellation_reason String?
-  cancelled_by        String?  // CUSTOMER, WORKER
-  created_at          DateTime @default(now())
+  cancellation_reason  String?
+  cancelled_by         String?  // CUSTOMER, WORKER
+  proposed_total       Float?
+  proposed_reason      String?
+  proposed_by          String?
+  proposed_at          DateTime?
+  price_rejection_note String?
+  created_at           DateTime @default(now())
   work_started_at     DateTime?
   work_completed_at   DateTime?
   booking_id          String?  @unique

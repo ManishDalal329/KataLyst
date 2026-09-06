@@ -28,7 +28,8 @@ router.post('/otp/request', async (req: Request, res: Response) => {
 router.post('/otp/verify', async (req: Request, res: Response) => {
   const { phone, otp, role, name, cooperative_id, skills } = req.body;
 
-  if (!phone || !otp) {
+  const cleanPhone = (phone || '').trim();
+  if (!cleanPhone || !otp) {
     return res.status(400).json({ error: 'Phone and OTP are required' });
   }
 
@@ -37,8 +38,13 @@ router.post('/otp/verify', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Invalid OTP' });
   }
 
-  let user = await prisma.user.findUnique({
-    where: { phone },
+  let user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { phone: cleanPhone },
+        { id: cleanPhone }
+      ]
+    },
     include: {
       workerProfile: {
         include: {
@@ -48,18 +54,45 @@ router.post('/otp/verify', async (req: Request, res: Response) => {
     }
   });
 
+  const requestedRole = role || 'CUSTOMER';
+
   // If user doesn't exist, create user profile
   if (!user) {
-    const userRole = role || 'CUSTOMER';
-    const userName = name || `User ${phone.slice(-4)}`;
+    const userName = name || (cleanPhone.includes('@') ? cleanPhone.split('@')[0] : `User ${cleanPhone.slice(-4)}`);
 
-    user = await prisma.user.create({
-      data: {
-        phone,
-        role: userRole,
-        name: userName,
-        lang_pref: 'EN'
-      },
+    try {
+      user = await prisma.user.create({
+        data: {
+          phone: cleanPhone,
+          role: requestedRole,
+          name: userName,
+          lang_pref: 'EN'
+        },
+        include: {
+          workerProfile: {
+            include: {
+              cooperative: true
+            }
+          }
+        }
+      });
+    } catch (e) {
+      user = await prisma.user.findFirst({
+        where: { phone: cleanPhone },
+        include: {
+          workerProfile: {
+            include: {
+              cooperative: true
+            }
+          }
+        }
+      });
+    }
+  } else if (role && user.role !== role) {
+    // If user exists but requested a different role on login, update user role
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { role: requestedRole },
       include: {
         workerProfile: {
           include: {
@@ -68,21 +101,23 @@ router.post('/otp/verify', async (req: Request, res: Response) => {
         }
       }
     });
+  }
 
-    // If role is WORKER, create associated worker profile
-    if (userRole === 'WORKER') {
-      let targetCoopId = cooperative_id;
-      if (!targetCoopId) {
-        const defaultCoop = await prisma.cooperative.findFirst({ where: { status: 'APPROVED' } });
-        targetCoopId = defaultCoop ? defaultCoop.id : undefined;
-      }
+  // If role is WORKER, create associated worker profile if not already present
+  if (user && user.role === 'WORKER' && !user.workerProfile) {
+    let targetCoopId = cooperative_id;
+    if (!targetCoopId) {
+      const defaultCoop = await prisma.cooperative.findFirst({ where: { status: 'APPROVED' } });
+      targetCoopId = defaultCoop ? defaultCoop.id : undefined;
+    }
 
-      if (targetCoopId) {
+    if (targetCoopId) {
+      try {
         await prisma.worker.create({
           data: {
             user_id: user.id,
             cooperative_id: targetCoopId,
-            skills: skills || 'General Household Services',
+            skills: skills || 'General Household Services, Plumbing, Repair',
             verification_status: 'VERIFIED',
             rating_avg: 4.8,
             availability_status: true,
@@ -90,19 +125,21 @@ router.post('/otp/verify', async (req: Request, res: Response) => {
             lng: 77.2090
           }
         });
+      } catch (e) {
+        console.warn('Worker profile creation skipped or already exists for user:', user.id);
+      }
 
-        // Refetch user with worker profile
-        user = await prisma.user.findUnique({
-          where: { id: user.id },
-          include: {
-            workerProfile: {
-              include: {
-                cooperative: true
-              }
+      // Refetch user with worker profile
+      user = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: {
+          workerProfile: {
+            include: {
+              cooperative: true
             }
           }
-        }) as any;
-      }
+        }
+      }) as any;
     }
   }
 

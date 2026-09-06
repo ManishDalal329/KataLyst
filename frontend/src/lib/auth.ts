@@ -45,6 +45,7 @@ export interface StoredUser {
     high: number;
   };
   coopAffiliation?: string;
+  workerProfile?: any;
 
   // Org specific
   registeredAddress?: string;
@@ -126,13 +127,17 @@ export function getCurrentUser(): SessionUser | null {
 }
 
 /**
- * Save current session user to localStorage
+ * Save current session user and optional JWT token to localStorage
  */
-export function setSession(user: SessionUser): void {
+export function setSession(user: SessionUser, token?: string): void {
   try {
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
     localStorage.setItem('sahakar_user', JSON.stringify(user));
-    localStorage.setItem('sahakar_token', 'session_token_' + user.id);
+    if (token) {
+      localStorage.setItem('sahakar_token', token);
+    } else if (!localStorage.getItem('sahakar_token')) {
+      localStorage.setItem('sahakar_token', 'session_token_' + user.id);
+    }
   } catch (e) {
     console.error('Failed to set sahakar_session in localStorage', e);
   }
@@ -161,11 +166,19 @@ export function updateUserProfile(userId: string, updatedFields: Partial<StoredU
   if (index === -1) {
     const session = getCurrentUser();
     if (session) {
-      index = users.findIndex((u) => u.email === session.email);
+      index = users.findIndex((u) => u.email === session.email || u.id === session.id);
     }
   }
 
   if (index === -1) {
+    // If user not in local store, update active session directly
+    const session = getCurrentUser();
+    if (session) {
+      const updatedSession = { ...session, ...updatedFields };
+      const currentToken = localStorage.getItem('sahakar_token') || undefined;
+      setSession(updatedSession, currentToken);
+      return updatedSession;
+    }
     throw new Error('User account not found');
   }
 
@@ -174,7 +187,8 @@ export function updateUserProfile(userId: string, updatedFields: Partial<StoredU
 
   const updatedSession: SessionUser = { ...users[index] };
   delete (updatedSession as any).passwordHash;
-  setSession(updatedSession);
+  const currentToken = localStorage.getItem('sahakar_token') || undefined;
+  setSession(updatedSession, currentToken);
   return updatedSession;
 }
 
@@ -281,22 +295,42 @@ export async function authenticateWithGoogle(
 }
 
 /**
- * Authenticate or auto-create account for OTP login
+ * Authenticate or auto-create account for OTP login via API (with fallback)
  */
 export async function authenticateWithOtp(
   phone: string,
   otp: string,
   role?: UserRole,
   name?: string
-): Promise<SessionUser> {
+): Promise<{ user: SessionUser; token: string }> {
   const cleanPhone = phone.trim();
-  const users = getUsers();
   const defaultRole = role || 'CUSTOMER';
+  const defaultName = name || (defaultRole === 'WORKER' ? 'Worker Member' : defaultRole === 'COOP_ADMIN' ? 'Coop Admin' : 'User Member');
 
+  try {
+    const res = await fetch('/api/auth/otp/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone: cleanPhone,
+        otp: otp || '123456',
+        role: defaultRole,
+        name: defaultName
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setSession(data.user, data.token);
+      return { user: data.user, token: data.token };
+    }
+  } catch (e) {
+    console.warn('Backend OTP verification call failed, using local session', e);
+  }
+
+  const users = getUsers();
   let user = users.find((u) => u.phone === cleanPhone || u.email === cleanPhone);
   if (!user) {
     const dummyHash = await hashPassword('otp_login_protected');
-    const defaultName = name || (defaultRole === 'WORKER' ? 'Worker Member' : defaultRole === 'COOP_ADMIN' ? 'Coop Admin' : 'User Member');
     user = {
       id: 'otp_' + Math.random().toString(36).substring(2, 9),
       name: defaultName,
@@ -308,11 +342,15 @@ export async function authenticateWithOtp(
     };
     users.push(user);
     saveUsers(users);
+  } else if (role && user.role !== role) {
+    user.role = role;
+    saveUsers(users);
   }
 
   const sessionUser: SessionUser = { ...user };
   delete (sessionUser as any).passwordHash;
 
-  setSession(sessionUser);
-  return sessionUser;
+  const fallbackToken = 'session_token_' + sessionUser.id;
+  setSession(sessionUser, fallbackToken);
+  return { user: sessionUser, token: fallbackToken };
 }

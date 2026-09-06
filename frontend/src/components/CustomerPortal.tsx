@@ -6,12 +6,12 @@ import { useTranslation } from 'react-i18next';
 import {
   MapPin, Star, Sparkles, CheckCircle2, Clock, Calendar, Info,
   ShieldCheck, DollarSign, X, ArrowRight, Bookmark, Loader2,
-  UserCheck, AlertCircle, ChevronDown, ChevronUp, Bell, Ban
+  UserCheck, AlertCircle, ChevronDown, ChevronUp, Bell, Ban, RefreshCw
 } from 'lucide-react';
 import {
-  WORK_LEVELS,
   calculatePriceBreakdown,
-  getProblemTypesForCategory
+  getProblemTypesForCategory,
+  getCategoryPricingConfig
 } from '../config/bookingConfig';
 
 const WORKER_AVATARS: Record<string, string> = {
@@ -64,11 +64,15 @@ export const CustomerPortal: React.FC = () => {
   };
   const minDateTimeLocal = getMinDateTimeLocal();
 
-  const [scheduledTime, setScheduledTime] = useState<string>(
-    new Date(Date.now() + 3600000 * 2).toISOString().slice(0, 16)
-  );
+  const getInitialScheduledTime = () => {
+    const future = new Date(Date.now() + 3600000 * 2);
+    const offset = future.getTimezoneOffset() * 60000;
+    return new Date(future.getTime() - offset).toISOString().slice(0, 16);
+  };
+
+  const [scheduledTime, setScheduledTime] = useState<string>(getInitialScheduledTime());
   const [address, setAddress] = useState<string>('Flat 402, Green Park Heights, Sector 14');
-  const [instructions, setInstructions] = useState<string>('Main kitchen pipe is leaking, please bring sealant and pipe wrenches');
+  const [instructions, setInstructions] = useState<string>('');
   const [isSubmittingRequest, setIsSubmittingRequest] = useState<boolean>(false);
   const [requestSuccessNotice, setRequestSuccessNotice] = useState<string>('');
 
@@ -98,6 +102,9 @@ export const CustomerPortal: React.FC = () => {
   const [ratingComment, setRatingComment] = useState<string>('Prompt, transparent, and skilled cooperative worker!');
   const [isSubmittingRating, setIsSubmittingRating] = useState<boolean>(false);
 
+  // Price Approval State (Requirement 4 & 5)
+  const [isProcessingPriceApproval, setIsProcessingPriceApproval] = useState<string | null>(null);
+
   // In-app real-time notification toasts
   const [notifications, setNotifications] = useState<Array<{ id: string; message: string; timestamp: Date }>>([]);
 
@@ -124,6 +131,7 @@ export const CustomerPortal: React.FC = () => {
         setSelectedProblemType(problemTypes[0]);
         setCustomProblemType('');
       }
+      setInstructions('');
     }
   }, [selectedCategory]);
 
@@ -192,9 +200,14 @@ export const CustomerPortal: React.FC = () => {
       const data = await fetchApi('/categories');
       if (Array.isArray(data) && data.length > 0) {
         setCategories(data);
-        if (!selectedCategory) {
-          setSelectedCategory(data[0]);
-        }
+        setSelectedCategory((prev: any) => {
+          if (!prev || prev.id.startsWith('cat-')) {
+            const match = data.find((c: any) => c.name.toLowerCase().includes('plumb')) || data[0];
+            return match;
+          }
+          const existing = data.find((c: any) => c.id === prev.id);
+          return existing || data[0];
+        });
       }
     } catch (e) {
       console.error('Failed to load categories', e);
@@ -241,6 +254,8 @@ export const CustomerPortal: React.FC = () => {
   // 1. Submit Raise Request
   const handleRaiseRequest = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingRequest) return;
+
     if (!user) {
       await quickLoginAs('9900112233', 'CUSTOMER');
     }
@@ -271,9 +286,10 @@ export const CustomerPortal: React.FC = () => {
         method: 'POST',
         body: JSON.stringify({
           category_id: selectedCategory.id,
+          category_name: selectedCategory.name,
           problem_type: problemTypeToSubmit,
           work_level: workLevel,
-          scheduled_time: scheduledTime,
+          scheduled_time: selectedDate.toISOString(),
           address,
           instructions
         })
@@ -281,6 +297,7 @@ export const CustomerPortal: React.FC = () => {
 
       setRequestSuccessNotice(t('request_raised_success'));
       setCustomProblemType('');
+      setInstructions('');
       loadMyRequests();
       setTimeout(() => {
         setRequestSuccessNotice('');
@@ -355,6 +372,38 @@ export const CustomerPortal: React.FC = () => {
     }
   };
 
+  // 5. Approve Revised Price (Requirement 4 & 5)
+  const handleApprovePrice = async (requestId: string) => {
+    setIsProcessingPriceApproval(requestId);
+    try {
+      await fetchApi(`/requests/${requestId}/approve-price`, {
+        method: 'POST'
+      });
+      await loadMyRequests();
+    } catch (e: any) {
+      alert(e.message || t('error'));
+    } finally {
+      setIsProcessingPriceApproval(null);
+    }
+  };
+
+  // 6. Reject Revised Price (Requirement 4 & 5)
+  const handleRejectPrice = async (requestId: string) => {
+    const reason = window.prompt('Please enter a reason for rejecting the revised price (optional):') || 'Price adjustment declined by customer.';
+    setIsProcessingPriceApproval(requestId);
+    try {
+      await fetchApi(`/requests/${requestId}/reject-price`, {
+        method: 'POST',
+        body: JSON.stringify({ reason })
+      });
+      await loadMyRequests();
+    } catch (e: any) {
+      alert(e.message || t('error'));
+    } finally {
+      setIsProcessingPriceApproval(null);
+    }
+  };
+
   const toggleTimeline = (requestId: string) => {
     setExpandedTimelines(prev => ({
       ...prev,
@@ -374,6 +423,12 @@ export const CustomerPortal: React.FC = () => {
         return (
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-50 text-amber-800 border border-amber-200 animate-pulse">
             {t('status_in_progress')}
+          </span>
+        );
+      case 'PENDING_PRICE_APPROVAL':
+        return (
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-purple-100 text-purple-900 border border-purple-300 animate-pulse">
+            Pending Price Approval
           </span>
         );
       case 'CONFIRMED':
@@ -400,7 +455,8 @@ export const CustomerPortal: React.FC = () => {
 
   // Price calculations for current form selection
   const currentBaseRate = selectedCategory?.base_rate || 499.0;
-  const currentPriceBreakdown = calculatePriceBreakdown(currentBaseRate, workLevel);
+  const currentPricingConfig = getCategoryPricingConfig(selectedCategory?.name);
+  const currentPriceBreakdown = calculatePriceBreakdown(currentBaseRate, workLevel, selectedCategory?.name);
   const currentProblemTypes = selectedCategory ? getProblemTypesForCategory(selectedCategory.name) : [];
 
   return (
@@ -431,7 +487,7 @@ export const CustomerPortal: React.FC = () => {
       )}
 
       {/* Customer Header Banner */}
-      <div className="p-6 rounded-3xl border border-[#E8E2D9] bg-gradient-to-r from-white via-[#FAF8F5] to-[#F4F0EA] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
             <ShieldCheck className="w-6 h-6 text-[#8B7355]" />
@@ -441,7 +497,7 @@ export const CustomerPortal: React.FC = () => {
         </div>
 
         {/* Quick Cooperative Trust Badge */}
-        <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white border border-[#E8E2D9] text-xs font-extrabold text-[#6B4F3B]">
+        <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[var(--bg)] border border-[var(--border)] text-xs font-extrabold text-[#6B4F3B]">
           <Sparkles className="w-3.5 h-3.5 text-amber-500" />
           <span>80% Worker Share • Zero Middleman Markup</span>
         </div>
@@ -591,26 +647,25 @@ export const CustomerPortal: React.FC = () => {
               type="text"
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
-              placeholder="e.g., Kitchen tap is leaking continuously since morning"
+              placeholder="Describe the issue in a few words (e.g., Kitchen tap leaking since morning)"
               className="w-full px-4 py-3 bg-[#FAF8F5] border border-[#E8E2D9] rounded-2xl text-xs font-semibold text-[#2B2824] focus:outline-none focus:border-[#6B4F3B] shadow-sm"
             />
           </div>
 
-          {/* Work Level Multiplier Selection */}
+          {/* Work Level or Duration Selection */}
           <div className="space-y-3">
             <label className="block text-xs font-bold text-[#6E675F] uppercase tracking-wider">
-              {t('work_level_label')} (Centralized Multiplier Architecture)
+              {currentPricingConfig.headingLabel}
             </label>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {(Object.keys(WORK_LEVELS) as Array<'LOW' | 'MODERATE' | 'HIGH'>).map((lvlKey) => {
-                const lvl = WORK_LEVELS[lvlKey];
-                const isSelected = workLevel === lvlKey;
+              {currentPricingConfig.tiers.map((lvl) => {
+                const isSelected = workLevel === lvl.key;
                 const levelPrice = Number((currentBaseRate * lvl.multiplier).toFixed(2));
                 return (
                   <div
-                    key={lvlKey}
-                    onClick={() => setWorkLevel(lvlKey)}
+                    key={lvl.key}
+                    onClick={() => setWorkLevel(lvl.key)}
                     className={`p-4 rounded-2xl border cursor-pointer transition-all space-y-1 ${
                       isSelected
                         ? 'border-[#6B4F3B] bg-[#F4F0EA] shadow-md ring-1 ring-[#6B4F3B]'
@@ -618,10 +673,10 @@ export const CustomerPortal: React.FC = () => {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-sm text-[#2B2824]">{lvl.defaultLabel}</span>
+                      <span className="font-extrabold text-sm text-[#2B2824]">{lvl.label}</span>
                       <span className="text-xs font-black text-[#6B4F3B]">₹{levelPrice}</span>
                     </div>
-                    <p className="text-[11px] text-[#6E675F]">{lvl.defaultDescription}</p>
+                    <p className="text-[11px] text-[#6E675F]">{lvl.description}</p>
                     <div className="text-[10px] text-[#857E75] pt-1">
                       Worker payout: <strong>₹{(levelPrice * 0.80).toFixed(2)}</strong> (80%)
                     </div>
@@ -635,23 +690,31 @@ export const CustomerPortal: React.FC = () => {
           <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E8E2D9] space-y-2">
             <div className="flex items-center space-x-1.5 text-xs font-extrabold text-[#6B4F3B] border-b border-[#E8E2D9] pb-2">
               <ShieldCheck className="w-4 h-4 text-[#8B7355]" />
-              <span>{t('transparent_price_breakdown')} ({workLevel} Level • ₹{currentPriceBreakdown.total.toFixed(2)})</span>
+              <span>{t('transparent_price_breakdown')} ({currentPriceBreakdown.tier.label} • ₹{currentPriceBreakdown.total.toFixed(2)})</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
               <div>
-                <span className="text-[#6E675F]">{t('worker_gets_share')} (80%):</span>
+                <span className="text-[#6E675F]">{t('worker_gets_share')}:</span>
                 <div className="text-sm font-extrabold text-[#2B2824]">₹{currentPriceBreakdown.workerShare.toFixed(2)}</div>
               </div>
               <div>
-                <span className="text-[#6E675F]">{t('coop_fund_share')} (15%):</span>
+                <span className="text-[#6E675F]">{t('coop_fund_share')}:</span>
                 <div className="text-sm font-extrabold text-[#8B7355]">₹{currentPriceBreakdown.coopFund.toFixed(2)}</div>
               </div>
               <div>
-                <span className="text-[#6E675F]">{t('platform_fee_share')} (5%):</span>
+                <span className="text-[#6E675F]">{t('platform_fee_share')}:</span>
                 <div className="text-sm font-extrabold text-[#6E675F]">₹{currentPriceBreakdown.platformFee.toFixed(2)}</div>
               </div>
             </div>
+          </div>
+
+          {/* Payout / Cost Disclaimer (Part 3) */}
+          <div className="flex items-start space-x-2 text-[13px] text-[#6E675F] pt-0.5">
+            <Info className="w-4 h-4 text-[#8B7355] shrink-0 mt-0.5" />
+            <span>
+              This is an estimated cost based on the work level selected. The final amount may change if the worker identifies additional issues during the visit that weren&apos;t visible beforehand.
+            </span>
           </div>
 
           {/* Service Address Input */}
@@ -682,7 +745,7 @@ export const CustomerPortal: React.FC = () => {
               </>
             ) : (
               <>
-                <span>{t('raise_request_btn')} (₹{currentPriceBreakdown.total.toFixed(2)})</span>
+                <span>Confirm & Raise Request · ₹{currentPriceBreakdown.total.toFixed(0)}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -698,10 +761,12 @@ export const CustomerPortal: React.FC = () => {
             <p className="text-xs text-[#6E675F]">{t('my_raised_requests_sub')}</p>
           </div>
           <button
+            type="button"
             onClick={loadMyRequests}
-            className="text-xs font-extrabold text-[#6B4F3B] hover:underline"
+            className="px-3.5 py-1.5 rounded-xl bg-[#F4F0EA] hover:bg-[#E8E2D9] border border-[#E8E2D9] text-[#2B2824] text-xs font-bold transition-all flex items-center space-x-1.5 shadow-sm active:scale-95"
           >
-            Refresh Responses
+            <RefreshCw className={`w-3.5 h-3.5 text-[#6B4F3B] ${loadingRequests ? 'animate-spin' : ''}`} />
+            <span>Refresh Responses</span>
           </button>
         </div>
 
@@ -763,59 +828,176 @@ export const CustomerPortal: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Dynamic Response Indicator or Confirmed Worker Information */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                      {isAwaiting && (
-                        <div className="flex items-center space-x-2">
+                  {/* Dynamic Response Indicator & Accepted Worker Cards (Requirement 3) */}
+                  <div className="space-y-3">
+                    {isAwaiting && (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
                           {totalAcceptedCount > 0 ? (
                             <span className="inline-flex items-center space-x-1.5 text-xs font-extrabold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
                               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                               <span>🟢 {totalAcceptedCount} worker(s) accepted (capped at 5 fastest)</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center space-x-1.5 text-xs font-bold text-amber-800 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+                            <span className="inline-flex items-center space-x-1.5 text-xs font-semibold text-stone-600 bg-stone-100 px-3 py-1 rounded-full border border-stone-200">
                               <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-                              <span>🟡 Waiting for worker responses</span>
+                              <span>Waiting for workers to respond</span>
                             </span>
                           )}
                         </div>
-                      )}
 
-                      {reqItem.status === 'CONFIRMED' && reqItem.selected_worker && (
-                        <div className="text-xs text-[#2B2824] font-semibold">
-                          Confirmed Worker: <strong className="text-[#6B4F3B]">{reqItem.selected_worker.user?.name}</strong> ({reqItem.selected_worker.cooperative?.name})
+                        {/* Inline Worker Cards Grid (up to 5 accepted workers) */}
+                        {acceptedWorkers.length > 0 && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
+                            {acceptedWorkers.map((acc: any, idx: number) => {
+                              const worker = acc.worker;
+                              const workerName = worker?.user?.name || 'Cooperative Member';
+                              const avatarUrl = worker?.user?.profilePicture || worker?.profilePicture || WORKER_AVATARS[workerName] || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250`;
+                              const workerDomains = worker?.skills || 'General Household Services';
+                              const activeShiftText = worker?.activeShift ? `${worker.activeShift.startTime}–${worker.activeShift.endTime}` : 'Available 9 AM–6 PM';
+                              const isConfirming = isConfirmingWorker === worker.id;
+
+                              return (
+                                <div
+                                  key={acc.id || idx}
+                                  className="p-3.5 rounded-2xl border border-[#E8E2D9] bg-[#FAF8F5] flex flex-col justify-between space-y-3 hover:border-[#6B4F3B] transition-all shadow-sm"
+                                >
+                                  <div className="flex items-start space-x-2.5">
+                                    <img
+                                      src={avatarUrl}
+                                      alt={workerName}
+                                      className="w-10 h-10 rounded-full object-cover border border-white shrink-0"
+                                    />
+                                    <div className="min-w-0 flex-1 text-xs">
+                                      <div className="font-extrabold text-[#2B2824] truncate flex items-center justify-between">
+                                        <span>{workerName}</span>
+                                        <span className="text-[10px] font-bold text-amber-700 flex items-center">
+                                          <Star className="w-3 h-3 text-amber-500 fill-amber-400 mr-0.5" />
+                                          {worker.rating_avg || 4.8}
+                                        </span>
+                                      </div>
+                                      <div className="text-[11px] text-[#8B7355] truncate font-semibold">
+                                        {worker.cooperative?.name || 'Verified Cooperative'}
+                                      </div>
+                                      <div className="text-[10px] text-[#6E675F] truncate font-medium mt-0.5">
+                                        {workerDomains} · {activeShiftText}
+                                      </div>
+                                      <div className="mt-1 flex items-center space-x-1.5 text-[9px]">
+                                        <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">Verified</span>
+                                        <span className="px-1.5 py-0.5 rounded bg-[#6B4F3B] text-white font-bold">{worker.matchScore || 95}% Match</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <button
+                                    onClick={() => handleConfirmWorker(reqItem.id, worker.id)}
+                                    disabled={!!isConfirmingWorker}
+                                    className="w-full py-1.5 rounded-xl bg-[#6B4F3B] hover:bg-[#543D2D] text-white text-xs font-extrabold shadow-sm transition-all flex items-center justify-center space-x-1 disabled:opacity-50"
+                                  >
+                                    {isConfirming ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                      <span>Confirm Worker</span>
+                                    )}
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {reqItem.status === 'CONFIRMED' && reqItem.selected_worker && (
+                      <div className="text-xs text-[#2B2824] font-semibold">
+                        Confirmed Worker: <strong className="text-[#6B4F3B]">{reqItem.selected_worker.user?.name}</strong> ({reqItem.selected_worker.cooperative?.name})
+                      </div>
+                    )}
+
+                    {reqItem.status === 'IN_PROGRESS' && reqItem.selected_worker && (
+                      <div className="text-xs text-amber-800 font-bold flex items-center space-x-1.5">
+                        <Clock className="w-4 h-4 text-amber-600 animate-spin" />
+                        <span>Work in Progress with {reqItem.selected_worker.user?.name}</span>
+                      </div>
+                    )}
+
+                    {/* Price Revision Approval Card (Requirement 4 & 5) */}
+                    {reqItem.status === 'PENDING_PRICE_APPROVAL' && (
+                      <div className="p-4 rounded-2xl bg-purple-50 border-2 border-purple-300 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2 text-[#2B2824] font-extrabold text-sm">
+                            <DollarSign className="w-4 h-4 text-purple-700" />
+                            <span>Payout Adjustment Requested by Worker</span>
+                          </div>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-200 text-purple-900 uppercase">
+                            Action Required
+                          </span>
                         </div>
-                      )}
 
-                      {reqItem.status === 'IN_PROGRESS' && reqItem.selected_worker && (
-                        <div className="text-xs text-amber-800 font-bold flex items-center space-x-1.5">
-                          <Clock className="w-4 h-4 text-amber-600 animate-spin" />
-                          <span>Work in Progress with {reqItem.selected_worker.user?.name}</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-white p-3 rounded-xl border border-purple-200">
+                          <div>
+                            <span className="text-[#6E675F] block text-[11px]">Original Quoted Total:</span>
+                            <span className="text-base font-extrabold text-[#2B2824] line-through">₹{reqItem.amount.toFixed(2)}</span>
+                          </div>
+                          <div>
+                            <span className="text-[#6E675F] block text-[11px]">Proposed Revised Total:</span>
+                            <span className="text-base font-black text-purple-800">₹{reqItem.proposed_total?.toFixed(2)}</span>
+                          </div>
                         </div>
-                      )}
 
-                      {reqItem.status === 'COMPLETED' && reqItem.selected_worker && (
-                        <div className="text-xs text-emerald-800 font-bold flex items-center space-x-1.5">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          <span>Completed by {reqItem.selected_worker.user?.name}</span>
+                        <div className="text-xs text-[#2B2824]">
+                          <strong className="text-purple-900">Worker&apos;s Stated Reason:</strong>
+                          <p className="italic text-[#6E675F] mt-0.5 bg-white p-2.5 rounded-xl border border-purple-200">
+                            &quot;{reqItem.proposed_reason}&quot;
+                          </p>
                         </div>
-                      )}
 
-                      {reqItem.status === 'CANCELLED' && (
-                        <div className="text-xs text-red-700 font-semibold flex items-center space-x-1.5">
-                          <Ban className="w-3.5 h-3.5 text-red-500" />
-                          <span>Cancelled by {reqItem.cancelled_by}: &quot;{reqItem.cancellation_reason}&quot;</span>
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          <button
+                            onClick={() => handleApprovePrice(reqItem.id)}
+                            disabled={isProcessingPriceApproval === reqItem.id}
+                            className="px-5 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm transition-all flex items-center space-x-1.5 disabled:opacity-50"
+                          >
+                            {isProcessingPriceApproval === reqItem.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            )}
+                            <span>Approve Revised Price (₹{reqItem.proposed_total?.toFixed(2)})</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleRejectPrice(reqItem.id)}
+                            disabled={isProcessingPriceApproval === reqItem.id}
+                            className="px-4 py-2 rounded-full bg-stone-100 hover:bg-red-50 hover:text-red-700 hover:border-red-300 text-[#6E675F] font-bold text-xs border border-[#E8E2D9] transition-all disabled:opacity-50"
+                          >
+                            Reject & Keep Original (₹{reqItem.amount.toFixed(2)})
+                          </button>
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      {/* Soft informational notice for open > 24 hours */}
-                      {reqItem.showWaitingNotice && (
-                        <p className="text-[11px] text-[#857E75] mt-1.5 bg-[#FAF8F5] p-2 rounded-xl border border-[#E8E2D9]">
-                          ℹ️ {t('waiting_soft_notice')}
-                        </p>
-                      )}
-                    </div>
+                    {reqItem.status === 'COMPLETED' && reqItem.selected_worker && (
+                      <div className="text-xs text-emerald-800 font-bold flex items-center space-x-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <span>Completed by {reqItem.selected_worker.user?.name}</span>
+                      </div>
+                    )}
+
+                    {reqItem.status === 'CANCELLED' && (
+                      <div className="text-xs text-red-700 font-semibold flex items-center space-x-1.5">
+                        <Ban className="w-3.5 h-3.5 text-red-500" />
+                        <span>Cancelled by {reqItem.cancelled_by}: &quot;{reqItem.cancellation_reason}&quot;</span>
+                      </div>
+                    )}
+
+                    {/* Soft informational notice for open > 24 hours */}
+                    {reqItem.showWaitingNotice && (
+                      <p className="text-[11px] text-[#857E75] mt-1.5 bg-[#FAF8F5] p-2 rounded-xl border border-[#E8E2D9]">
+                        ℹ️ {t('waiting_soft_notice')}
+                      </p>
+                    )}
+                  </div>
 
                     {/* Action Buttons */}
                     <div className="flex items-center space-x-2">
@@ -853,7 +1035,6 @@ export const CustomerPortal: React.FC = () => {
                         </button>
                       )}
                     </div>
-                  </div>
 
                   {/* 7. Compact Status & Timeline Expander */}
                   <div className="pt-2 border-t border-[#E8E2D9]">
@@ -951,6 +1132,14 @@ export const CustomerPortal: React.FC = () => {
               </div>
             </div>
 
+            {/* Payout / Cost Disclaimer */}
+            <div className="flex items-start space-x-2 text-[13px] text-[#6E675F]">
+              <Info className="w-4 h-4 text-[#8B7355] shrink-0 mt-0.5" />
+              <span>
+                This is an estimated cost based on the work level selected. The final amount may change if the worker identifies additional issues during the visit that weren&apos;t visible beforehand.
+              </span>
+            </div>
+
             {/* Dynamic Worker Cards (1 to 5) */}
             {viewingRequest.acceptedWorkers?.length === 0 ? (
               <div className="p-8 rounded-2xl bg-[#FAF8F5] border border-[#E8E2D9] text-center space-y-2">
@@ -965,7 +1154,9 @@ export const CustomerPortal: React.FC = () => {
                 {viewingRequest.acceptedWorkers.map((acc: any, index: number) => {
                   const worker = acc.worker;
                   const workerName = worker?.user?.name || 'Worker Member';
-                  const avatarUrl = WORKER_AVATARS[workerName] || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250`;
+                  const avatarUrl = worker?.user?.profilePicture || worker?.profilePicture || WORKER_AVATARS[workerName] || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250`;
+                  const workerDomains = worker?.skills || 'General Household Services';
+                  const activeShiftText = worker?.activeShift ? `${worker.activeShift.startTime}–${worker.activeShift.endTime}` : 'Available 9 AM–6 PM';
                   const gradientCover = COVER_GRADIENTS[index % COVER_GRADIENTS.length];
                   const isConfirmingThis = isConfirmingWorker === worker.id;
 
@@ -1034,6 +1225,7 @@ export const CustomerPortal: React.FC = () => {
                           <div>
                             <h4 className="font-extrabold text-[#2B2824] text-sm leading-tight">{workerName}</h4>
                             <p className="text-[11px] font-semibold text-[#8B7355]">{worker.cooperative?.name}</p>
+                            <p className="text-[10px] font-medium text-[#6E675F]">{workerDomains} · {activeShiftText}</p>
                           </div>
                         </div>
 

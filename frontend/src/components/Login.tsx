@@ -62,13 +62,14 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
     }
   }, []);
 
-  const handleAuthComplete = (mappedRole: string) => {
+  const handleAuthComplete = (roleParam?: string) => {
+    const targetRole = roleParam || (user ? user.role : 'CUSTOMER');
     if (onSuccess) {
-      onSuccess(mappedRole);
+      onSuccess(targetRole);
     } else {
-      if (mappedRole === 'WORKER') navigate('/worker');
-      else if (mappedRole === 'COOP_ADMIN') navigate('/coop');
-      else if (mappedRole === 'GOV_ADMIN') navigate('/admin');
+      if (targetRole === 'WORKER') navigate('/worker');
+      else if (targetRole === 'COOP_ADMIN') navigate('/coop');
+      else if (targetRole === 'GOV_ADMIN') navigate('/admin');
       else navigate('/services');
     }
   };
