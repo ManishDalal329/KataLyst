@@ -22,7 +22,16 @@ interface AuthContextType {
   token: string | null;
   loginWithOtp: (phone: string, otp: string, role?: string, name?: string) => Promise<User>;
   loginWithGoogle: (googleUser: { email: string; name: string; picture?: string }, role?: string) => Promise<User>;
-  loginWithEmail: (email: string, pass: string, role?: string, name?: string, isSignUp?: boolean, orgName?: string) => Promise<User>;
+  loginWithEmail: (
+    email: string,
+    pass: string,
+    role?: string,
+    name?: string,
+    isSignUp?: boolean,
+    orgName?: string,
+    registeredAddress?: string,
+    registrationNo?: string
+  ) => Promise<User>;
   quickLoginAs: (phone: string, role?: string, name?: string) => Promise<User>;
   updateProfile: (updatedFields: Partial<StoredUser>) => void;
   logout: () => void;
@@ -103,7 +112,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     role?: string,
     name?: string,
     isSignUp?: boolean,
-    orgName?: string
+    orgName?: string,
+    registeredAddress?: string,
+    registrationNo?: string
   ): Promise<User> => {
     const mappedRole = role ? (role as UserRole) : undefined;
     let sessionUser: SessionUser;
@@ -115,7 +126,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         password: pass,
         role: mappedRole || 'CUSTOMER',
-        orgName
+        orgName,
+        registeredAddress,
+        registrationNo
       });
     } else {
       sessionUser = await login(email, pass);

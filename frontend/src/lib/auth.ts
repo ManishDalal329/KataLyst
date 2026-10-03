@@ -202,6 +202,8 @@ export async function signup(params: {
   role: UserRole;
   orgName?: string;
   phone?: string;
+  registeredAddress?: string;
+  registrationNo?: string;
 }): Promise<SessionUser> {
   const cleanEmail = params.email.trim().toLowerCase();
   const users = getUsers();
@@ -220,8 +222,9 @@ export async function signup(params: {
     role: params.role,
     orgName: params.orgName?.trim(),
     phone: params.phone?.trim() || cleanEmail,
+    registeredAddress: params.registeredAddress?.trim(),
+    registrationNo: params.registrationNo?.trim() || (params.role === 'COOP_ADMIN' || params.role === 'GOV_ADMIN' ? 'COOP-DEL-2024-8891' : undefined),
     coopAffiliation: params.role === 'WORKER' ? 'North Delhi Labour Cooperative Society' : undefined,
-    registrationNo: params.role === 'COOP_ADMIN' || params.role === 'GOV_ADMIN' ? 'COOP-DEL-2024-8891' : undefined,
     verificationStatus: params.role === 'COOP_ADMIN' || params.role === 'GOV_ADMIN' ? 'VERIFIED & APPROVED' : undefined,
     createdAt: new Date().toISOString()
   };
