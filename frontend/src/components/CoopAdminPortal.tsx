@@ -130,6 +130,19 @@ export const CoopAdminPortal: React.FC = () => {
     proposals: []
   };
 
+  const orgDisplayName = (() => {
+    if (user?.orgName && user.orgName.trim()) return user.orgName.trim();
+    if (user?.coopAffiliation && user.coopAffiliation.trim()) return user.coopAffiliation.trim();
+    if (user?.name) {
+      if (user.name.includes('(') && user.name.includes(')')) {
+        const match = user.name.match(/\(([^)]+)\)/);
+        if (match && match[1]) return match[1].trim();
+      }
+      return user.name.trim();
+    }
+    return currentCoop.name;
+  })();
+
   return (
     <div className="space-y-6 py-4">
 
@@ -138,13 +151,13 @@ export const CoopAdminPortal: React.FC = () => {
         <div>
           <div className="flex items-center space-x-2">
             <Building2 className="w-6 h-6 text-[#8B7355]" />
-            <h1 className="text-2xl font-extrabold text-[#2B2824]">{currentCoop.name}</h1>
+            <h1 className="text-2xl font-extrabold text-[#2B2824]">{orgDisplayName}</h1>
             <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold uppercase">
               {currentCoop.status}
             </span>
           </div>
           <p className="text-xs text-[#6E675F] mt-1">
-            {t('coop_registration')}: <strong className="font-mono text-[#2B2824]">{currentCoop.registration_no}</strong> • {currentCoop.district}, {currentCoop.state}
+            {t('coop_registration')}: <strong className="font-mono text-[#2B2824]">{user?.registrationNo || currentCoop.registration_no}</strong> • {user?.registeredAddress || `${currentCoop.district}, ${currentCoop.state}`}
           </p>
         </div>
 
@@ -164,11 +177,10 @@ export const CoopAdminPortal: React.FC = () => {
       <div className="flex items-center space-x-2 border-b border-[#E8E2D9] pb-3 overflow-x-auto">
         <button
           onClick={() => setActiveTab('members')}
-          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${
-            activeTab === 'members'
-              ? 'bg-[#6B4F3B] text-white shadow-sm'
-              : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${activeTab === 'members'
+            ? 'bg-[#6B4F3B] text-white shadow-sm'
+            : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
+            }`}
         >
           <UserPlus className="w-4 h-4" />
           <span>{t('tab_members')} ({currentCoop.workers?.length || 0})</span>
@@ -176,11 +188,10 @@ export const CoopAdminPortal: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('rates')}
-          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${
-            activeTab === 'rates'
-              ? 'bg-[#6B4F3B] text-white shadow-sm'
-              : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${activeTab === 'rates'
+            ? 'bg-[#6B4F3B] text-white shadow-sm'
+            : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
+            }`}
         >
           <DollarSign className="w-4 h-4" />
           <span>{t('tab_rates')} ({currentCoop.serviceCategories?.length || 0})</span>
@@ -188,11 +199,10 @@ export const CoopAdminPortal: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('proposals')}
-          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${
-            activeTab === 'proposals'
-              ? 'bg-[#6B4F3B] text-white shadow-sm'
-              : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${activeTab === 'proposals'
+            ? 'bg-[#6B4F3B] text-white shadow-sm'
+            : 'text-[#6E675F] hover:text-[#2B2824] hover:bg-[#F4F0EA]'
+            }`}
         >
           <Vote className="w-4 h-4" />
           <span>{t('tab_proposals')} ({currentCoop.proposals?.length || 0})</span>
@@ -218,7 +228,7 @@ export const CoopAdminPortal: React.FC = () => {
               {t('no_members_yet')}
             </div>
           ) : (
-            <div className="rounded-3xl border border-[#E8E2D9] bg-white overflow-hidden shadow-sm overflow-x-auto">
+            <div className="rounded-3xl border border-[#E8E2D9] bg-white overflow-hidden shadow-sm overflow-x-auto select-none">
               <table className="w-full text-left text-xs">
                 <thead className="bg-[#FAF8F5] border-b border-[#E8E2D9] text-[#6E675F] font-bold uppercase tracking-wider">
                   <tr>
@@ -231,7 +241,7 @@ export const CoopAdminPortal: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-[#E8E2D9] text-[#2B2824]">
                   {currentCoop.workers?.map((w: any) => (
-                    <tr key={w.id} className="hover:bg-[#FAF8F5]/60 transition-colors">
+                    <tr key={w.id} className="hover:bg-[#FAF8F5]/10 transition-colors">
                       <td className="p-4 font-bold flex items-center space-x-2">
                         <span>{w.user?.name || 'Worker'}</span>
                       </td>
@@ -323,9 +333,8 @@ export const CoopAdminPortal: React.FC = () => {
                 <div key={prop.id} className="p-5 rounded-2xl bg-white border border-[#E8E2D9] space-y-2 shadow-sm">
                   <div className="flex justify-between items-start">
                     <h3 className="font-extrabold text-[#2B2824] text-sm">{prop.title}</h3>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                      prop.status === 'OPEN' ? 'bg-[#F4F0EA] text-[#6B4F3B] border border-[#8B7355]/30' : 'bg-[#E8E2D9] text-[#6E675F]'
-                    }`}>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${prop.status === 'OPEN' ? 'bg-[#F4F0EA] text-[#6B4F3B] border border-[#8B7355]/30' : 'bg-[#E8E2D9] text-[#6E675F]'
+                      }`}>
                       {prop.status}
                     </span>
                   </div>

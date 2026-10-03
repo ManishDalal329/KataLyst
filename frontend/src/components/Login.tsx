@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { KatalystLogo } from './KatalystLogo';
-import { ShieldCheck, UserCheck, HardHat, Building2, CheckCircle2, ArrowRight, Lock, Mail, User as UserIcon, Sparkles, X, KeyRound } from 'lucide-react';
+import { ShieldCheck, UserCheck, HardHat, Building2, CheckCircle2, ArrowRight, Lock, Mail, User as UserIcon, Sparkles, X, KeyRound, MapPin, FileText } from 'lucide-react';
 
 interface LoginProps {
   onSuccess?: (role: string) => void;
@@ -21,6 +21,8 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [orgName, setOrgName] = useState('');
+  const [registeredAddress, setRegisteredAddress] = useState('');
+  const [registrationNo, setRegistrationNo] = useState('');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('123456');
   const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
@@ -99,9 +101,18 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
     try {
       const mappedRole = isSignUp ? (selectedRole === 'ADMIN' ? 'COOP_ADMIN' : selectedRole) : undefined;
       const displayName = isSignUp
-        ? (selectedRole === 'ADMIN' && orgName ? `${fullName} (${orgName})` : fullName)
+        ? (selectedRole === 'ADMIN' && orgName ? `${fullName || 'Admin'} (${orgName})` : fullName)
         : undefined;
-      const loggedUser = await loginWithEmail(email, password, mappedRole, displayName, isSignUp, orgName);
+      const loggedUser = await loginWithEmail(
+        email,
+        password,
+        mappedRole,
+        displayName,
+        isSignUp,
+        orgName,
+        registeredAddress,
+        registrationNo
+      );
       handleAuthComplete(loggedUser?.role || mappedRole);
     } catch (err: any) {
       setError(err?.message || 'Authentication failed. Please try again.');
@@ -187,16 +198,16 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
   };
 
   return (
-    <div className="h-screen max-h-screen w-full bg-[var(--bg)] relative overflow-hidden flex items-center justify-center p-3 sm:p-5 my-auto font-sans transition-colors duration-200">
+    <div className="min-h-screen w-full bg-[var(--bg)] relative overflow-x-hidden overflow-y-auto no-scrollbar flex items-center justify-center p-3 sm:p-6 my-auto font-sans transition-colors duration-200">
       {/* Subtle warm background ambient glow spheres */}
       <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Container matching glass-panel style with max height restricted to 100vh */}
-      <div className="w-full max-w-5xl max-h-[calc(100vh-2rem)] bg-[var(--surface)] backdrop-blur-xl rounded-3xl border border-[var(--border)] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 relative z-10 my-auto">
+      {/* Flexible glass-panel container */}
+      <div className="w-full max-w-5xl bg-[var(--surface)] backdrop-blur-xl rounded-3xl border border-[var(--border)] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 relative z-10 my-auto">
 
         {/* LEFT COLUMN: Auth Form */}
-        <div className="lg:col-span-7 p-5 sm:p-8 md:p-9 flex flex-col justify-between relative overflow-y-auto">
+        <div className="lg:col-span-7 p-5 sm:p-8 flex flex-col justify-between relative">
 
           {/* Top Brand Logo */}
           <div>
@@ -345,20 +356,48 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                 )}
 
                 {isSignUp && selectedRole === 'ADMIN' && (
-                  <div>
-                    <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Organization / Cooperative Name</label>
-                    <div className="relative">
-                      <Building2 className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
-                      <input
-                        type="text"
-                        value={orgName}
-                        onChange={(e) => setOrgName(e.target.value)}
-                        placeholder="e.g. North Delhi Labour Cooperative Society"
-                        required={isSignUp && selectedRole === 'ADMIN'}
-                        className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm"
-                      />
+                  <>
+                    <div>
+                      <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Organization / Cooperative Name</label>
+                      <div className="relative">
+                        <Building2 className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
+                        <input
+                          type="text"
+                          value={orgName}
+                          onChange={(e) => setOrgName(e.target.value)}
+                          placeholder="e.g. North Delhi Labour Cooperative Society"
+                          required={isSignUp && selectedRole === 'ADMIN'}
+                          className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm"
+                        />
+                      </div>
                     </div>
-                  </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Operating Region / Location</label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
+                        <input
+                          type="text"
+                          value={registeredAddress}
+                          onChange={(e) => setRegisteredAddress(e.target.value)}
+                          placeholder="e.g. Central Delhi, Delhi NCR"
+                          className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Government Reg. No. / Identity Proof</label>
+                      <div className="relative">
+                        <FileText className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
+                        <input
+                          type="text"
+                          value={registrationNo}
+                          onChange={(e) => setRegistrationNo(e.target.value)}
+                          placeholder="e.g. COOP-DEL-2024-8891"
+                          className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm font-mono"
+                        />
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 <div>
@@ -416,20 +455,48 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
                 )}
 
                 {isSignUp && selectedRole === 'ADMIN' && (
-                  <div>
-                    <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Organization / Cooperative Name</label>
-                    <div className="relative">
-                      <Building2 className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
-                      <input
-                        type="text"
-                        value={orgName}
-                        onChange={(e) => setOrgName(e.target.value)}
-                        placeholder="e.g. North Delhi Labour Cooperative Society"
-                        required={isSignUp && selectedRole === 'ADMIN'}
-                        className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm"
-                      />
+                  <>
+                    <div>
+                      <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Organization / Cooperative Name</label>
+                      <div className="relative">
+                        <Building2 className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
+                        <input
+                          type="text"
+                          value={orgName}
+                          onChange={(e) => setOrgName(e.target.value)}
+                          placeholder="e.g. North Delhi Labour Cooperative Society"
+                          required={isSignUp && selectedRole === 'ADMIN'}
+                          className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm"
+                        />
+                      </div>
                     </div>
-                  </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Operating Region / Location</label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
+                        <input
+                          type="text"
+                          value={registeredAddress}
+                          onChange={(e) => setRegisteredAddress(e.target.value)}
+                          placeholder="e.g. Central Delhi, Delhi NCR"
+                          className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">Government Reg. No. / Identity Proof</label>
+                      <div className="relative">
+                        <FileText className="absolute left-3.5 top-2.5 w-4 h-4 text-[var(--accent)]" />
+                        <input
+                          type="text"
+                          value={registrationNo}
+                          onChange={(e) => setRegistrationNo(e.target.value)}
+                          placeholder="e.g. COOP-DEL-2024-8891"
+                          className="w-full pl-10 pr-3.5 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)] transition-all shadow-sm font-mono"
+                        />
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 <div>
