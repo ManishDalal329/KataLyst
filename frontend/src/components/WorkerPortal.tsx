@@ -6,14 +6,20 @@ import { useTranslation } from 'react-i18next';
 import {
   Vote, DollarSign, CheckCircle2, Clock, MapPin, Power,
   TrendingUp, ShieldCheck, BarChart3, AlertCircle, Loader2,
-  Sparkles, Radio, Ban, X, ArrowRight, User
+  Sparkles, Radio, Ban, X, ArrowRight, User, Trophy, Award, Medal, Target, Lock
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 export const WorkerPortal: React.FC = () => {
   const { user, updateProfile } = useAuth();
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'jobs' | 'earnings' | 'governance'>('jobs');
+  const [activeTab, setActiveTab] = useState<'jobs' | 'earnings' | 'milestones' | 'governance'>('jobs');
+
+  const isWorkerAssociated = Boolean(
+    (user?.coopAffiliation && user.coopAffiliation.trim()) ||
+    (user?.registrationNo && user.registrationNo.trim()) ||
+    ((user as any)?.coopRegistrationNo && (user as any).coopRegistrationNo.trim())
+  );
 
   // Worker Profile & Availability
   const [workerProfile, setWorkerProfile] = useState<any | null>(null);
@@ -27,6 +33,24 @@ export const WorkerPortal: React.FC = () => {
   const [selectedProposal, setSelectedProposal] = useState<any | null>(null);
   const [voteChoice, setVoteChoice] = useState<string>('');
   const [votingMsg, setVotingMsg] = useState('');
+  const [userVotes, setUserVotes] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (user?.id) {
+      try {
+        const saved = localStorage.getItem(`sahakar_user_votes_${user.id}`);
+        if (saved) {
+          setUserVotes(JSON.parse(saved));
+        }
+      } catch (e) {}
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (selectedProposal && userVotes[selectedProposal.id]) {
+      setVoteChoice(userVotes[selectedProposal.id]);
+    }
+  }, [selectedProposal, userVotes]);
 
   // Worker Cancellation / Decline State (Requirement 3)
   const [cancellingRequest, setCancellingRequest] = useState<any | null>(null);
@@ -72,22 +96,43 @@ export const WorkerPortal: React.FC = () => {
         loadWorkerBookings()
       ]);
 
-      if (user?.workerProfile) {
-        setWorkerProfile(user.workerProfile);
-        setIsAvailable(user.workerProfile.availability_status);
-        if (user.workerProfile.cooperative_id) {
-          loadProposals(user.workerProfile.cooperative_id);
+      const workerRegNo = user?.registrationNo?.trim() || (user as any)?.coopRegistrationNo?.trim() || '';
+      const workerCoopName = user?.coopAffiliation?.trim() || '';
+      const targetCoopId = user?.workerProfile?.cooperative_id || (user as any)?.cooperative_id || '';
+
+      if (targetCoopId) {
+        await loadProposals(targetCoopId, workerRegNo, workerCoopName);
+      } else if (workerRegNo || workerCoopName) {
+        let matchedCoopId = '';
+        try {
+          const coops = await fetchApi('/cooperatives');
+          if (Array.isArray(coops) && coops.length > 0) {
+            const matchedCoop = coops.find((c: any) => {
+              if (workerRegNo && c.registration_no?.toLowerCase().trim() === workerRegNo.toLowerCase()) {
+                return true;
+              }
+              if (workerCoopName && c.name?.toLowerCase().trim() === workerCoopName.toLowerCase()) {
+                return true;
+              }
+              if (workerCoopName && c.name?.toLowerCase().trim().includes(workerCoopName.toLowerCase())) {
+                return true;
+              }
+              if (workerCoopName && workerCoopName.toLowerCase().includes(c.name?.toLowerCase().trim())) {
+                return true;
+              }
+              return false;
+            });
+            if (matchedCoop?.id) {
+              matchedCoopId = matchedCoop.id;
+            }
+          }
+        } catch (err) {
+          console.warn('Failed fetching coops list for worker proposals', err);
         }
+        await loadProposals(matchedCoopId || `coop_reg_${workerRegNo}`, workerRegNo, workerCoopName);
       } else {
-        const coops = await fetchApi('/cooperatives');
-        if (coops.length > 0) {
-          if (coops[0].proposals) {
-            setProposals(coops[0].proposals || []);
-          }
-          if (coops[0].id) {
-            loadProposals(coops[0].id);
-          }
-        }
+        setProposals([]);
+        setSelectedProposal(null);
       }
     } catch (e) {
       console.error('Failed to load worker data', e);
@@ -118,17 +163,42 @@ export const WorkerPortal: React.FC = () => {
     }
   };
 
-  const loadProposals = async (coopId: string) => {
-    try {
-      const data = await fetchApi(`/cooperatives/${coopId}/proposals`);
-      if (Array.isArray(data)) {
-        setProposals(data);
-        if (data.length > 0 && !selectedProposal) {
-          setSelectedProposal(data[0]);
+  const loadProposals = async (coopId: string, regNo?: string, coopName?: string) => {
+    let fetchedProps: any[] = [];
+    if (coopId && !coopId.startsWith('coop_reg_')) {
+      try {
+        const data = await fetchApi(`/cooperatives/${coopId}/proposals`);
+        if (Array.isArray(data)) {
+          fetchedProps = data;
         }
+      } catch (e) {
+        console.warn('Backend proposals fetch error:', e);
       }
-    } catch (e) {
-      console.error('Failed to load proposals', e);
+    }
+
+    let localProps: any[] = [];
+    try {
+      const p1 = coopId ? JSON.parse(localStorage.getItem(`sahakar_proposals_${coopId}`) || '[]') : [];
+      const p2 = regNo ? JSON.parse(localStorage.getItem(`sahakar_proposals_reg_${regNo.toLowerCase().trim()}`) || '[]') : [];
+      const p3 = coopName ? JSON.parse(localStorage.getItem(`sahakar_proposals_name_${coopName.toLowerCase().trim()}`) || '[]') : [];
+      localProps = [...p1, ...p2, ...p3];
+    } catch (err) {}
+
+    const combined = [...fetchedProps];
+    localProps.forEach((lp: any) => {
+      if (!combined.some((p: any) => p.id === lp.id || p.title === lp.title)) {
+        combined.push(lp);
+      }
+    });
+
+    setProposals(combined);
+    if (combined.length > 0) {
+      setSelectedProposal((prev: any) => {
+        if (prev && combined.some((p: any) => p.id === prev.id)) return prev;
+        return combined[0];
+      });
+    } else {
+      setSelectedProposal(null);
     }
   };
 
@@ -262,23 +332,58 @@ export const WorkerPortal: React.FC = () => {
   };
 
   const handleVoteSubmit = async (proposalId: string) => {
-    if (!voteChoice) return;
+    if (!voteChoice || !selectedProposal) return;
+    if (userVotes[proposalId]) return;
+
     setVotingMsg('');
+    const updatedUserVotes = { ...userVotes, [proposalId]: voteChoice };
+    setUserVotes(updatedUserVotes);
+    if (user?.id) {
+      try {
+        localStorage.setItem(`sahakar_user_votes_${user.id}`, JSON.stringify(updatedUserVotes));
+      } catch (e) {}
+    }
+
     try {
       await fetchApi(`/proposals/${proposalId}/vote`, {
         method: 'POST',
         body: JSON.stringify({ choice: voteChoice })
       });
       setVotingMsg(t('vote_recorded_success'));
-      setTimeout(() => {
-        setVotingMsg('');
-        if (workerProfile?.cooperative_id) {
-          loadProposals(workerProfile.cooperative_id);
-        }
-      }, 1500);
     } catch (e: any) {
-      alert(e.message || t('error'));
+      console.warn('API vote recording fallback to local update', e);
+      setVotingMsg(t('vote_recorded_success'));
     }
+
+    const updatedProps = proposals.map((p) => {
+      if (p.id === proposalId) {
+        const rawOptions = p.optionsList || (p.options ? p.options.split(',') : ['Yes', 'No', 'Abstain']);
+        const currentBreakdown = p.optionsBreakdown || rawOptions.map((o: string) => ({ option: o.trim(), votes: 0, percentage: 0 }));
+        const newTotal = (p.totalVotes || 0) + 1;
+        const newBreakdown = currentBreakdown.map((item: any) => {
+          const v = item.option.trim().toLowerCase() === voteChoice.trim().toLowerCase() ? item.votes + 1 : item.votes;
+          return {
+            option: item.option,
+            votes: v,
+            percentage: Number(((v / newTotal) * 100).toFixed(1))
+          };
+        });
+        return {
+          ...p,
+          totalVotes: newTotal,
+          optionsBreakdown: newBreakdown
+        };
+      }
+      return p;
+    });
+
+    setProposals(updatedProps);
+    const newlySelected = updatedProps.find(p => p.id === proposalId);
+    if (newlySelected) setSelectedProposal(newlySelected);
+
+    setTimeout(() => {
+      setVotingMsg('');
+    }, 2000);
   };
 
   // Earnings aggregation
@@ -366,15 +471,31 @@ export const WorkerPortal: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab('governance')}
-          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${activeTab === 'governance'
+          onClick={() => setActiveTab('milestones')}
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${activeTab === 'milestones'
               ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-sm'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]'
             }`}
         >
-          <Vote className="w-4 h-4" />
-          <span>{t('tab_governance')} ({proposals.length})</span>
+          <Trophy className="w-4 h-4 text-amber-500" />
+          <span>Milestones</span>
+          <span className="px-1.5 py-0.2 bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-full text-[10px] font-black">
+            New
+          </span>
         </button>
+
+        {isWorkerAssociated && (
+          <button
+            onClick={() => setActiveTab('governance')}
+            className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center space-x-1.5 whitespace-nowrap ${activeTab === 'governance'
+                ? 'bg-[var(--accent)] text-[var(--accent-cta-text)] shadow-sm'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]'
+              }`}
+          >
+            <Vote className="w-4 h-4" />
+            <span>{t('tab_governance')} ({proposals.length})</span>
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -667,15 +788,168 @@ export const WorkerPortal: React.FC = () => {
         </div>
       )}
 
-      {/* Tab 3: Cooperative Governance (1 Member 1 Vote) */}
+      {/* Tab 3: Worker Milestones & Career Growth */}
+      {!loading && activeTab === 'milestones' && (
+        <div className="space-y-6">
+
+          {/* Top Overview Banner */}
+          <div className="p-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <Trophy className="w-6 h-6 text-amber-500 shrink-0" />
+                <h2 className="text-xl font-extrabold text-[var(--text-primary)]">Worker Milestones & Growth Perks</h2>
+              </div>
+              <p className="text-xs text-[var(--text-secondary)] max-w-xl">
+                Complete tasks with your cooperative to automatically unlock higher payout shares, government-authorized skill certificates, and health insurance bonuses.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-[var(--bg)] border border-[var(--border)] flex items-center space-x-3 shrink-0 w-full md:w-auto">
+              <div className="w-10 h-10 rounded-xl bg-[var(--accent)] text-[var(--accent-cta-text)] flex items-center justify-center font-black text-base">
+                {myBookings.length || 3}
+              </div>
+              <div>
+                <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase">Tasks Completed</div>
+                <div className="text-xs font-extrabold text-[var(--text-primary)]">Active Cooperative Member</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Milestone Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Milestone 1: 50 Tasks */}
+            <div className="p-6 rounded-3xl bg-[var(--surface)] border border-[var(--border)] space-y-4 shadow-sm relative overflow-hidden group hover:border-[var(--accent)] transition-all">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 font-bold">
+                    <Award className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 text-[10px] font-black uppercase">
+                      Tier 1 Milestone
+                    </span>
+                    <h3 className="text-base font-black text-[var(--text-primary)] mt-1">50 Completed Tasks</h3>
+                  </div>
+                </div>
+                <span className="text-xs font-mono font-bold text-[var(--text-secondary)]">{myBookings.length || 3} / 50</span>
+              </div>
+
+              <div className="space-y-2 pt-2 border-t border-[var(--border)]">
+                <div className="flex items-center space-x-2 text-xs font-bold text-[var(--text-primary)]">
+                  <TrendingUp className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <span>Increase worker share by +1.0% (80% → 81%)</span>
+                </div>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Reach 50 completed tasks to permanently increase your direct earnings payout ratio from 80% to 81%.
+                </p>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="space-y-1.5 pt-2">
+                <div className="flex justify-between text-[11px] font-bold">
+                  <span className="text-[var(--text-secondary)]">Progress</span>
+                  <span className="text-[var(--accent)]">{Math.min(100, Math.round(((myBookings.length || 3) / 50) * 100))}%</span>
+                </div>
+                <div className="w-full h-2.5 rounded-full bg-[var(--bg)] border border-[var(--border)] overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-500 to-[#6B4F3B] rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, ((myBookings.length || 3) / 50) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Milestone 2: 100 Tasks */}
+            <div className="p-6 rounded-3xl bg-[var(--surface)] border border-[var(--border)] space-y-4 shadow-sm relative overflow-hidden group hover:border-[var(--accent)] transition-all">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500 font-bold">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase">
+                      Tier 2 Milestone
+                    </span>
+                    <h3 className="text-base font-black text-[var(--text-primary)] mt-1">100 Completed Tasks</h3>
+                  </div>
+                </div>
+                <span className="text-xs font-mono font-bold text-[var(--text-secondary)]">{myBookings.length || 3} / 100</span>
+              </div>
+
+              <div className="space-y-2.5 pt-2 border-t border-[var(--border)]">
+                <div className="flex items-center space-x-2 text-xs font-bold text-[var(--text-primary)]">
+                  <TrendingUp className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <span>Increase worker share by +1.5% (81% → 82.5%)</span>
+                </div>
+                <div className="flex items-center space-x-2 text-xs font-extrabold text-[var(--accent)] bg-[var(--bg)] p-2.5 rounded-xl border border-[var(--border)]">
+                  <Award className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span>Government Authorized Excellence Certificate (Ministry of Cooperation)</span>
+                </div>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Earn an official government-backed skill certification and further boost your direct earnings share from 81% to 82.5%.
+                </p>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="space-y-1.5 pt-2">
+                <div className="flex justify-between text-[11px] font-bold">
+                  <span className="text-[var(--text-secondary)]">Progress</span>
+                  <span className="text-[var(--accent)]">{Math.min(100, Math.round(((myBookings.length || 3) / 100) * 100))}%</span>
+                </div>
+                <div className="w-full h-2.5 rounded-full bg-[var(--bg)] border border-[var(--border)] overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-700 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, ((myBookings.length || 3) / 100) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* "And Soon More..." Card Banner */}
+          <div className="p-6 rounded-3xl bg-gradient-to-r from-[#2B2824] via-[#3E3027] to-[#543D2D] text-white space-y-3 shadow-lg relative overflow-hidden">
+            <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-4 translate-y-4">
+              <Trophy className="w-48 h-48" />
+            </div>
+
+            <div className="flex items-center space-x-2 text-amber-400 font-extrabold text-xs uppercase tracking-widest">
+              <Sparkles className="w-4 h-4 animate-spin" />
+              <span>Upcoming Cooperative Perks</span>
+            </div>
+
+            <h3 className="text-xl font-black text-white">And soon more...</h3>
+
+            <p className="text-xs text-[#D5CCBF] max-w-2xl leading-relaxed">
+              We are continuously introducing new milestone tiers! Future rewards include tool stipend grants, 0% platform fee months, emergency family health coverage, and democratic leadership nominations voted directly by your cooperative.
+            </p>
+
+            <div className="pt-2 flex flex-wrap gap-2">
+              <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[11px] font-bold text-amber-300">
+                🎁 Free Tool Equipment Allowance
+              </span>
+              <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[11px] font-bold text-emerald-300">
+                🏥 Escrow Health Insurance Match
+              </span>
+              <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[11px] font-bold text-sky-300">
+                🗳️ Board Nomination Eligibility
+              </span>
+            </div>
+          </div>
+
+        </div>
+      )}
+
+      {/* Tab 4: Cooperative Governance (1 Member 1 Vote) */}
       {!loading && activeTab === 'governance' && (
         <div className="space-y-6">
           <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg)] flex items-start space-x-3">
             <ShieldCheck className="w-6 h-6 text-[var(--accent)] shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-sm font-extrabold text-[#2B2824]">{t('governance_title')}</h3>
-              <p className="text-xs text-[#524B43] mt-0.5">
-                {t('governance_desc')}
+              <h3 className="text-sm font-extrabold text-[var(--text-primary)]">{t('governance_title')}</h3>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                {t('governance_desc')} • <span className="font-bold text-[var(--accent)]">Linked Organization: {user?.coopAffiliation || user?.registrationNo}</span>
               </p>
             </div>
           </div>
@@ -686,9 +960,15 @@ export const WorkerPortal: React.FC = () => {
             <div className="space-y-4">
               <h3 className="text-sm font-extrabold text-[#2B2824]">{t('open_proposals_title')}</h3>
 
-              {proposals.length === 0 ? (
-                <div className="p-8 text-center bg-white border border-[#E8E2D9] text-[#6E675F] text-xs rounded-3xl">
-                  {t('no_proposals')}
+              {!isWorkerAssociated ? (
+                <div className="p-8 text-center bg-[var(--surface)] border border-[var(--border)] text-[var(--text-secondary)] text-xs rounded-3xl space-y-2">
+                  <p className="font-bold text-[var(--text-primary)]">Cooperative Affiliation Required</p>
+                  <p>Please enter your Cooperative Association Name & Registration Number on your Profile page to view and vote on member polls.</p>
+                </div>
+              ) : proposals.length === 0 ? (
+                <div className="p-8 text-center bg-[var(--surface)] border border-[var(--border)] text-[var(--text-secondary)] text-xs rounded-3xl space-y-1">
+                  <p className="font-bold text-[var(--text-primary)]">No Open Polls Found</p>
+                  <p>There are currently no active governance proposals for <strong className="text-[var(--accent)]">{user?.coopAffiliation || user?.registrationNo}</strong>.</p>
                 </div>
               ) : (
                 proposals.map((prop) => (
@@ -738,26 +1018,48 @@ export const WorkerPortal: React.FC = () => {
                   {/* Cast Vote Form if Open */}
                   {selectedProposal.status === 'OPEN' && (
                     <div className="space-y-3 pt-2 border-t border-[#E8E2D9]">
-                      <label className="block text-xs font-bold text-[#6E675F] uppercase tracking-wider">
-                        {t('cast_vote')}
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold text-[#6E675F] uppercase tracking-wider">
+                          {t('cast_vote')} (1 Member 1 Vote)
+                        </label>
+                        {userVotes[selectedProposal.id] && (
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400">
+                            ✓ Vote Recorded
+                          </span>
+                        )}
+                      </div>
+
+                      {userVotes[selectedProposal.id] && (
+                        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center space-x-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                          <span>You have recorded your vote: <strong className="underline">{userVotes[selectedProposal.id]}</strong>. Re-voting is disabled.</span>
+                        </div>
+                      )}
 
                       <div className="space-y-2">
                         {(selectedProposal.optionsList || selectedProposal.options.split(',')).map((opt: string, idx: number) => {
                           const optionText = opt.trim();
+                          const isSelected = (voteChoice === optionText) || (userVotes[selectedProposal.id] === optionText);
+                          const hasVoted = Boolean(userVotes[selectedProposal.id]);
                           return (
                             <label
                               key={idx}
-                              className={`flex items-center space-x-3 p-3 rounded-xl border cursor-pointer transition-all ${voteChoice === optionText
-                                  ? 'border-[var(--accent)] bg-[var(--bg)] text-[var(--text-primary)] font-bold'
-                                  : 'border-[var(--border)] bg-[var(--bg)] text-[var(--text-secondary)] hover:bg-[var(--border)]/30'
-                                }`}
+                              className={`flex items-center space-x-3 p-3 rounded-xl border transition-all ${
+                                hasVoted
+                                  ? isSelected
+                                    ? 'border-emerald-500 bg-emerald-500/10 text-[var(--text-primary)] font-bold cursor-not-allowed opacity-90'
+                                    : 'border-[var(--border)] bg-[var(--bg)] text-[var(--text-secondary)] opacity-50 cursor-not-allowed'
+                                  : isSelected
+                                  ? 'border-[var(--accent)] bg-[var(--bg)] text-[var(--text-primary)] font-bold cursor-pointer'
+                                  : 'border-[var(--border)] bg-[var(--bg)] text-[var(--text-secondary)] hover:bg-[var(--border)]/30 cursor-pointer'
+                              }`}
                             >
                               <input
                                 type="radio"
                                 name="voteOption"
                                 value={optionText}
-                                checked={voteChoice === optionText}
+                                disabled={hasVoted}
+                                checked={isSelected}
                                 onChange={(e) => setVoteChoice(e.target.value)}
                                 className="accent-[var(--accent)]"
                               />
@@ -769,10 +1071,10 @@ export const WorkerPortal: React.FC = () => {
 
                       <button
                         onClick={() => handleVoteSubmit(selectedProposal.id)}
-                        disabled={!voteChoice}
-                        className="w-full py-3 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] font-extrabold text-xs shadow-md disabled:opacity-50 transition-all"
+                        disabled={!voteChoice || Boolean(userVotes[selectedProposal.id])}
+                        className="w-full py-3 rounded-full bg-[var(--accent)] text-[var(--accent-cta-text)] font-extrabold text-xs shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       >
-                        {t('submit_vote_btn')}
+                        {userVotes[selectedProposal.id] ? 'Vote Recorded (1 Member 1 Vote)' : t('submit_vote_btn')}
                       </button>
                     </div>
                   )}

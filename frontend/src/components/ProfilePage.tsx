@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { AddressItem, PaymentOptionItem } from '../lib/auth';
+import { AddressItem, PaymentOptionItem, getRegisteredCooperatives } from '../lib/auth';
 import {
   User as UserIcon,
   HardHat,
@@ -391,6 +391,8 @@ const WorkerProfileForm: React.FC<ProfileFormProps> = ({ user, isEditing, onSave
   const [profilePicture, setProfilePicture] = useState(user.profilePicture || '');
   const [bio, setBio] = useState(user.bio || '');
   const [domains, setDomains] = useState<string[]>(user.domains || ['Cleaning & Sanitation', 'Plumbing Services']);
+  const [coopAffiliation, setCoopAffiliation] = useState(user.coopAffiliation || '');
+  const [registrationNo, setRegistrationNo] = useState(user.registrationNo || user.coopRegistrationNo || '');
   const [startTime, setStartTime] = useState(user.activeShift?.startTime || '09:00');
   const [endTime, setEndTime] = useState(user.activeShift?.endTime || '18:00');
   const [selectedDays, setSelectedDays] = useState<string[]>(user.activeShift?.days || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
@@ -435,12 +437,45 @@ const WorkerProfileForm: React.FC<ProfileFormProps> = ({ user, isEditing, onSave
     if (!phone.trim()) return onError('Phone number is required');
     if (lowRate < 0 || modRate < 0 || highRate < 0) return onError('Rate values must be positive numbers');
 
+    const cleanCoop = coopAffiliation.trim();
+    const cleanReg = registrationNo.trim();
+
+    let matchedCoop = null;
+    let finalCoopName = cleanCoop;
+    let finalRegNo = cleanReg;
+    let finalCoopId = '';
+
+    if (cleanCoop || cleanReg) {
+      const validCoops = getRegisteredCooperatives();
+      matchedCoop = validCoops.find((c) => {
+        const matchReg = cleanReg && c.registration_no.toLowerCase() === cleanReg.toLowerCase();
+        const matchName = cleanCoop && (
+          c.name.toLowerCase() === cleanCoop.toLowerCase() ||
+          c.name.toLowerCase().includes(cleanCoop.toLowerCase()) ||
+          cleanCoop.toLowerCase().includes(c.name.toLowerCase())
+        );
+        return matchReg || matchName;
+      });
+
+      if (!matchedCoop) {
+        return onError('Invalid Cooperative details! The entered Association Name or Registration Number does not match any registered Cooperative Admin. Please verify with your Cooperative Admin.');
+      }
+
+      finalCoopName = matchedCoop.name;
+      finalRegNo = matchedCoop.registration_no;
+      finalCoopId = matchedCoop.id;
+    }
+
     onSave({
       name: name.trim(),
       phone: phone.trim(),
       profilePicture,
       bio: bio.trim(),
       domains,
+      coopAffiliation: finalCoopName,
+      registrationNo: finalRegNo,
+      coopRegistrationNo: finalRegNo,
+      cooperative_id: finalCoopId,
       activeShift: {
         startTime,
         endTime,
@@ -692,16 +727,48 @@ const WorkerProfileForm: React.FC<ProfileFormProps> = ({ user, isEditing, onSave
         </div>
       </div>
 
-      {/* Cooperative Affiliation */}
-      <div className="p-5 rounded-2xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-between text-xs">
-        <div className="flex items-center space-x-2">
-          <ShieldCheck className="w-5 h-5 text-[var(--accent)]" />
+      {/* Cooperative Organization Affiliation & Registration */}
+      <div className="p-6 rounded-3xl bg-[var(--surface)] border border-[var(--border)] shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <ShieldCheck className="w-5 h-5 text-[var(--accent)]" />
+            <h3 className="text-base font-extrabold text-[var(--text-primary)]">Cooperative Organization Affiliation</h3>
+          </div>
+          <span className="text-[10px] font-mono text-[var(--text-secondary)]">Member ID: {user.id}</span>
+        </div>
+        <p className="text-xs text-[var(--text-secondary)]">
+          Link your worker profile to your Cooperative Organization by entering the exact Association Name and Registration Number used by your Cooperative Admin. This unlocks member voting on your organization's governance polls.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
           <div>
-            <span className="font-bold text-[var(--text-primary)]">Cooperative Affiliation: </span>
-            <span className="text-[var(--accent)] font-extrabold">{user.coopAffiliation || 'North Delhi Labour Cooperative Society'}</span>
+            <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
+              Cooperative Association Name
+            </label>
+            <input
+              type="text"
+              value={coopAffiliation}
+              disabled={!isEditing}
+              onChange={(e) => setCoopAffiliation(e.target.value)}
+              placeholder="e.g. DMC or North Delhi Labour Cooperative Society"
+              className="w-full px-3.5 py-2.5 bg-[var(--bg)] border border-[var(--border)] rounded-xl text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] disabled:opacity-75"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
+              Cooperative Registration Number
+            </label>
+            <input
+              type="text"
+              value={registrationNo}
+              disabled={!isEditing}
+              onChange={(e) => setRegistrationNo(e.target.value)}
+              placeholder="e.g. COOP-DEL-2024-8891"
+              className="w-full px-3.5 py-2.5 bg-[var(--bg)] border border-[var(--border)] rounded-xl text-xs font-mono font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] disabled:opacity-75"
+            />
           </div>
         </div>
-        <span className="text-[10px] font-mono text-[var(--text-secondary)]">Member ID: {user.id}</span>
       </div>
 
       {isEditing && (

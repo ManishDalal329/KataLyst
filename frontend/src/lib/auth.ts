@@ -50,6 +50,9 @@ export interface StoredUser {
   // Org specific
   registeredAddress?: string;
   registrationNo?: string;
+  coopRegistrationNo?: string;
+  cooperative_id?: string;
+  region?: string;
   verificationStatus?: string;
 
   createdAt: string;
@@ -110,6 +113,86 @@ export function saveUsers(users: StoredUser[]): void {
   } catch (e) {
     console.error('Failed to save sahakar_users to localStorage', e);
   }
+}
+
+export interface RegisteredCoopInfo {
+  id: string;
+  name: string;
+  registration_no: string;
+  adminName?: string;
+  adminEmail?: string;
+}
+
+/**
+ * Retrieve all registered cooperative organizations from localStorage users & seed list
+ */
+export function getRegisteredCooperatives(): RegisteredCoopInfo[] {
+  const list: RegisteredCoopInfo[] = [
+    {
+      id: 'coop_seed_1',
+      name: 'Delhi NCR Urban Workers Cooperative',
+      registration_no: 'COOP/DEL/2024/0089'
+    },
+    {
+      id: 'coop_seed_2',
+      name: 'Mumbai Gig Workers Cooperative Society',
+      registration_no: 'COOP/MUM/2024/0142'
+    },
+    {
+      id: 'coop_seed_3',
+      name: 'Bengaluru Smart Community Care Coop',
+      registration_no: 'COOP/BLR/2024/0205'
+    },
+    {
+      id: 'coop_seed_4',
+      name: 'North Delhi Labour Cooperative Society',
+      registration_no: 'COOP-DEL-2024-8891'
+    }
+  ];
+
+  try {
+    const users = getUsers();
+    const currentUser = getCurrentUser();
+    const allUsers: any[] = [...users];
+    if (currentUser && !allUsers.some(u => u.id === currentUser.id)) {
+      allUsers.push(currentUser);
+    }
+
+    allUsers.forEach((u) => {
+      if (u.role === 'COOP_ADMIN' || u.role === 'GOV_ADMIN') {
+        const regNo = u.registrationNo?.trim() || u.coopRegistrationNo?.trim() || '';
+        const name = u.orgName?.trim() || u.coopAffiliation?.trim() || (u.name?.includes('(') ? u.name.match(/\(([^)]+)\)/)?.[1]?.trim() : u.name?.trim()) || '';
+
+        if (regNo || name) {
+          const existsIndex = list.findIndex((item) =>
+            (regNo && item.registration_no.toLowerCase() === regNo.toLowerCase()) ||
+            (name && item.name.toLowerCase() === name.toLowerCase())
+          );
+
+          if (existsIndex === -1) {
+            list.push({
+              id: 'coop_usr_' + u.id,
+              name: name || 'Registered Cooperative',
+              registration_no: regNo || 'COOP-DEL-2024-8891',
+              adminName: u.name,
+              adminEmail: u.email
+            });
+          } else {
+            if (regNo && list[existsIndex].registration_no !== regNo) {
+              list[existsIndex].registration_no = regNo;
+            }
+            if (name && list[existsIndex].name !== name) {
+              list[existsIndex].name = name;
+            }
+          }
+        }
+      }
+    });
+  } catch (e) {
+    console.error('Error in getRegisteredCooperatives:', e);
+  }
+
+  return list;
 }
 
 /**
